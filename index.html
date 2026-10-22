@@ -1328,7 +1328,7 @@
     .hero-qubits .hero-stats { padding-top: 28px; }
     .hero-pista b { color: var(--gold); font-weight: 700; }
     /* Salida tras la QFT: el texto se desvanece junto con las esferas */
-    .hero-qubits .hero-text { transition: opacity 0.9s ease-in 0.2s; }
+    .hero-qubits .hero-text { transition: opacity 0.3s ease-out; }
     .saliendo .hero-qubits .hero-text { opacity: 0; }
   </style>
 </head>
@@ -1374,6 +1374,6 @@
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022h"></script>
+  <script src="js/qubits.js?v=20261022i"></script>
 </body>
 </html>

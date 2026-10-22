@@ -13,7 +13,7 @@
 // fracción de la sección. Con data-linea="selector" se traza una línea fina
 // y corta sobre ese elemento, centrada, con un cuadrito.
 // Con data-qft="pagina.html", después de medir la QFT se dejan ver los
-// rojos y azules 2 s, las esferas se desvanecen en su sitio (el canvas
+// rojos y azules 1 s, las esferas se desvanecen en su sitio (el canvas
 // avisa con el evento 'qft-salida') y luego se pasa a esa página.
 (function () {
   var R = 8, DX = 26, DY = DX * Math.sqrt(3) / 2;
@@ -366,7 +366,7 @@
       current.forEach(function (q) { q.hot = false; }); current = [];
       qftActivo = false; anclado = false; collapsed = true;
       start();
-      // con data-qft, los rojos y azules se disfrutan 2 s antes de salir
+      // con data-qft, los rojos y azules se disfrutan 1 s antes de salir
       if (destino) setTimeout(salir, (still ? 0 : fin) + DISFRUTE);
     }
     function qftAll() {
@@ -383,11 +383,12 @@
       start();
     }
     // salida de escena: cada esfera se vuelve transparente sin moverse, con
-    // un pequeño desfase al azar, y al terminar se pasa a la página de destino
-    var DISFRUTE = 2000, SALIDA = 1300, saliendo = 0;
+    // un pequeño desfase al azar, y al terminar se pasa a la página de destino.
+    // El texto, la línea y el medidor se van antes, y las esferas después
+    var DISFRUTE = 1000, SALIDA = 1300, saliendo = 0;
     function salir() {
       saliendo = performance.now();
-      qubits.forEach(function (q) { q.outAt = saliendo + Math.random() * 450; });
+      qubits.forEach(function (q) { q.outAt = saliendo + 250 + Math.random() * 300; });
       canvas.dispatchEvent(new CustomEvent('qft-salida', { bubbles: true, detail: { duracion: SALIDA } }));
       start();
       setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA);
@@ -421,7 +422,7 @@
       if (span) {
         // al salir de escena la línea y la compuerta se desvanecen
         ctx.save();
-        if (saliendo) ctx.globalAlpha = Math.max(0, 1 - (performance.now() - saliendo) / 450);
+        if (saliendo) ctx.globalAlpha = Math.max(0, 1 - (performance.now() - saliendo) / 250);
         ctx.strokeStyle = LINE; ctx.lineWidth = 1;
         var half = Math.min(105, (span[1] - span[0]) / 2 - 16);
         lineHalf = half;
