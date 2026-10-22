@@ -58,9 +58,77 @@
       if (!ini.movio && Math.abs(dx) > 4) { ini.movio = true; pista.classList.add('arrastrando'); }
       if (ini.movio) pista.scrollLeft = ini.s - dx;
     });
+    var recienArrastrado = false;
     window.addEventListener('pointerup', function () {
       if (!ini) return;
+      // el clic que sigue a un arrastre no abre ni cierra tarjetas
+      if (ini.movio) { recienArrastrado = true; setTimeout(function () { recienArrastrado = false; }, 0); }
       ini = null; pista.classList.remove('arrastrando');
+    });
+
+    // clic en una etapa: se despliega a lo ancho con su detalle (guardado en
+    // <template id="etapa-N-detalle">); otro clic en el resumen la cierra.
+    // Solo una abierta a la vez
+    var etapas = Array.prototype.slice.call(pista.querySelectorAll('.etapa'));
+    // cada apertura o cierre cambia la versión de la tarjeta: los temporizadores
+    // de una acción anterior ya no la tocan si se vuelve a hacer clic rápido
+    function cerrar(et) {
+      var v = et._v = (et._v || 0) + 1;
+      et._abierta = false;
+      var det = et.querySelector('.etapa-detalle');
+      det.style.width = det.offsetWidth + 'px';
+      det.classList.remove('ver');
+      void det.offsetWidth;
+      det.style.width = '0px';
+      setTimeout(function () {
+        if (et._v !== v) return;
+        et.classList.remove('abierta'); et.setAttribute('aria-expanded', 'false');
+        et.querySelector('.etapa-despliega').textContent = 'Desplegar →';
+        det.style.width = ''; avance();
+      }, 450);
+    }
+    function abrir(et) {
+      var v = et._v = (et._v || 0) + 1;
+      et._abierta = true;
+      var det = et.querySelector('.etapa-detalle');
+      if (!det.childElementCount) {
+        var t = document.getElementById('etapa-' + et.getAttribute('data-etapa') + '-detalle');
+        if (t) det.appendChild(t.content.cloneNode(true));
+      }
+      et.classList.add('abierta'); et.setAttribute('aria-expanded', 'true');
+      et.querySelector('.etapa-despliega').textContent = '← Cerrar';
+      // de 0 al ancho natural del detalle
+      det.style.width = 'auto';
+      var ancho = det.scrollWidth;
+      det.style.width = '0px';
+      void det.offsetWidth;
+      det.style.width = ancho + 'px';
+      det.classList.add('ver');
+      // acompaña el crecimiento para que la tarjeta quede a la vista
+      // (se repite al terminar de crecer: antes la pista aún no tiene ese largo)
+      var objetivo = Math.max(0, pista.scrollLeft + et.getBoundingClientRect().left - pista.getBoundingClientRect().left - 8);
+      pista.scrollTo({ left: objetivo, behavior: 'smooth' });
+      setTimeout(function () {
+        if (et._v !== v) return;
+        det.style.width = 'auto'; avance();
+        pista.scrollTo({ left: objetivo, behavior: 'smooth' });
+      }, 750);
+    }
+    etapas.forEach(function (et) {
+      function alternar(e) {
+        if (recienArrastrado) return;
+        // con la tarjeta abierta, solo el resumen la cierra
+        if (et._abierta) {
+          if (e && e.target.closest('.etapa-detalle')) return;
+          return cerrar(et);
+        }
+        etapas.forEach(function (o) { if (o !== et && o._abierta) cerrar(o); });
+        abrir(et);
+      }
+      et.addEventListener('click', alternar);
+      et.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(null); }
+      });
     });
     // con el teclado: flechas izquierda y derecha
     pista.addEventListener('keydown', function (e) {
