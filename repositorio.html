@@ -1536,6 +1536,11 @@
     .etapa-abajo.ver .eb-cuerpo { opacity: 1; transform: none; }
     .eb-cuerpo > .etapa-col { flex: 1 1 300px; border-left: none; padding-left: 0; }
     .eb-cuerpo > .etapa-col.etapa-ancha { flex: 2 1 520px; }
+    /* etapa 03: VQE */
+    .vqe-formula { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: var(--black); margin: 4px 0 8px; font-variant-numeric: lining-nums; }
+    .vqe-pasos { margin: 0; padding-left: 20px; color: #333; font-size: 14px; line-height: 1.6; }
+    .vqe-pasos li { margin-bottom: 6px; }
+    .vqe-pasos li::marker { color: #8C6D33; font-family: 'Space Mono', monospace; font-size: 11px; }
     .etapas-pie { transition: opacity .3s; }
     .etapas-pie { display: flex; align-items: center; gap: 16px; padding-top: 10px; }
     .pista-progreso { flex: 1; height: 1px; background: #2c2a26; position: relative; }
@@ -1691,11 +1696,11 @@
               </div>
             </article>
 
-            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Solucionadores cuánticos e integración de ciclos computacionales">
+            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Solucionador: VQE, Variational Quantum Eigensolver">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
                 <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
-                <p class="etapa-pregunta">¿Cómo se ejecuta, se mide y se optimiza?</p>
+                <p class="etapa-pregunta">¿Cómo encuentra el VQE la energía mínima?</p>
               </div>
             </article>
 
@@ -1756,31 +1761,31 @@
   </template>
   <!-- detalle de la etapa 3: se despliega dentro de la tarjeta al hacer clic -->
   <template id="etapa-3-detalle">
-
               <div class="etapa-col">
-                <div class="etapa-sub">Qué incluye</div>
+                <div class="etapa-sub">Qué hace el VQE</div>
                 <ul class="etapa-lista">
-                  <li>VQE, QAOA, Grover u otros métodos.</li>
-                  <li>Reservorios cuánticos y modelos híbridos.</li>
-                  <li>Función de costo, optimizadores y criterios de parada, cuando corresponda.</li>
-                  <li>Iteraciones, mediciones y realimentación.</li>
+                  <li>Prepara el estado |ψ(θ)⟩ con el ansatz.</li>
+                  <li>Mide la energía ⟨H⟩<sub>θ</sub> término a término.</li>
+                  <li>Un optimizador clásico ajusta θ para bajarla.</li>
+                  <li>Repite hasta converger a la energía mínima.</li>
                 </ul>
               </div>
-              <div class="etapa-col etapa-ancha">
-                <div class="etapa-sub">No todos funcionan como VQE · ¿qué realiza el bloque 3?</div>
-                <table class="detalle-tabla">
-                  <tbody>
-                    <tr><td>VQE</td><td>Minimiza la energía mediante un ciclo cuántico-clásico que actualiza parámetros. <span class="ref">Nature Communications</span></td></tr>
-                    <tr><td>QAOA</td><td>Optimiza los parámetros del circuito para mejorar una función objetivo.</td></tr>
-                    <tr><td>Grover</td><td>Aplica iteraciones de amplificación de amplitud; no requiere un optimizador clásico.</td></tr>
-                    <tr><td>Reservorio cuántico</td><td>Usa una dinámica cuántica, generalmente fija, para extraer características y entrenar una capa de salida clásica. <span class="ref">npj Quantum Information</span></td></tr>
-                    <tr><td>QML variacional</td><td>Entrena parámetros para minimizar una función de pérdida.</td></tr>
-                  </tbody>
-                </table>
+              <div class="etapa-col">
+                <div class="etapa-sub">La cuenta</div>
+                <p class="vqe-formula">E(θ) = ⟨ψ(θ)| Ĥ |ψ(θ)⟩ ≥ E<sub>0</sub></p>
+                <p class="etapa-nota">Por el principio variacional, ninguna elección de θ da una energía menor que la del estado fundamental E<sub>0</sub>: minimizar E(θ) nos acerca a él desde arriba.</p>
+                <p class="vqe-formula">Ĥ = Σ<sub>k</sub> c<sub>k</sub> P<sub>k</sub></p>
+                <p class="etapa-nota">El Hamiltoniano se escribe como suma de cadenas de Pauli. Cada P<sub>k</sub> se mide rotando a su base: esas son las compuertas M<sub>i</sub> antes de los medidores.</p>
               </div>
               <div class="etapa-col">
-                <div class="etapa-sub">En reservorios cuánticos</div>
-                <p class="etapa-nota">El bucle puede recorrer las muestras o una secuencia temporal para construir las características medidas y entrenar un readout clásico. No necesariamente modifica los parámetros del circuito cuántico.</p>
+                <div class="etapa-sub">El ciclo, paso a paso</div>
+                <ol class="vqe-pasos">
+                  <li>Elegir θ inicial.</li>
+                  <li>Ejecutar el circuito con muchos <i>shots</i> y estimar cada ⟨P<sub>k</sub>⟩.</li>
+                  <li>Sumar c<sub>k</sub>⟨P<sub>k</sub>⟩ para obtener E(θ).</li>
+                  <li>El optimizador propone un nuevo θ (por ejemplo COBYLA o SPSA).</li>
+                  <li>Parar cuando E(θ) deja de bajar o se agota el presupuesto de iteraciones.</li>
+                </ol>
               </div>
   </template>
   <!-- detalle de la etapa 4: se despliega dentro de la tarjeta al hacer clic -->
