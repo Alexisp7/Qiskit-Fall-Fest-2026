@@ -1330,9 +1330,31 @@
     /* Salida tras la QFT: el texto se desvanece junto con las esferas */
     .hero-qubits .hero-text { transition: opacity 0.3s ease-out; }
     .saliendo .hero-qubits .hero-text { opacity: 0; }
+    /* mientras se van los qubits baja el menú de problemas, que allá ya
+       aparece en su sitio */
+    .header-salida {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+      transform: translateY(-100%); visibility: hidden;
+      transition: transform 0.9s cubic-bezier(.2,.7,.2,1) 0.3s, visibility 0s 0.3s;
+    }
+    .saliendo .header-salida { transform: none; visibility: visible; }
   </style>
 </head>
 <body>
+
+  <header class="header header-salida" aria-hidden="true">
+    <div class="header-inner">
+      <nav class="main-nav">
+        <a href="index.html">Portada</a>
+        <span class="nav-sep">|</span>
+        <a href="problemas.html" class="active">Problemas</a>
+        <span class="nav-sep">|</span>
+        <a href="repositorio.html">Repositorio</a>
+        <span class="nav-sep">|</span>
+        <a href="equipo.html">Equipo</a>
+      </nav>
+    </div>
+  </header>
 
   <div class="hero-qubits">
     <canvas class="qubits-fondo" data-linea=".hero-pista" data-qft="problemas.html" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
@@ -1374,6 +1396,6 @@
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022i"></script>
+  <script src="js/qubits.js?v=20261022j"></script>
 </body>
 </html>

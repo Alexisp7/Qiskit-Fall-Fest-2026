@@ -281,7 +281,7 @@
       ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       function lado(dir, k, col) {
         // se desvanece al acercarse al medidor
-        ctx.globalAlpha = Math.min(1, k / 0.22);
+        ctx.globalAlpha = Math.min(1, k / 0.22) * apagado();
         // cada flecha sale del medidor y llega como máximo al borde de la línea
         var largo = half - dir * meterOff - mx;
         var x0 = w / 2 + meterOff + dir * mx, x1 = x0 + dir * largo * k;
@@ -386,10 +386,14 @@
     // un pequeño desfase al azar, y al terminar se pasa a la página de destino.
     // El texto, la línea y el medidor se van antes, y las esferas después
     var DISFRUTE = 1000, SALIDA = 1300, saliendo = 0;
+    // opacidad de la línea, el medidor y sus flechas durante la salida
+    function apagado() { return saliendo ? Math.max(0, 1 - (performance.now() - saliendo) / 250) : 1; }
     function salir() {
       saliendo = performance.now();
       qubits.forEach(function (q) { q.outAt = saliendo + 250 + Math.random() * 300; });
       canvas.dispatchEvent(new CustomEvent('qft-salida', { bubbles: true, detail: { duracion: SALIDA } }));
+      // la página de destino sabe que llega desde aquí (su menú ya bajó)
+      try { sessionStorage.setItem('desde-qft', '1'); } catch (e) {}
       start();
       setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA);
     }
@@ -422,7 +426,7 @@
       if (span) {
         // al salir de escena la línea y la compuerta se desvanecen
         ctx.save();
-        if (saliendo) ctx.globalAlpha = Math.max(0, 1 - (performance.now() - saliendo) / 250);
+        ctx.globalAlpha = apagado();
         ctx.strokeStyle = LINE; ctx.lineWidth = 1;
         var half = Math.min(105, (span[1] - span[0]) / 2 - 16);
         lineHalf = half;

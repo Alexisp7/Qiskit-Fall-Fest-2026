@@ -1342,6 +1342,7 @@
     @keyframes desdeArriba { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
     .header.entra { animation: desdeArriba 0.9s cubic-bezier(.2,.7,.2,1) both; animation-delay: 0.15s; }
     @media (prefers-reduced-motion: reduce) { .entra, .header.entra { animation: none; } }
+    .desde-qft .header.entra { animation: none; }
     /* una sola fila: el track ancho y la tarjeta de próximos */
     @media (min-width: 901px) {
       .problemas-wrap .projects-grid { grid-template-rows: max(300px, calc(100vh - 340px)); }
@@ -1352,6 +1353,10 @@
       .problemas-proximo { grid-column: span 2; aspect-ratio: 3 / 1 !important; }
     }
   </style>
+  <script>
+    // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
+    try { if (sessionStorage.getItem('desde-qft')) { sessionStorage.removeItem('desde-qft'); document.documentElement.classList.add('desde-qft'); } } catch (e) {}
+  </script>
 </head>
 <body>
 
