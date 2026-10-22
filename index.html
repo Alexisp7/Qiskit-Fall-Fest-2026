@@ -1317,11 +1317,8 @@
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--gray-light, #9a958c);
-      /* la línea del medidor se traza en el borde de arriba de la pista */
-      padding-top: 26px;
-      margin: 0 0 4px;
+      margin-top: 34px;
     }
-    .hero-qubits .hero-stats { padding-top: 28px; }
     /* texto de la portada en serif, más cálido que la sans del cuerpo */
     .hero-qubits .hero-bio {
       font-family: 'Cormorant Garamond', serif;
@@ -1349,7 +1346,7 @@
 <body>
 
   <div class="hero-qubits">
-    <canvas class="qubits-fondo" data-linea=".hero-pista" data-qft="problemas.html" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
+    <canvas class="qubits-fondo" data-linea=".hero-stats" data-qft="problemas.html" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
   <section class="hero">
     <div class="hero-text">
       <div class="hero-kicker">Hackathon</div>
@@ -1360,7 +1357,6 @@
         <a class="hero-title hero-link" href="https://alexisfisteo-ij75.vercel.app/index.html">Alexis R. Salvatierra</a>
       </div>
       <p class="hero-bio">En este espacio se desarrollarán los tracks del hackathon Qiskit Fall Fest 2026. Su fin es únicamente de referencia y didáctico.</p>
-      <p class="hero-pista">Arrastra el medidor a la derecha, activa la <b>QFT</b> y mídela</p>
       <div class="hero-stats">
         <div class="stat-item">
           <div class="stat-num">01</div>
@@ -1378,6 +1374,7 @@
           <div class="stat-sub">en progreso</div>
         </div>
       </div>
+      <p class="hero-pista">Arrastra el medidor a la derecha, activa la <b>QFT</b> y mídela</p>
     </div>
   </section>
   </div>
@@ -1398,6 +1395,6 @@
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022e"></script>
+  <script src="js/qubits.js?v=20261022f"></script>
 </body>
 </html>
