@@ -1356,11 +1356,6 @@
     @media (max-width: 900px) {
       .problemas-proximo { grid-column: span 2; aspect-ratio: 3 / 1 !important; }
     }
-      /* ítem del menú bloqueado: candado dorado al lado */
-    .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
-    nav.main-nav a.active .candado { stroke: var(--gold); }
-    nav.main-nav a.nav-bloqueado { opacity: .75; }
-    nav.main-nav a.nav-bloqueado.active, nav.main-nav a.nav-bloqueado:hover { opacity: 1; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1380,7 +1375,7 @@
         <span class="nav-sep">|</span>
         <a href="equipo.html">Equipo</a>
         <span class="nav-sep">|</span>
-        <a href="preguntas.html" class="nav-bloqueado" title="Sección bloqueada">Preguntas <svg class="candado" viewBox="0 0 12 14" aria-hidden="true"><path d="M3.2 6V4.2a2.8 2.8 0 0 1 5.6 0V6"/><rect x="1.5" y="6" width="9" height="7" rx="1.2"/></svg></a>
+        <a href="preguntas.html">Preguntas</a>
       </nav>
     </div>
   </header>
