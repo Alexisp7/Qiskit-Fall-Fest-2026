@@ -1337,11 +1337,17 @@
     .equipo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; max-width: 1280px; margin: 0 auto; }
     @media (max-width: 900px) { .equipo-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 520px) { .equipo-grid { grid-template-columns: 1fr; } }
-    .miembro { background: #1A1A1A; padding: 52px 28px; min-height: 220px; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .miembro { background: #1A1A1A; padding: 40px 28px 36px; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    /* espacio para la foto: se reemplaza la inicial por <img src="img/equipo/..."> */
+    .miembro-foto { width: 120px; height: 120px; border-radius: 50%; border: 1px solid rgba(200,169,110,0.55); background: #141414; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; }
+    .miembro-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .miembro-foto span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 44px; color: rgba(200,169,110,0.45); }
     .miembro-nombre { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #F2EEE6; line-height: 1.15; }
     .miembro-nombre em { font-style: italic; color: var(--gold); }
-    .miembro-rol { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 14px 0 18px; }
-    .miembro-desc { color: #A8A39A; font-size: 14px; line-height: 1.6; margin-bottom: 22px; }
+    .miembro-rol { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 12px 0 16px; }
+    .miembro-desc { flex: 1; color: #A8A39A; font-size: 14px; line-height: 1.6; margin: 0 0 22px; max-width: 260px; }
+    .miembro-desc.pendiente { color: #5E5A53; font-style: italic; }
+    .miembro-links { display: flex; gap: 18px; justify-content: center; }
     .miembro a { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #F2EEE6; text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 3px; }
     .miembro a:hover { color: var(--gold); }
   </style>
@@ -1373,21 +1379,32 @@
     <div style="max-width:1280px;margin:0 auto;padding:0 48px;">
       <div class="equipo-grid">
         <div class="miembro">
+          <div class="miembro-foto"><span>A</span></div>
           <div class="miembro-nombre"><em>Alexis</em></div>
           <div class="miembro-rol">Integrante</div>
-          <a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Ver portafolio</a>
+          <p class="miembro-desc">Estudiante de física en la UNMSM. Mecánica cuántica, computación y sistemas complejos.</p>
+          <div class="miembro-links"><a href="https://www.linkedin.com/in/ronaldo-alexis-salvatierra-balde%C3%B3n-b99411212/" target="_blank" rel="noopener">LinkedIn</a><a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Portafolio</a></div>
         </div>
         <div class="miembro">
+          <div class="miembro-foto"><span>C</span></div>
           <div class="miembro-nombre"><em>Cristh</em></div>
           <div class="miembro-rol">Integrante</div>
+          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
+          <div class="miembro-links"><!-- LinkedIn de Cristh: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
         </div>
         <div class="miembro">
+          <div class="miembro-foto"><span>P</span></div>
           <div class="miembro-nombre"><em>Paul</em></div>
           <div class="miembro-rol">Integrante</div>
+          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
+          <div class="miembro-links"><!-- LinkedIn de Paul: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
         </div>
         <div class="miembro">
+          <div class="miembro-foto"><span>F</span></div>
           <div class="miembro-nombre"><em>Francis</em></div>
           <div class="miembro-rol">Integrante</div>
+          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
+          <div class="miembro-links"><!-- LinkedIn de Francis: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
         </div>
       </div>
     </div>
