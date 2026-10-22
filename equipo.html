@@ -1334,8 +1334,10 @@
       .problemas-proximo { grid-column: span 2; aspect-ratio: 3 / 1 !important; }
     }
     /* Equipo */
-    .equipo-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 1100px; margin: 0 auto; }
-    .miembro { flex: 1 1 280px; max-width: 360px; background: #1A1A1A; padding: 44px 32px; text-align: center; }
+    .equipo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; max-width: 1280px; margin: 0 auto; }
+    @media (max-width: 900px) { .equipo-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .equipo-grid { grid-template-columns: 1fr; } }
+    .miembro { background: #1A1A1A; padding: 52px 28px; min-height: 220px; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .miembro-nombre { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #F2EEE6; line-height: 1.15; }
     .miembro-nombre em { font-style: italic; color: var(--gold); }
     .miembro-rol { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 14px 0 18px; }
@@ -1365,16 +1367,27 @@
       <div class="section-header">
         <h2 class="section-title">El <em>equipo</em></h2>
       </div>
-      <p class="problemas-intro">Quienes desarrollan los tracks del hackathon Qiskit Fall Fest 2026 en este espacio.</p>
+      <p class="problemas-intro">Somos cuatro integrantes desarrollando los tracks del hackathon Qiskit Fall Fest 2026 en este espacio.</p>
     </div>
 
     <div style="max-width:1280px;margin:0 auto;padding:0 48px;">
       <div class="equipo-grid">
         <div class="miembro">
-          <div class="miembro-nombre">Alexis R.<br/><em>Salvatierra</em></div>
-          <div class="miembro-rol">Física · UNMSM</div>
-          <p class="miembro-desc">Estudiante de física en la Universidad Nacional Mayor de San Marcos. Mecánica cuántica, computación y sistemas complejos.</p>
+          <div class="miembro-nombre"><em>Alexis</em></div>
+          <div class="miembro-rol">Integrante</div>
           <a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Ver portafolio</a>
+        </div>
+        <div class="miembro">
+          <div class="miembro-nombre"><em>Cristh</em></div>
+          <div class="miembro-rol">Integrante</div>
+        </div>
+        <div class="miembro">
+          <div class="miembro-nombre"><em>Paul</em></div>
+          <div class="miembro-rol">Integrante</div>
+        </div>
+        <div class="miembro">
+          <div class="miembro-nombre"><em>Francis</em></div>
+          <div class="miembro-rol">Integrante</div>
         </div>
       </div>
     </div>
