@@ -1333,28 +1333,97 @@
     @media (max-width: 900px) {
       .problemas-proximo { grid-column: span 2; aspect-ratio: 3 / 1 !important; }
     }
-    /* Equipo */
-    .equipo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; max-width: 1280px; margin: 0 auto; }
-    @media (max-width: 900px) { .equipo-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 520px) { .equipo-grid { grid-template-columns: 1fr; } }
-    .miembro { background: #1A1A1A; padding: 40px 28px 36px; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; align-items: center; }
-    /* espacio para la foto: se reemplaza la inicial por <img src="img/equipo/..."> */
-    .miembro-foto { width: 120px; height: 120px; border-radius: 50%; border: 1px solid rgba(200,169,110,0.55); background: #141414; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; }
-    .miembro-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .miembro-foto span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 44px; color: rgba(200,169,110,0.45); }
-    .miembro-nombre { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #F2EEE6; line-height: 1.15; }
-    .miembro-nombre em { font-style: italic; color: var(--gold); }
-    .miembro-rol { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 12px 0 16px; }
-    .miembro-desc { flex: 1; color: #A8A39A; font-size: 14px; line-height: 1.6; margin: 0 0 22px; max-width: 260px; }
-    .miembro-desc.pendiente { color: #5E5A53; font-style: italic; }
-    .miembro-links { display: flex; gap: 18px; justify-content: center; }
-    .miembro a { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #F2EEE6; text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 3px; }
-    .miembro a:hover { color: var(--gold); }
+    /* ── Equipo como circuito cuántico: 4 qubits entrelazados (GHZ) ── */
+    html, body { background: var(--bg-dark); }
+    .equipo-wrap { background: var(--bg-dark); padding: 96px 0 72px; color: #F2EEE6; overflow: hidden; }
+    .eq-cabecera { max-width: 760px; margin: 0 auto 56px; padding: 0 24px; text-align: center; }
+    .eq-kicker { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); }
+    .eq-titulo { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 64px; line-height: 1; margin: 14px 0 22px; color: #F2EEE6; }
+    .eq-titulo em { font-style: italic; color: var(--gold); font-weight: 500; }
+    .eq-estado { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; color: #E9E2D3; white-space: nowrap; }
+    .eq-estado .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 22px; line-height: 1.15; margin: 0 4px; }
+    .eq-estado .frac span:first-child { border-bottom: 1px solid #8a8478; padding: 0 4px 2px; }
+    /* Cormorant usa números antiguos: el 0 parecería una o */
+    .eq-estado, .eq-resultado, .ket-medido { font-variant-numeric: lining-nums; }
+    .eq-nota { color: #A8A39A; font-size: 15px; line-height: 1.7; margin-top: 18px; }
+
+    .circuito { position: relative; max-width: 1280px; margin: 0 auto; padding: 0 48px; box-sizing: border-box; }
+    .circuito canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .qubit { position: relative; display: grid; grid-template-columns: 150px 1fr 470px; align-items: center; min-height: 200px; }
+    .ket { position: relative; z-index: 1; }
+    .ket b { display: block; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: #6f6a61; font-weight: 400; }
+    .ket span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; color: #E9E2D3; }
+    .ficha {
+      position: relative; z-index: 1; display: grid; grid-template-columns: 132px 1fr; gap: 26px; align-items: center;
+      background: linear-gradient(135deg, #191919, #141414); border: 1px solid #262626; padding: 22px 26px 22px 22px;
+      transition: border-color .35s, transform .35s, box-shadow .35s;
+    }
+    .qubit:hover .ficha { border-color: rgba(200,169,110,.55); transform: translateX(-6px); box-shadow: -18px 0 40px -24px rgba(200,169,110,.5); }
+
+    /* foto dentro de una esfera de Bloch */
+    .foto { position: relative; width: 132px; height: 132px; }
+    .foto-marco { position: absolute; inset: 8px; border-radius: 50%; overflow: hidden; background: radial-gradient(circle at 35% 30%, #262626, #101010); display: flex; align-items: center; justify-content: center; }
+    .foto-marco img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); transition: filter .4s; }
+    .qubit:hover .foto-marco img { filter: none; }
+    .foto-marco i { font-family: 'Cormorant Garamond', serif; font-size: 52px; color: rgba(200,169,110,.35); }
+    .bloch { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .bloch .esfera { fill: none; stroke: rgba(200,169,110,.55); stroke-width: 1; }
+    .bloch .ecuador { fill: none; stroke: rgba(200,169,110,.45); stroke-width: 1; }
+    .bloch .ecuador.atras { stroke-dasharray: 2 3; }
+    .bloch .flecha { transform-origin: 66px 66px; animation: giro 14s linear infinite; transition: transform .7s cubic-bezier(.3,1.4,.5,1); }
+    .bloch .flecha line, .bloch .flecha path { stroke: var(--gold); stroke-width: 1.6; fill: var(--gold); stroke-linecap: round; transition: stroke .4s, fill .4s; }
+    .bloch .ket-medido { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 18px; fill: #F2EEE6; opacity: 0; transition: opacity .4s; }
+    @keyframes giro { to { transform: rotate(360deg); } }
+    .medido-0 .bloch .flecha, .medido-1 .bloch .flecha { animation: none; }
+    .medido-0 .bloch .flecha { transform: rotate(0deg); }
+    .medido-1 .bloch .flecha { transform: rotate(180deg); }
+    .medido-0 .bloch .flecha line, .medido-0 .bloch .flecha path { stroke: #3B82F6; fill: #3B82F6; }
+    .medido-1 .bloch .flecha line, .medido-1 .bloch .flecha path { stroke: #EF4444; fill: #EF4444; }
+    .medido-0 .bloch .ket-medido, .medido-1 .bloch .ket-medido { opacity: 1; }
+
+    .ficha-nombre { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; font-style: italic; color: var(--gold); line-height: 1; }
+    .ficha-rol { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #6f6a61; margin: 8px 0 12px; }
+    .ficha-bio { color: #B5B0A6; font-size: 13.5px; line-height: 1.6; margin: 0 0 14px; }
+    .ficha-bio.pendiente { color: #5E5A53; font-style: italic; }
+    .ficha-links { display: flex; gap: 18px; min-height: 16px; }
+    .ficha-links a { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #F2EEE6; text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 3px; transition: color .2s; }
+    .ficha-links a:hover { color: var(--gold); }
+
+    /* medición */
+    .eq-medir { text-align: center; margin-top: 40px; }
+    .boton-medir {
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase;
+      color: #111; background: var(--gold); border: none; padding: 14px 28px; cursor: pointer; transition: background .2s, transform .2s;
+    }
+    .boton-medir:hover { background: #E0C48C; transform: translateY(-1px); }
+    .boton-medir:disabled { opacity: .6; cursor: default; transform: none; }
+    .eq-resultado { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: #E9E2D3; margin-top: 18px; min-height: 30px; }
+    .eq-resultado b { font-style: normal; font-weight: 600; }
+    .eq-conteo { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.18em; color: #6f6a61; margin-top: 6px; min-height: 14px; }
+
+    /* entrada desde la izquierda, como en problemas */
+    @keyframes desdeIzq { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .entra { animation: desdeIzq 0.8s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 0.12s + 0.1s); }
+    @media (prefers-reduced-motion: reduce) { .entra, .bloch .flecha { animation: none; } }
+
+    @media (max-width: 900px) {
+      .equipo-wrap { padding-top: 64px; }
+      .eq-titulo { font-size: 48px; }
+      .eq-estado { font-size: 22px; }
+      .circuito { padding: 0 16px; }
+      .circuito canvas { display: none; }
+      .qubit { grid-template-columns: 1fr; min-height: 0; margin-bottom: 14px; }
+      .ket { margin-bottom: 6px; }
+      .ket span { display: none; }
+      .ficha { grid-template-columns: 96px 1fr; gap: 18px; padding: 18px; }
+      .foto { width: 96px; height: 96px; }
+      .qubit:hover .ficha { transform: none; }
+    }
   </style>
 </head>
 <body>
 
-  <header class="header">
+  <header class="header entra" style="--i:0">
     <div class="header-inner">
       <nav class="main-nav">
         <a href="index.html">Portada</a>
@@ -1368,45 +1437,114 @@
     </div>
   </header>
 
-  <section class="projects-wrap problemas-wrap">
-    <div class="projects-inner">
-      <div class="section-header">
-        <h2 class="section-title">El <em>equipo</em></h2>
-      </div>
-      <p class="problemas-intro">Somos cuatro integrantes desarrollando los tracks del hackathon Qiskit Fall Fest 2026 en este espacio.</p>
+  <section class="equipo-wrap">
+    <div class="eq-cabecera entra" style="--i:1">
+      <div class="eq-kicker">Registro de 4 qubits</div>
+      <h1 class="eq-titulo">El <em>equipo</em></h1>
+      <div class="eq-estado">|equipo⟩ = <span class="frac"><span>1</span><span>√2</span></span> ( |0000⟩ + |1111⟩ )</div>
+      <p class="eq-nota">Cuatro integrantes, un solo estado. Una compuerta H y tres CNOT nos dejan entrelazados: al medir, siempre coincidimos.</p>
     </div>
 
-    <div style="max-width:1280px;margin:0 auto;padding:0 48px;">
-      <div class="equipo-grid">
-        <div class="miembro">
-          <div class="miembro-foto"><span>A</span></div>
-          <div class="miembro-nombre"><em>Alexis</em></div>
-          <div class="miembro-rol">Integrante</div>
-          <p class="miembro-desc">Estudiante de física en la UNMSM. Mecánica cuántica, computación y sistemas complejos.</p>
-          <div class="miembro-links"><a href="https://www.linkedin.com/in/ronaldo-alexis-salvatierra-balde%C3%B3n-b99411212/" target="_blank" rel="noopener">LinkedIn</a><a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Portafolio</a></div>
+    <div class="circuito">
+      <canvas aria-hidden="true"></canvas>
+      <article class="qubit entra" style="--i:2">
+        <div class="ket"><b>q₀</b><span>|Alexis⟩</span></div>
+        <div class="tramo"></div>
+        <div class="ficha">
+          <div class="foto">
+            <!-- foto: reemplazar la inicial por <img src="img/equipo/alexis.jpg" alt="Alexis"> -->
+            <div class="foto-marco"><i>A</i></div>
+            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
+              <circle class="esfera" cx="66" cy="66" r="62"/>
+              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
+              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
+              <g class="flecha" style="animation-delay:-0.0s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
+              <text class="ket-medido" x="100" y="18">|0⟩</text>
+            </svg>
+          </div>
+          <div>
+            <div class="ficha-nombre">Alexis</div>
+            <div class="ficha-rol">q₀ · Integrante</div>
+            <p class="ficha-bio">Estudiante de física en la UNMSM. Mecánica cuántica, computación y sistemas complejos.</p>
+            <div class="ficha-links"><a href="https://www.linkedin.com/in/ronaldo-alexis-salvatierra-balde%C3%B3n-b99411212/" target="_blank" rel="noopener">LinkedIn</a><a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Portafolio</a></div>
+          </div>
         </div>
-        <div class="miembro">
-          <div class="miembro-foto"><span>C</span></div>
-          <div class="miembro-nombre"><em>Cristh</em></div>
-          <div class="miembro-rol">Integrante</div>
-          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
-          <div class="miembro-links"><!-- LinkedIn de Cristh: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+      </article>
+      <article class="qubit entra" style="--i:3">
+        <div class="ket"><b>q₁</b><span>|Cristh⟩</span></div>
+        <div class="tramo"></div>
+        <div class="ficha">
+          <div class="foto">
+            <!-- foto: reemplazar la inicial por <img src="img/equipo/cristh.jpg" alt="Cristh"> -->
+            <div class="foto-marco"><i>C</i></div>
+            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
+              <circle class="esfera" cx="66" cy="66" r="62"/>
+              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
+              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
+              <g class="flecha" style="animation-delay:-3.4s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
+              <text class="ket-medido" x="100" y="18">|0⟩</text>
+            </svg>
+          </div>
+          <div>
+            <div class="ficha-nombre">Cristh</div>
+            <div class="ficha-rol">q₁ · Integrante</div>
+            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
+            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+          </div>
         </div>
-        <div class="miembro">
-          <div class="miembro-foto"><span>P</span></div>
-          <div class="miembro-nombre"><em>Paul</em></div>
-          <div class="miembro-rol">Integrante</div>
-          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
-          <div class="miembro-links"><!-- LinkedIn de Paul: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+      </article>
+      <article class="qubit entra" style="--i:4">
+        <div class="ket"><b>q₂</b><span>|Paul⟩</span></div>
+        <div class="tramo"></div>
+        <div class="ficha">
+          <div class="foto">
+            <!-- foto: reemplazar la inicial por <img src="img/equipo/paul.jpg" alt="Paul"> -->
+            <div class="foto-marco"><i>P</i></div>
+            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
+              <circle class="esfera" cx="66" cy="66" r="62"/>
+              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
+              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
+              <g class="flecha" style="animation-delay:-6.8s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
+              <text class="ket-medido" x="100" y="18">|0⟩</text>
+            </svg>
+          </div>
+          <div>
+            <div class="ficha-nombre">Paul</div>
+            <div class="ficha-rol">q₂ · Integrante</div>
+            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
+            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+          </div>
         </div>
-        <div class="miembro">
-          <div class="miembro-foto"><span>F</span></div>
-          <div class="miembro-nombre"><em>Francis</em></div>
-          <div class="miembro-rol">Integrante</div>
-          <p class="miembro-desc pendiente">Breve presentación próximamente.</p>
-          <div class="miembro-links"><!-- LinkedIn de Francis: <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+      </article>
+      <article class="qubit entra" style="--i:5">
+        <div class="ket"><b>q₃</b><span>|Francis⟩</span></div>
+        <div class="tramo"></div>
+        <div class="ficha">
+          <div class="foto">
+            <!-- foto: reemplazar la inicial por <img src="img/equipo/francis.jpg" alt="Francis"> -->
+            <div class="foto-marco"><i>F</i></div>
+            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
+              <circle class="esfera" cx="66" cy="66" r="62"/>
+              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
+              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
+              <g class="flecha" style="animation-delay:-10.2s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
+              <text class="ket-medido" x="100" y="18">|0⟩</text>
+            </svg>
+          </div>
+          <div>
+            <div class="ficha-nombre">Francis</div>
+            <div class="ficha-rol">q₃ · Integrante</div>
+            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
+            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
+          </div>
         </div>
-      </div>
+      </article>
+    </div>
+
+    <div class="eq-medir entra" style="--i:6">
+      <button class="boton-medir" type="button">Medir el equipo</button>
+      <div class="eq-resultado" aria-live="polite"></div>
+      <div class="eq-conteo"></div>
     </div>
   </section>
 
@@ -1419,5 +1557,6 @@
       </div>
     </div>
   </footer>
+  <script src="js/equipo.js"></script>
 </body>
 </html>
