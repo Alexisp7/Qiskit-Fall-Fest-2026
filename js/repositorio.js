@@ -7,40 +7,46 @@
     var ver = function (el, ms) { if (el) setTimeout(function () { el.classList.add('ver'); }, ms); };
     ver(document.querySelector('.repo-cabecera'), 200);
     var tarjetas = Array.prototype.slice.call(document.querySelectorAll('.etapa'));
-    if (tarjetas.length) {
-      var x0 = tarjetas[0].offsetLeft;
-      var ultima = tarjetas[tarjetas.length - 1];
-      var total = ultima.offsetLeft + ultima.offsetWidth - x0;
+    var circuito = document.querySelector('.circuito-completo');
+    var pistaIntro = document.querySelector('.etapas-pista');
+    if (circuito && tarjetas.length) {
+      var total = circuito.viewBox.baseVal.width;
       // el trazo avanza a velocidad constante a lo largo de todo el circuito
       var cuando = function (x) { return INICIO + Math.max(0, x) / total * DUR; };
       var cuanto = function (ancho) { return Math.max(120, ancho / total * DUR); };
-      tarjetas.forEach(function (t) {
-        var bx = t.offsetLeft - x0;
-        Array.prototype.forEach.call(t.querySelectorAll('.etapa-circuito *'), function (el) {
-          if (el.tagName === 'tspan') return;
-          var b;
-          try { b = el.getBBox(); } catch (e) { return; }
-          var del = cuando(bx + b.x);
-          var guion = getComputedStyle(el).strokeDasharray;
-          if (el.tagName === 'text' || (guion && guion !== 'none')) {
-            // textos y trazos ya punteados (ansatz, realimentación) aparecen al paso
-            el.classList.add('fad');
-          } else {
-            el.setAttribute('pathLength', '1');
-            el.classList.add('dib');
-            // las compuertas y figuras se dibujan con duración mínima propia
-            el.style.setProperty('--dur', (b.width > 60 && b.height < 6 ? cuanto(b.width) : 450) + 'ms');
-          }
-          el.style.setProperty('--del', del + 'ms');
-        });
-        // tramos de cable entre tarjetas, en el momento en que el trazo llega
-        var fin = bx + t.offsetWidth;
-        t.style.setProperty('--sdel', cuando(fin) + 'ms');
-        t.style.setProperty('--sdur', cuanto(42) + 'ms');
-        t.style.setProperty('--bdel', cuando(bx - 42) + 'ms');
-        // número, título y pregunta, cuando el trazo va por la mitad de su etapa
-        ver(t, cuando(bx + t.offsetWidth * 0.5));
+      Array.prototype.forEach.call(circuito.querySelectorAll('*'), function (el) {
+        if (el.tagName === 'tspan') return;
+        var b;
+        try { b = el.getBBox(); } catch (e) { return; }
+        var guion = getComputedStyle(el).strokeDasharray;
+        if (el.tagName === 'text' || (guion && guion !== 'none')) {
+          // textos y trazos ya punteados (ansatz, realimentación) aparecen al paso
+          el.classList.add('fad');
+        } else {
+          el.setAttribute('pathLength', '1');
+          el.classList.add('dib');
+          // los cables largos van al ritmo del trazo; las figuras, a su ritmo
+          el.style.setProperty('--dur', (b.width > 60 && b.height < 6 ? cuanto(b.width) : 450) + 'ms');
+        }
+        el.style.setProperty('--del', cuando(b.x) + 'ms');
       });
+      // número, título y pregunta, cuando el trazo va por la mitad de su etapa
+      tarjetas.forEach(function (t) { ver(t, cuando(t.offsetLeft - tarjetas[0].offsetLeft + t.offsetWidth * 0.5)); });
+
+      // la pista acompaña al trazo hasta el final del circuito (si la persona
+      // la mueve a mano, deja de seguirlo)
+      var sigue = true;
+      ['wheel', 'pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+        pistaIntro.addEventListener(ev, function () { sigue = false; }, { passive: true });
+      });
+      var t0 = performance.now();
+      (function acompana(now) {
+        if (!sigue) return;
+        var p = Math.min(1, Math.max(0, (now - t0 - INICIO) / DUR));
+        var max = pistaIntro.scrollWidth - pistaIntro.clientWidth;
+        pistaIntro.scrollLeft = Math.max(0, Math.min(max, p * total - pistaIntro.clientWidth * 0.62));
+        if (p < 1) requestAnimationFrame(acompana);
+      })(t0);
     }
     ver(document.querySelector('.header'), MENU);
     setTimeout(function () { raizHtml.classList.remove('rp-intro'); }, FIN);
