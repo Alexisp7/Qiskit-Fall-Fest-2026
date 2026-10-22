@@ -1327,12 +1327,13 @@
     @media (prefers-reduced-motion: reduce) { .hero-pista { animation: none; } }
     .hero-qubits .hero-stats { padding-top: 28px; }
     .hero-pista b { color: var(--gold); font-weight: 700; }
-    .hero-pista { line-height: 22px; }
-    /* al medir, la pista se vuelve un "Bienvenido" tecleado como en una
-       terminal: letra por letra, con cursor, y luego se desvanece */
-    .hero-pista.bienvenida { animation: none; opacity: 1; font-size: 15px; font-weight: 700; letter-spacing: 0.42em; color: var(--black); transition: opacity 0.4s ease; }
-    .hero-pista.bienvenida.se-va { opacity: 0; }
-    .cursor { display: inline-block; width: 0.62em; height: 1.05em; margin-left: 0.1em; vertical-align: -0.15em; background: var(--gold); animation: cursor 0.9s steps(1) infinite; }
+    /* bienvenida: con la pantalla ya vacía se teclea "Bienvenido" como en
+       una terminal, letra por letra con cursor, y se va rápido */
+    .bienvenida { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; }
+    .bienvenida.ver { opacity: 1; }
+    .bienvenida.se-va { opacity: 0; transition: opacity 0.25s ease; }
+    .bienvenida p { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.45em; text-transform: uppercase; color: var(--black); margin: 0; }
+    .cursor { display: inline-block; width: 0.62em; height: 1.05em; margin-left: 0.1em; vertical-align: -0.15em; background: var(--gold); animation: cursor 0.8s steps(1) infinite; }
     @keyframes cursor { 50% { opacity: 0; } }
     /* Salida tras la QFT: el texto se desvanece junto con las esferas */
     .hero-qubits .hero-text { transition: opacity 0.3s ease-out; }
@@ -1345,7 +1346,12 @@
       transition: transform 0.9s cubic-bezier(.2,.7,.2,1) 0.3s, visibility 0s 0.3s;
     }
     .saliendo .header-salida { transform: none; visibility: visible; }
-  </style>
+      /* ítem del menú bloqueado: candado dorado al lado */
+    .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
+    nav.main-nav a.active .candado { stroke: var(--gold); }
+    nav.main-nav a.nav-bloqueado { opacity: .75; }
+    nav.main-nav a.nav-bloqueado.active, nav.main-nav a.nav-bloqueado:hover { opacity: 1; }
+</style>
 </head>
 <body>
 
@@ -1359,12 +1365,14 @@
         <a href="repositorio.html">Repositorio</a>
         <span class="nav-sep">|</span>
         <a href="equipo.html">Equipo</a>
+        <span class="nav-sep">|</span>
+        <a href="preguntas.html" class="nav-bloqueado" title="Sección bloqueada">Preguntas <svg class="candado" viewBox="0 0 12 14" aria-hidden="true"><path d="M3.2 6V4.2a2.8 2.8 0 0 1 5.6 0V6"/><rect x="1.5" y="6" width="9" height="7" rx="1.2"/></svg></a>
       </nav>
     </div>
   </header>
 
   <div class="hero-qubits">
-    <canvas class="qubits-fondo" data-linea=".hero-pista" data-qft="problemas.html" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
+    <canvas class="qubits-fondo" data-linea=".hero-pista" data-qft="problemas.html" data-qft-espera="1550" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
   <section class="hero">
     <div class="hero-text">
       <div class="hero-kicker">Hackathon</div>
@@ -1398,27 +1406,27 @@
   </div>
 
 
+  <div class="bienvenida" aria-live="polite"><p><span class="tecleado"></span><span class="cursor"></span></p></div>
   <script>
     document.addEventListener('qft-salida', function () { document.body.classList.add('saliendo'); });
-    // al medir la QFT: "Bienvenido" se escribe letra por letra, se queda un
-    // segundo y se desvanece
-    document.addEventListener('qft-medida', function () {
-      var pista = document.querySelector('.hero-pista');
-      if (!pista || pista.classList.contains('bienvenida')) return;
+    // cuando ya se fueron los qubits: "Bienvenido" tecleado en la pantalla
+    // vacía, un instante, y se va rápido antes de pasar a problemas
+    document.addEventListener('qft-salida', function () {
+      var caja = document.querySelector('.bienvenida'), destino = caja.querySelector('.tecleado');
       var texto = 'Bienvenido', i = 0;
-      pista.classList.add('bienvenida');
-      pista.innerHTML = '<span class="tecleado"></span><span class="cursor"></span>';
-      var destino = pista.querySelector('.tecleado');
-      (function tecla() {
-        destino.textContent = texto.slice(0, ++i);
-        // ritmo irregular, como alguien tecleando
-        if (i < texto.length) setTimeout(tecla, 55 + Math.random() * 70);
-        else setTimeout(function () { pista.classList.add('se-va'); }, 1000);
-      })();
+      setTimeout(function () {
+        caja.classList.add('ver');
+        (function tecla() {
+          destino.textContent = texto.slice(0, ++i);
+          // ritmo irregular, como alguien tecleando
+          if (i < texto.length) setTimeout(tecla, 50 + Math.random() * 50);
+          else setTimeout(function () { caja.classList.add('se-va'); }, 450);
+        })();
+      }, 1300);
     });
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022k"></script>
+  <script src="js/qubits.js?v=20261022l"></script>
 </body>
 </html>

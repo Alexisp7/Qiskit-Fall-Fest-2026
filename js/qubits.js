@@ -13,7 +13,7 @@
 // fracción de la sección. Con data-linea="selector" se traza una línea fina
 // y corta sobre ese elemento, centrada, con un cuadrito.
 // Con data-qft="pagina.html", después de medir la QFT se dejan ver los
-// rojos y azules un momento, las esferas se desvanecen en su sitio (el canvas
+// rojos y azules 1 s, las esferas se desvanecen en su sitio (el canvas
 // avisa con el evento 'qft-salida') y luego se pasa a esa página.
 (function () {
   var R = 8, DX = 26, DY = DX * Math.sqrt(3) / 2;
@@ -366,12 +366,8 @@
       current.forEach(function (q) { q.hot = false; }); current = [];
       qftActivo = false; anclado = false; collapsed = true;
       start();
-      // con data-qft se avisa de la medición (la portada escribe su bienvenida)
-      // y los rojos y azules se disfrutan un momento antes de salir
-      if (destino) {
-        canvas.dispatchEvent(new CustomEvent('qft-medida', { bubbles: true }));
-        setTimeout(salir, (still ? 0 : fin) + DISFRUTE);
-      }
+      // con data-qft, los rojos y azules se disfrutan 1 s antes de salir
+      if (destino) setTimeout(salir, (still ? 0 : fin) + DISFRUTE);
     }
     function qftAll() {
       if (qftActivo) return mensaje();
@@ -389,7 +385,10 @@
     // salida de escena: cada esfera se vuelve transparente sin moverse, con
     // un pequeño desfase al azar, y al terminar se pasa a la página de destino.
     // El texto, la línea y el medidor se van antes, y las esferas después
-    var DISFRUTE = 1400, SALIDA = 1300, saliendo = 0;
+    var DISFRUTE = 1000, SALIDA = 1300, saliendo = 0;
+    // data-qft-espera: ms extra con la pantalla ya vacía antes de cambiar de
+    // página (la portada lo usa para su bienvenida)
+    var espera = +canvas.getAttribute('data-qft-espera') || 0;
     // opacidad de la línea, el medidor y sus flechas durante la salida
     function apagado() { return saliendo ? Math.max(0, 1 - (performance.now() - saliendo) / 250) : 1; }
     function salir() {
@@ -399,7 +398,7 @@
       // la página de destino sabe que llega desde aquí (su menú ya bajó)
       try { sessionStorage.setItem('desde-qft', '1'); } catch (e) {}
       start();
-      setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA);
+      setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA + espera);
     }
     function hadamard(q) {
       q.frozen = 'H'; q.masivo = false; q.hot = false; q.hAt = 0;
