@@ -1429,6 +1429,13 @@
     .etapa-nota { color: #B5B0A6; font-size: 13px; line-height: 1.65; margin: 0 0 10px; }
     /* flecha dorada en el hueco entre una etapa y la siguiente */
     .etapa:not([data-etapa="4"])::after { content: '→'; position: absolute; right: -31px; top: 22px; z-index: 2; width: 22px; height: 22px; line-height: 21px; text-align: center; font-size: 12px; color: #111; background: var(--gold); border-radius: 50%; }
+    /* submenú: cada etapa muestra solo su etiqueta, su título y el porqué;
+       el detalle está guardado en <template> para desplegarlo después */
+    .etapa { flex-direction: column; justify-content: center; align-items: flex-start; width: 340px; transition: background-color 1.2s ease, border-color .35s ease, transform .35s ease; }
+    .etapa:hover { border-color: rgba(200,169,110,.55); transform: translateY(-3px); }
+    .etapa .etapa-sub { margin: 4px 0 10px; color: var(--gold); }
+    .etapa .etapa-sub::before { content: ''; display: inline-block; width: 18px; height: 1px; background: var(--gold); vertical-align: middle; margin-right: 10px; }
+    .etapa-despliega { margin-top: 18px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: #5E5A53; }
     .etapas-pie { display: flex; align-items: center; gap: 16px; padding-top: 10px; }
     .pista-progreso { flex: 1; height: 1px; background: #2c2a26; position: relative; }
     .pista-progreso span { position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--gold); }
@@ -1468,6 +1475,7 @@
       .experimentos div { padding: 18px 20px; }
       .pregunta-central { font-size: 26px; }
       .etapa:not([data-etapa="4"])::after { top: 50%; margin-top: -11px; }
+      .etapa { width: 440px; padding: 34px 38px; gap: 0; align-items: flex-start; }
     }
     /* ítem del menú bloqueado: candado dorado al lado */
     .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
@@ -1509,11 +1517,50 @@
         <div class="etapas">
           <div class="etapas-pista" tabindex="0" aria-label="Las 4 etapas del proyecto">
             <article class="repo-panel etapa" data-etapa="1">
-              <div class="etapa-col etapa-intro">
-                <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Input</span></div>
-                <h2 class="etapa-titulo">Encoding y representación cuántica de datos</h2>
-                <p class="etapa-desc">Partimos de datos o de una instancia matemática del problema. Los procesamos y elegimos cómo representarlos en un sistema cuántico.</p>
-              </div>
+              <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Input</span></div>
+              <h2 class="etapa-titulo">Encoding y representación cuántica de datos</h2>
+              <div class="etapa-sub">Por qué</div>
+              <p class="etapa-desc">Partimos de datos o de una instancia matemática del problema. Los procesamos y elegimos cómo representarlos en un sistema cuántico.</p>
+              <span class="etapa-despliega">Desplegar · próximamente</span>
+            </article>
+
+            <article class="repo-panel etapa" data-etapa="2">
+              <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Quantum</span></div>
+              <h2 class="etapa-titulo">Diseño y construcción de circuitos cuánticos</h2>
+              <div class="etapa-sub">Por qué</div>
+              <p class="etapa-desc">Diseñamos los circuitos requeridos por el problema y por el algoritmo que vamos a utilizar.</p>
+              <span class="etapa-despliega">Desplegar · próximamente</span>
+            </article>
+
+            <article class="repo-panel etapa" data-etapa="3">
+              <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
+              <h2 class="etapa-titulo">Solucionadores cuánticos e integración de ciclos computacionales</h2>
+              <div class="etapa-sub">Por qué</div>
+              <p class="etapa-desc">Integramos los circuitos en el algoritmo completo: ejecución, extracción de resultados, entrenamiento u optimización, y los bucles que correspondan.</p>
+              <span class="etapa-despliega">Desplegar · próximamente</span>
+            </article>
+
+            <article class="repo-panel etapa" data-etapa="4">
+              <div class="etapa-cab"><span class="etapa-num">04</span><span class="etapa-tag">Validation</span></div>
+              <h2 class="etapa-titulo">Benchmarking, validación y evaluación de ventaja cuántica o híbrida</h2>
+              <div class="etapa-sub">Por qué</div>
+              <p class="etapa-desc">Comparamos la solución cuántica contra una clásica y evaluamos si el componente cuántico aporta valor por sí mismo o como mejora de un método clásico.</p>
+              <span class="etapa-despliega">Desplegar · próximamente</span>
+            </article>
+          </div>
+          <div class="etapas-pie">
+            <div class="pista-progreso"><span></span></div>
+            <div class="pista-pista">Arrastra o gira la rueda →</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- detalle de la etapa 1: se desplegará más adelante -->
+  <template id="etapa-1-detalle">
+
               <div class="etapa-col">
                 <div class="etapa-sub">Qué incluye</div>
                 <ul class="etapa-lista">
@@ -1522,14 +1569,10 @@
                   <li>Definición del estado inicial, operadores y recursos necesarios.</li>
                 </ul>
               </div>
-            </article>
+  </template>
+  <!-- detalle de la etapa 2: se desplegará más adelante -->
+  <template id="etapa-2-detalle">
 
-            <article class="repo-panel etapa" data-etapa="2">
-              <div class="etapa-col etapa-intro">
-                <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Quantum</span></div>
-                <h2 class="etapa-titulo">Diseño y construcción de circuitos cuánticos</h2>
-                <p class="etapa-desc">Diseñamos los circuitos requeridos por el problema y por el algoritmo que vamos a utilizar.</p>
-              </div>
               <div class="etapa-col">
                 <div class="etapa-sub">Qué incluye</div>
                 <ul class="etapa-lista">
@@ -1539,14 +1582,10 @@
                   <li>Circuitos de medición de observables.</li>
                 </ul>
               </div>
-            </article>
+  </template>
+  <!-- detalle de la etapa 3: se desplegará más adelante -->
+  <template id="etapa-3-detalle">
 
-            <article class="repo-panel etapa" data-etapa="3">
-              <div class="etapa-col etapa-intro">
-                <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
-                <h2 class="etapa-titulo">Solucionadores cuánticos e integración de ciclos computacionales</h2>
-                <p class="etapa-desc">Integramos los circuitos en el algoritmo completo: ejecución, extracción de resultados, entrenamiento u optimización, y los bucles que correspondan.</p>
-              </div>
               <div class="etapa-col">
                 <div class="etapa-sub">Qué incluye</div>
                 <ul class="etapa-lista">
@@ -1572,14 +1611,10 @@
                 <div class="etapa-sub">En reservorios cuánticos</div>
                 <p class="etapa-nota">El bucle puede recorrer las muestras o una secuencia temporal para construir las características medidas y entrenar un readout clásico. No necesariamente modifica los parámetros del circuito cuántico.</p>
               </div>
-            </article>
+  </template>
+  <!-- detalle de la etapa 4: se desplegará más adelante -->
+  <template id="etapa-4-detalle">
 
-            <article class="repo-panel etapa" data-etapa="4">
-              <div class="etapa-col etapa-intro">
-                <div class="etapa-cab"><span class="etapa-num">04</span><span class="etapa-tag">Validation</span></div>
-                <h2 class="etapa-titulo">Benchmarking, validación y evaluación de ventaja cuántica o híbrida</h2>
-                <p class="etapa-desc">Comparamos la solución cuántica contra una clásica y evaluamos si el componente cuántico aporta valor por sí mismo o como mejora de un método clásico.</p>
-              </div>
               <div class="etapa-col">
                 <div class="etapa-sub">Qué incluye</div>
                 <ul class="etapa-lista">
@@ -1603,17 +1638,7 @@
                 <p class="etapa-nota">Si el método cuántico no supera al clásico por sí solo, todavía podemos estudiar si mejora un procesamiento clásico existente: hay que compararlo con el mismo método clásico sin el componente cuántico, con datos y condiciones equivalentes.</p>
                 <p class="etapa-nota">Una mejora en precisión tampoco implica automáticamente una ventaja computacional: hay que considerar el costo del encoding, las mediciones, el entrenamiento y la ejecución.</p>
               </div>
-            </article>
-          </div>
-          <div class="etapas-pie">
-            <div class="pista-progreso"><span></span></div>
-            <div class="pista-pista">Arrastra o gira la rueda →</div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
+  </template>
 
   <hr class="gold-line"/>
 
