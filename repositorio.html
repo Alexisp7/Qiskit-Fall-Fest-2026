@@ -1401,19 +1401,40 @@
     .rp-intro .header, .rp-intro .repo-cabecera { opacity: 0; }
     .header, .repo-cabecera { transition: opacity 1.1s ease; }
     .rp-intro .header.ver, .rp-intro .repo-cabecera.ver { opacity: 1; }
-    .rp-intro .repo-panel { background-color: transparent; border-color: transparent; }
+    .rp-intro .repo-panel { background-color: transparent; border-color: transparent; overflow: hidden !important; }
     .rp-intro .repo-panel > :not(.rp-trazo) { opacity: 0; transform: translateX(70px); }
     .rp-intro .repo-panel.ver > :not(.rp-trazo) { opacity: 1; transform: none; transition: opacity 1.4s ease, transform 1.9s cubic-bezier(.16,1,.3,1); }
     .rp-intro .repo-panel.ver > :nth-child(2) { transition-delay: .15s; }
     .rp-intro .repo-panel.ver > :nth-child(3) { transition-delay: .3s; }
-    .rp-trazo { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); overflow: visible; pointer-events: none; transition: opacity 1.2s ease; }
+    .rp-trazo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; transition: opacity 1.2s ease; }
     .rp-trazo rect { fill: none; vector-effect: non-scaling-stroke; animation-duration: 1.4s; animation-timing-function: cubic-bezier(.6,0,.3,1); animation-fill-mode: both; animation-delay: var(--d); }
     .rp-trazo .blanco { stroke: rgba(242,238,230,.55); stroke-width: 1; stroke-dasharray: 1000; animation-name: trazar; }
     .rp-trazo .oro { stroke: var(--gold); stroke-width: 2; stroke-dasharray: 70 930; animation-name: cometa; }
     @keyframes trazar { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
     @keyframes cometa { 0% { stroke-dashoffset: 70; opacity: 1; } 85% { opacity: 1; } 100% { stroke-dashoffset: -930; opacity: 0; } }
     .rp-trazo.fuera { opacity: 0; }
-</style>
+    /* Escritorio: todo el repositorio cabe en una sola vista. Encabezado en
+       una franja y tres columnas: explicación y clonar | archivos | cambios.
+       Si el árbol o los commits crecen, se desplazan dentro de su panel */
+    @media (min-width: 901px) {
+      .repo-wrap { height: calc(100vh - 72px); min-height: 600px; box-sizing: border-box; padding: 18px 48px; display: flex; flex-direction: column; }
+      .repo-inner { width: 100%; max-width: 1280px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+      .repo-cabecera { display: grid; grid-template-columns: auto 1fr; column-gap: 40px; align-items: end; text-align: left; margin-bottom: 16px; }
+      .repo-kicker { grid-column: 1; grid-row: 1; }
+      .repo-titulo { grid-column: 1; grid-row: 2; font-size: 46px; margin: 6px 0 0; }
+      .repo-intro { grid-column: 2; grid-row: 1 / 3; justify-self: end; text-align: right; max-width: 520px; margin: 0 0 4px; font-size: 14px; line-height: 1.6; }
+      .repo-grid { flex: 1; min-height: 0; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr auto; }
+      .repo-panel { min-height: 0; overflow: auto; padding: 22px 24px; }
+      .repo-panel:nth-child(1) { grid-column: 1; grid-row: 1; }
+      .repo-panel:nth-child(2) { grid-column: 2; grid-row: 1 / 3; }
+      .repo-panel:nth-child(3) { grid-column: 3; grid-row: 1 / 3; }
+      .repo-panel:nth-child(4) { grid-column: 1; grid-row: 2; }
+      .repo-explica p { font-size: 14px; }
+      .repo-acciones { margin-top: 14px; }
+      /* en la columna angosta el comando se parte en vez de desplazarse */
+      .clonar code { white-space: normal; word-break: break-all; overflow: visible; }
+    }
+  </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
 </head>
 <body>
