@@ -88,15 +88,48 @@
     })
     .catch(function () { aviso(commits); });
 
-  // detalle ampliado de las etapas (diálogo nativo)
-  Array.prototype.forEach.call(document.querySelectorAll('[data-abre]'), function (b) {
-    var d = document.getElementById(b.getAttribute('data-abre'));
-    if (!d || !d.showModal) return;
-    b.addEventListener('click', function () { d.showModal(); });
-    d.querySelector('.detalle-cerrar').addEventListener('click', function () { d.close(); });
-    // clic fuera del cuadro: cierra
-    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
-  });
+  // pista de etapas: solo se mueve en el eje x, arrastrando o con la rueda
+  var pista = document.querySelector('.etapas-pista');
+  var barra = document.querySelector('.pista-progreso span');
+  if (pista) {
+    var avance = function () {
+      var max = pista.scrollWidth - pista.clientWidth;
+      if (barra) barra.style.width = (max > 0 ? pista.scrollLeft / max * 100 : 100) + '%';
+    };
+    pista.addEventListener('scroll', avance, { passive: true });
+    window.addEventListener('resize', avance);
+    avance();
+    // la rueda vertical se convierte en desplazamiento horizontal
+    pista.addEventListener('wheel', function (e) {
+      var d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (e.deltaMode === 1) d *= 32;
+      pista.scrollLeft += d;
+      e.preventDefault();
+    }, { passive: false });
+    // arrastrar con el mouse (en pantallas táctiles el desplazamiento es nativo)
+    var ini = null;
+    pista.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      ini = { x: e.clientX, s: pista.scrollLeft, movio: false };
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!ini) return;
+      var dx = e.clientX - ini.x;
+      if (!ini.movio && Math.abs(dx) > 4) { ini.movio = true; pista.classList.add('arrastrando'); }
+      if (ini.movio) pista.scrollLeft = ini.s - dx;
+    });
+    window.addEventListener('pointerup', function () {
+      if (!ini) return;
+      ini = null; pista.classList.remove('arrastrando');
+    });
+    // con el teclado: flechas izquierda y derecha
+    pista.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        pista.scrollBy({ left: e.key === 'ArrowRight' ? 240 : -240, behavior: 'smooth' });
+        e.preventDefault();
+      }
+    });
+  }
 
   // copiar el comando de clonado
   var boton = document.getElementById('copiar');
