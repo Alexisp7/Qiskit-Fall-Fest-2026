@@ -1308,29 +1308,24 @@
     .hero-qubits > .hero { position: relative; z-index: 1; }
     .qubits-fondo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
     .hero-qubits .hero-stats { border-top: none; }
+    /* Sin menú: la portada ocupa toda la pantalla */
+    .hero-qubits { min-height: 100vh; display: flex; align-items: center; }
+    .hero-qubits > .hero { width: 100%; }
+    .hero-pista {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gray-light, #9a958c);
+      margin-top: 34px;
+    }
+    .hero-pista b { color: var(--gold); font-weight: 700; }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════
-       HEADER
-  ═══════════════════════════════════ -->
-  <header class="header">
-    <div class="header-inner">
-      <nav class="main-nav">
-        <a href="index.html" class="active">Inicio</a>
-        <span class="nav-sep">|</span>
-        <a href="https://alexisfisteo-ij75.vercel.app/proyectos.html">Proyectos</a>
-        <span class="nav-sep">|</span>
-        <a href="https://github.com/Alexisp7/Qiskit-Fall-Fest-2026" target="_blank" rel="noopener">GitHub</a>
-        <span class="nav-sep">|</span>
-        <a href="https://alexisfisteo-ij75.vercel.app/index.html">Portafolio</a>
-      </nav>
-    </div>
-  </header>
-
   <div class="hero-qubits">
-    <canvas class="qubits-fondo" data-linea=".hero-stats" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
+    <canvas class="qubits-fondo" data-linea=".hero-stats" data-qft="problemas.html" data-libre="310 0, 310 0.85, 250 1" aria-hidden="true"></canvas>
   <section class="hero">
     <div class="hero-text">
       <div class="hero-kicker">Hackathon</div>
@@ -1358,6 +1353,7 @@
           <div class="stat-sub">en progreso</div>
         </div>
       </div>
+      <p class="hero-pista">Arrastra el medidor a la derecha y activa la <b>QFT</b></p>
     </div>
   </section>
   </div>
@@ -1372,23 +1368,6 @@
     </div>
   </footer>
 
-  <script>
-    // El menú se desvanece al bajar y desaparece antes de que los contadores lleguen arriba
-    (function () {
-      var header = document.querySelector('.header');
-      var target = document.querySelector('.hero-stats');
-      if (!header || !target) return;
-      function update() {
-        var end = target.getBoundingClientRect().top + window.scrollY - header.offsetHeight - 40;
-        var t = end > 0 ? Math.min(Math.max(window.scrollY / end, 0), 1) : 0;
-        header.style.opacity = String(1 - t);
-        header.style.visibility = t >= 1 ? 'hidden' : 'visible';
-      }
-      window.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update);
-      update();
-    })();
-  </script>
-  <script src="js/qubits.js?v=20261021s"></script>
+  <script src="js/qubits.js?v=20261022a"></script>
 </body>
 </html>

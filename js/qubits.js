@@ -29,6 +29,7 @@
     var ctx = canvas.getContext('2d');
     var section = canvas.parentElement;
     var limit = canvas.getAttribute('data-hasta');
+    var destino = canvas.getAttribute('data-qft');
     var profile = (canvas.getAttribute('data-libre') || '').split(',').map(function (pair) {
       return pair.trim().split(/\s+/).map(Number);
     }).filter(function (p) { return p.length === 2 && !isNaN(p[0]) && !isNaN(p[1]); });
@@ -365,15 +366,18 @@
     function qftAll() {
       if (qftActivo) return mensaje();
       qftActivo = true;
-      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY;
+      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY, fin = 0;
       qubits.forEach(function (q) {
         var d = Math.sqrt((q.x - cx) * (q.x - cx) + (q.y - cy) * (q.y - cy));
         q.collapseAt = 0; q.resetAt = 0;
         q.hAt = t0 + d * 0.9;
+        fin = Math.max(fin, d * 0.9);
       });
       current.forEach(function (q) { q.hot = false; }); current = [];
       collapsed = false;
       start();
+      // con data-qft="pagina.html", al terminar la onda de H se va a esa página
+      if (destino) setTimeout(function () { window.location.href = destino; }, (still ? 0 : fin) + 700);
     }
     function hadamard(q) {
       q.frozen = 'H'; q.masivo = false; q.hot = false; q.hAt = 0;
