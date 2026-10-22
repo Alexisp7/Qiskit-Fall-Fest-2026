@@ -6,6 +6,34 @@
   var API = 'https://api.github.com/repos/' + REPO;
   var WEB = 'https://github.com/' + REPO;
 
+  // ── intro: negro → trazos blancos y dorados → contenido desde la derecha ──
+  var raizHtml = document.documentElement;
+  if (raizHtml.classList.contains('rp-intro')) {
+    var TRAZO_0 = 600, TRAZO_PASO = 250, TRAZO_DUR = 1400, MENU = 3600, FIN = 5400;
+    var paneles = Array.prototype.slice.call(document.querySelectorAll('.repo-panel'));
+    var ver = function (el, ms) { if (el) setTimeout(function () { el.classList.add('ver'); }, ms); };
+    ver(document.querySelector('.repo-cabecera'), 200);
+    paneles.forEach(function (p, i) {
+      var d = TRAZO_0 + i * TRAZO_PASO;
+      // pathLength=1000 deja medir el borde en unidades fijas aunque el panel
+      // cambie de alto cuando llegan los datos de GitHub
+      p.insertAdjacentHTML('afterbegin',
+        '<svg class="rp-trazo" style="--d:' + d + 'ms" aria-hidden="true">' +
+        '<rect class="blanco" x="0.5" y="0.5" width="100%" height="100%" pathLength="1000"/>' +
+        '<rect class="oro" x="0.5" y="0.5" width="100%" height="100%" pathLength="1000"/></svg>');
+      ver(p, d + TRAZO_DUR - 200);
+    });
+    ver(document.querySelector('.header'), MENU);
+    // al terminar vuelven el fondo y el borde normales y el trazo se apaga
+    setTimeout(function () {
+      raizHtml.classList.remove('rp-intro');
+      Array.prototype.forEach.call(document.querySelectorAll('.rp-trazo'), function (t) {
+        t.classList.add('fuera');
+        setTimeout(function () { t.remove(); }, 1300);
+      });
+    }, FIN);
+  }
+
   function esc(t) {
     return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
