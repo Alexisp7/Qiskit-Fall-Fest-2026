@@ -1327,6 +1327,13 @@
     @media (prefers-reduced-motion: reduce) { .hero-pista { animation: none; } }
     .hero-qubits .hero-stats { padding-top: 28px; }
     .hero-pista b { color: var(--gold); font-weight: 700; }
+    .hero-pista { line-height: 22px; }
+    /* al medir, la pista se vuelve un "Bienvenido" tecleado como en una
+       terminal: letra por letra, con cursor, y luego se desvanece */
+    .hero-pista.bienvenida { animation: none; opacity: 1; font-size: 15px; font-weight: 700; letter-spacing: 0.42em; color: var(--black); transition: opacity 0.4s ease; }
+    .hero-pista.bienvenida.se-va { opacity: 0; }
+    .cursor { display: inline-block; width: 0.62em; height: 1.05em; margin-left: 0.1em; vertical-align: -0.15em; background: var(--gold); animation: cursor 0.9s steps(1) infinite; }
+    @keyframes cursor { 50% { opacity: 0; } }
     /* Salida tras la QFT: el texto se desvanece junto con las esferas */
     .hero-qubits .hero-text { transition: opacity 0.3s ease-out; }
     .saliendo .hero-qubits .hero-text { opacity: 0; }
@@ -1393,9 +1400,25 @@
 
   <script>
     document.addEventListener('qft-salida', function () { document.body.classList.add('saliendo'); });
+    // al medir la QFT: "Bienvenido" se escribe letra por letra, se queda un
+    // segundo y se desvanece
+    document.addEventListener('qft-medida', function () {
+      var pista = document.querySelector('.hero-pista');
+      if (!pista || pista.classList.contains('bienvenida')) return;
+      var texto = 'Bienvenido', i = 0;
+      pista.classList.add('bienvenida');
+      pista.innerHTML = '<span class="tecleado"></span><span class="cursor"></span>';
+      var destino = pista.querySelector('.tecleado');
+      (function tecla() {
+        destino.textContent = texto.slice(0, ++i);
+        // ritmo irregular, como alguien tecleando
+        if (i < texto.length) setTimeout(tecla, 55 + Math.random() * 70);
+        else setTimeout(function () { pista.classList.add('se-va'); }, 1000);
+      })();
+    });
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022j"></script>
+  <script src="js/qubits.js?v=20261022k"></script>
 </body>
 </html>
