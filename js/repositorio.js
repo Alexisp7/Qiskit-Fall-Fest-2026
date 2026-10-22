@@ -138,6 +138,7 @@
       panel.classList.remove('ver');
       pista.scrollTo({ left: et.offsetLeft - 2, behavior: still ? 'auto' : 'smooth' });
       // 2. el panel blanco entra justo antes de la etapa y la explica
+      panel.style.left = (et.offsetWidth + 24) + 'px';
       pCab.innerHTML = '';
       pCab.appendChild(et.querySelector('.etapa-cab').cloneNode(true));
       var titulo = document.createElement('div');
