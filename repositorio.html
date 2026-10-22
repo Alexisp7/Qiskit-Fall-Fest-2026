@@ -1451,6 +1451,49 @@
     .etapa.abierta .etapa-despliega { color: var(--gold); }
     .etapa.abierta::after { display: none; }
     .etapa:focus-visible { outline: 1px solid var(--gold); outline-offset: 3px; }
+    /* ── El circuito: cada etapa lleva su tramo y juntas forman uno solo.
+       01 encoding · 02 compuertas · 03 medición y computadora · 04 monitor ── */
+    .etapa { --px: 38px; --py: 34px; width: 440px; padding: var(--py) var(--px); justify-content: flex-start; }
+    .etapa-circuito { display: block; width: 440px; height: 150px; flex: 0 0 auto; margin: calc(-1 * var(--py) + 6px) calc(-1 * var(--px)) 18px; overflow: visible; }
+    .etapa-circuito .cable { stroke: rgba(242,238,230,.38); stroke-width: 1; }
+    .etapa-circuito .clasico { stroke: rgba(242,238,230,.38); stroke-width: 1; }
+    .etapa-circuito .compuerta { fill: #111; stroke: var(--gold); stroke-width: 1.2; }
+    .etapa-circuito .ansatz { fill: none; stroke: rgba(200,169,110,.45); stroke-dasharray: 3 4; }
+    .etapa-circuito .puerta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 17px; fill: var(--gold); text-anchor: middle; }
+    .etapa-circuito .puerta .ind { font-size: 11px; baseline-shift: sub; }
+    .etapa-circuito .ket { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; fill: #E9E2D3; font-variant-numeric: lining-nums; }
+    .etapa-circuito .rotulo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .14em; fill: #8a8478; text-anchor: middle; }
+    .etapa-circuito .enlace, .etapa-circuito .objetivo { stroke: var(--gold); stroke-width: 1.2; fill: none; }
+    .etapa-circuito .objetivo { fill: #111; }
+    .etapa-circuito .control { fill: var(--gold); }
+    .etapa-circuito .aguja { fill: none; stroke: var(--gold); stroke-width: 1.2; }
+    .etapa-circuito .flujo { stroke: #8a8478; }
+    .etapa-circuito .punta { fill: none; stroke: var(--gold); stroke-width: 1.2; }
+    .etapa-circuito .lazo { stroke: var(--gold); stroke-width: 1; stroke-dasharray: 4 4; }
+    .etapa-circuito .pc { fill: #161616; stroke: #F2EEE6; stroke-opacity: .55; stroke-width: 1.2; }
+    .etapa-circuito .pc-pantalla { fill: #0c0c0c; stroke: rgba(200,169,110,.5); }
+    .etapa-circuito .pc-pie { fill: none; stroke: #F2EEE6; stroke-opacity: .45; }
+    .etapa-circuito .pc-txt { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .1em; fill: #CFC9BD; text-anchor: middle; }
+    .etapa-circuito .eje { stroke: rgba(242,238,230,.3); }
+    .etapa-circuito .barra { fill: rgba(242,238,230,.25); }
+    .etapa-circuito .barra-q { fill: var(--gold); }
+    .etapa-circuito .check { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linecap: round; }
+    /* cables que cruzan el hueco entre tarjetas (en vez de la flecha) */
+    .etapas-pista .etapa::after, .etapas-pista .etapa::before { content: none; }
+    .etapas-pista .etapa[data-etapa="1"]::after, .etapas-pista .etapa[data-etapa="2"]::after {
+      content: ''; position: absolute; left: 100%; width: 42px; top: 50px; height: 61px; margin: 0; border-radius: 0;
+      background: linear-gradient(rgba(242,238,230,.38), rgba(242,238,230,.38)) 0 0 / 100% 1px no-repeat, linear-gradient(rgba(242,238,230,.38), rgba(242,238,230,.38)) 0 30px / 100% 1px no-repeat, linear-gradient(rgba(242,238,230,.38), rgba(242,238,230,.38)) 0 60px / 100% 1px no-repeat;
+    }
+    .etapas-pista .etapa[data-etapa="3"]::after {
+      content: ''; position: absolute; left: 100%; width: 42px; top: 78px; height: 5px; margin: 0; border-radius: 0;
+      border-top: 1px solid rgba(242,238,230,.38); border-bottom: 1px solid rgba(242,238,230,.38); box-sizing: border-box; background: none;
+    }
+    /* la realimentación θ cruza de la 03 a la 02 */
+    .etapas-pista .etapa[data-etapa="3"]::before {
+      content: ''; position: absolute; right: 100%; width: 42px; top: 19px; height: 1px;
+      background: repeating-linear-gradient(90deg, var(--gold) 0 4px, transparent 4px 8px);
+    }
+    .etapas-pista .etapa.abierta::after { content: none; }
     .etapas-pie { display: flex; align-items: center; gap: 16px; padding-top: 10px; }
     .pista-progreso { flex: 1; height: 1px; background: #2c2a26; position: relative; }
     .pista-progreso span { position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--gold); }
@@ -1490,7 +1533,15 @@
       .experimentos div { padding: 18px 20px; }
       .pregunta-central { font-size: 26px; }
       .etapa:not([data-etapa="4"])::after { top: 50%; margin-top: -11px; }
-      .etapa { width: 440px; padding: 34px 38px; gap: 0; align-items: flex-start; }
+      .etapa { width: 440px; padding: var(--py) var(--px); gap: 0; align-items: flex-start; }
+    }
+    /* pantallas bajas: títulos y espacios más justos para que nada se corte */
+    @media (min-width: 901px) and (max-height: 780px) {
+      .etapa { --py: 26px; }
+      .etapa-circuito { margin-bottom: 10px; }
+      .repo-panel h2.etapa-titulo { font-size: 26px; margin-bottom: 10px; }
+      .etapa-num { font-size: 46px; }
+      .etapa-desc { font-size: 14px; line-height: 1.55; }
     }
     /* ítem del menú bloqueado: candado dorado al lado */
     .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
@@ -1533,6 +1584,7 @@
           <div class="etapas-pista" tabindex="0" aria-label="Las 4 etapas del proyecto">
             <article class="repo-panel etapa" data-etapa="1" tabindex="0" role="button" aria-expanded="false">
               <div class="etapa-resumen">
+                <svg class="etapa-circuito" viewBox="0 0 440 150" aria-hidden="true"><text class="ket" x="14" y="50">|0⟩</text><text class="ket" x="14" y="80">|0⟩</text><text class="ket" x="14" y="110">|0⟩</text><line class="cable" x1="44" y1="45" x2="440" y2="45"/><line class="cable" x1="44" y1="75" x2="440" y2="75"/><line class="cable" x1="44" y1="105" x2="440" y2="105"/><text class="rotulo" x="205" y="12">datos x</text><line class="flujo" x1="205" y1="17" x2="205" y2="27"/><path class="punta" d="M201 24 L205 30 L209 24"/><rect class="compuerta" x="160" y="31" width="90" height="88"/><text class="puerta" x="205.0" y="80.0">U(x)</text><text class="rotulo" x="205.0" y="132">encoding</text></svg>
                 <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Input</span></div>
                 <h2 class="etapa-titulo">Encoding y representación cuántica de datos</h2>
                 <div class="etapa-sub">Por qué</div>
@@ -1544,6 +1596,7 @@
 
             <article class="repo-panel etapa" data-etapa="2" tabindex="0" role="button" aria-expanded="false">
               <div class="etapa-resumen">
+                <svg class="etapa-circuito" viewBox="0 0 440 150" aria-hidden="true"><line class="cable" x1="0" y1="45" x2="440" y2="45"/><line class="cable" x1="0" y1="75" x2="440" y2="75"/><line class="cable" x1="0" y1="105" x2="440" y2="105"/><rect class="ansatz" x="132" y="28" width="250" height="94"/><text class="rotulo" x="257" y="137">ansatz U(θ)</text><rect class="compuerta" x="50" y="33" width="24" height="24"/><text class="puerta" x="62.0" y="50.0">H</text><rect class="compuerta" x="46" y="63" width="32" height="24"/><text class="puerta" x="62.0" y="80.0">R<tspan class="ind">y</tspan></text><rect class="compuerta" x="46" y="93" width="32" height="24"/><text class="puerta" x="62.0" y="110.0">R<tspan class="ind">y</tspan></text><line class="enlace" x1="170" y1="45" x2="170" y2="84"/><circle class="control" cx="170" cy="45" r="3.5"/><circle class="objetivo" cx="170" cy="75" r="9"/><line class="enlace" x1="161" y1="75" x2="179" y2="75"/><line class="enlace" x1="230" y1="75" x2="230" y2="114"/><circle class="control" cx="230" cy="75" r="3.5"/><circle class="objetivo" cx="230" cy="105" r="9"/><line class="enlace" x1="221" y1="105" x2="239" y2="105"/><rect class="compuerta" x="282" y="33" width="32" height="24"/><text class="puerta" x="298.0" y="50.0">R<tspan class="ind">z</tspan></text><rect class="compuerta" x="340" y="93" width="32" height="24"/><text class="puerta" x="356.0" y="110.0">R<tspan class="ind">z</tspan></text><line class="lazo" x1="440" y1="14" x2="300" y2="14"/><line class="lazo" x1="300" y1="14" x2="300" y2="26"/><path class="punta" d="M296 22 L300 28 L304 22"/><text class="rotulo" x="372" y="10">θ</text></svg>
                 <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Quantum</span></div>
                 <h2 class="etapa-titulo">Diseño y construcción de circuitos cuánticos</h2>
                 <div class="etapa-sub">Por qué</div>
@@ -1555,6 +1608,7 @@
 
             <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false">
               <div class="etapa-resumen">
+                <svg class="etapa-circuito" viewBox="0 0 440 150" aria-hidden="true"><line class="cable" x1="0" y1="45" x2="92" y2="45"/><line class="cable" x1="0" y1="75" x2="92" y2="75"/><line class="cable" x1="0" y1="105" x2="92" y2="105"/><rect class="compuerta" x="95" y="35" width="26" height="20"/><path class="aguja" d="M100 50 A9 9 0 0 1 116 50 M108 50 L114 40"/><rect class="compuerta" x="95" y="65" width="26" height="20"/><path class="aguja" d="M100 80 A9 9 0 0 1 116 80 M108 80 L114 70"/><rect class="compuerta" x="95" y="95" width="26" height="20"/><path class="aguja" d="M100 110 A9 9 0 0 1 116 110 M108 110 L114 100"/><line class="clasico" x1="121" y1="43" x2="236" y2="43"/><line class="clasico" x1="121" y1="47" x2="236" y2="47"/><line class="clasico" x1="121" y1="73" x2="236" y2="73"/><line class="clasico" x1="121" y1="77" x2="236" y2="77"/><line class="clasico" x1="121" y1="103" x2="236" y2="103"/><line class="clasico" x1="121" y1="107" x2="236" y2="107"/><rect class="pc" x="236" y="28" width="150" height="88" rx="4"/><rect class="pc-pantalla" x="246" y="38" width="130" height="62"/><path class="pc-pie" d="M298 116 L292 128 L330 128 L324 116"/><text class="pc-txt" x="311" y="62">optimizador</text><text class="pc-txt" x="311" y="80">costo · iteraciones</text><line class="clasico" x1="386" y1="73" x2="440" y2="73"/><line class="clasico" x1="386" y1="77" x2="440" y2="77"/><line class="lazo" x1="311" y1="28" x2="311" y2="14"/><line class="lazo" x1="311" y1="14" x2="0" y2="14"/><path class="punta" d="M6 10 L0 14 L6 18"/></svg>
                 <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
                 <h2 class="etapa-titulo">Solucionadores cuánticos e integración de ciclos computacionales</h2>
                 <div class="etapa-sub">Por qué</div>
@@ -1566,6 +1620,7 @@
 
             <article class="repo-panel etapa" data-etapa="4" tabindex="0" role="button" aria-expanded="false">
               <div class="etapa-resumen">
+                <svg class="etapa-circuito" viewBox="0 0 440 150" aria-hidden="true"><line class="clasico" x1="0" y1="73" x2="92" y2="73"/><line class="clasico" x1="0" y1="77" x2="92" y2="77"/><rect class="pc" x="92" y="20" width="250" height="104" rx="4"/><rect class="pc-pantalla" x="102" y="30" width="230" height="84"/><path class="pc-pie" d="M200 124 L194 138 L240 138 L234 124"/><line class="eje" x1="120" y1="100" x2="316" y2="100"/><rect class="barra" x="140" y="62" width="34" height="38"/><rect class="barra barra-q" x="200" y="48" width="34" height="52"/><rect class="barra" x="260" y="40" width="34" height="60"/><text class="pc-txt" x="157" y="111">C</text><text class="pc-txt" x="217" y="111">Q</text><text class="pc-txt" x="277" y="111">H</text><text class="rotulo" x="217" y="16">benchmark</text><path class="check" d="M366 66 L376 78 L398 52"/><text class="rotulo" x="382" y="98">¿ventaja?</text></svg>
                 <div class="etapa-cab"><span class="etapa-num">04</span><span class="etapa-tag">Validation</span></div>
                 <h2 class="etapa-titulo">Benchmarking, validación y evaluación de ventaja cuántica o híbrida</h2>
                 <div class="etapa-sub">Por qué</div>
