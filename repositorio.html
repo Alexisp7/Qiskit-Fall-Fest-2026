@@ -1566,19 +1566,51 @@
       .etapa-num { font-size: 46px; }
       .etapa-desc { font-size: 14px; line-height: 1.55; }
     }
-    /* negro noche: más profundo que el gris oscuro del resto del sitio */
-    :root { --bg-dark: #050507; }
-    .footer-wrap { background: var(--bg-dark); }
-    /* repositorio en negro de punta a punta: el menú también es oscuro,
-       con el ítem activo en dorado */
-    .header { background: var(--bg-dark); border-bottom-color: #14141a; }
-    nav.main-nav a { color: #A8A39A; }
-    nav.main-nav a::before { background: var(--gold); }
-    nav.main-nav a:hover, nav.main-nav a.active { color: #111; }
-    nav.main-nav a.nav-bloqueado:hover .candado { stroke: #111; }
-    /* subtítulo bajo el nombre del repositorio */
-    .repo-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px; line-height: 1.2; color: #E9E2D3; margin: 8px 0 0; }
-    .repo-cabecera { text-align: left; }
+    /* ── Tema claro: fondo blanco y el circuito como una figura impresa
+       (tinta azul marino, encoding en azul, ansatz en gris) ── */
+    :root { --tinta: #1B2A4A; --azul: #2B6CB0; --linea-clara: #E5E2DC; }
+    html, body, .repo-wrap { background: #fff; }
+    .footer-wrap { background: #111; }
+    .repo-cabecera { display: block; text-align: left; }
+    .repo-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; line-height: 1.2; color: var(--black); margin: 6px 0 0; }
+    .etapa-pregunta { color: #8C6D33; }
+    .pista-progreso { background: var(--linea-clara); }
+    .pista-pista { color: #8a8478; }
+    /* detalle desplegado sobre blanco */
+    .ea-titulo { color: var(--black); }
+    .etapa-lista li { color: #333; }
+    .etapa-col + .etapa-col { border-left-color: var(--linea-clara); }
+    .etapa-nota { color: #4A4A4A; }
+    .detalle-tabla th { border-bottom-color: var(--linea-clara); }
+    .detalle-tabla td { border-bottom-color: #EEEBE6; color: #333; }
+    .detalle-tabla td:first-child { color: var(--black); }
+    .ref { border-color: var(--linea-clara); color: #8a8478; }
+    .experimentos div { background: #F7F5F1; }
+    .experimentos b { color: var(--black); }
+    .pregunta-central { color: #8C6D33; }
+    /* el circuito, fiel a una figura de libro */
+    .etapa-circuito .cable, .etapa-circuito .clasico { stroke: var(--tinta); stroke-opacity: 1; stroke-width: 1.4; }
+    .etapa-circuito .compuerta { fill: #fff; stroke: var(--tinta); stroke-opacity: 1; stroke-width: 1.6; }
+    .etapa-circuito .puerta, .etapa-circuito .ket { fill: var(--tinta); font-weight: 500; }
+    .etapa-circuito .region-enc { fill: #D6E8FB; stroke: var(--azul); stroke-width: 1.6; }
+    .etapa-circuito .region-ans { fill: #E6E6E6; stroke: #6B6B6B; stroke-width: 1.6; }
+    .etapa-circuito .region-titulo, .etapa-circuito .region-enc + .region-titulo { fill: var(--tinta); }
+    .etapa-circuito .region-formula { fill: var(--tinta); }
+    .etapa-circuito .enlace, .etapa-circuito .objetivo { stroke: var(--tinta); stroke-width: 1.6; }
+    .etapa-circuito .objetivo { fill: #fff; }
+    .etapa-circuito .control { fill: var(--tinta); }
+    .etapa-circuito .aguja, .etapa-circuito .flujo { stroke: var(--tinta); stroke-width: 1.6; }
+    .etapa-circuito .lazo { fill: none; stroke: var(--azul); stroke-width: 1.3; }
+    .etapa-circuito .punta { stroke: var(--azul); stroke-width: 1.4; }
+    .etapa-circuito .rotulo { fill: #5A6478; }
+    .etapa-circuito .pc { fill: #fff; stroke: var(--tinta); stroke-opacity: 1; stroke-width: 1.6; }
+    .etapa-circuito .pc-pantalla { fill: #F2F6FB; stroke: var(--azul); }
+    .etapa-circuito .pc-pie { stroke: var(--tinta); stroke-opacity: 1; }
+    .etapa-circuito .pc-txt { fill: var(--tinta); }
+    .etapa-circuito .eje { stroke: var(--tinta); }
+    .etapa-circuito .barra { fill: #A9B3C4; }
+    .etapa-circuito .barra-q { fill: var(--azul); }
+    .etapa-circuito .check { stroke: var(--azul); }
     /* ítem del menú bloqueado: candado dorado al lado */
     .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
     nav.main-nav a.active .candado { stroke: var(--gold); }
@@ -1609,7 +1641,7 @@
     <div class="repo-inner">
       <div class="repo-cabecera">
         <div class="repo-kicker">Alexisp7 / Qiskit-Fall-Fest-2026</div>
-        <p class="repo-sub">Código reutilizable de nuestra librería</p>
+        <p class="repo-sub">Conoce nuestra librería</p>
       </div>
 
       <div class="repo-grid">
