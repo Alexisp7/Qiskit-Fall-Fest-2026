@@ -132,7 +132,8 @@
       cab.appendChild(et.querySelector('.etapa-cab').cloneNode(true));
       var titulo = document.createElement('div');
       titulo.className = 'ea-titulo';
-      titulo.textContent = et.querySelector('.etapa-titulo').textContent;
+      // el título completo de la etapa solo aparece en el detalle desplegado
+      titulo.textContent = et.getAttribute('data-titulo');
       cab.appendChild(titulo);
       columnas.innerHTML = '';
       if (t) columnas.appendChild(t.content.cloneNode(true));
