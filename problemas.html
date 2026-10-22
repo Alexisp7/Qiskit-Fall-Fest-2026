@@ -1328,6 +1328,10 @@
     .problemas-wrap { scroll-snap-align: none !important; }
     .problemas-intro { max-width: 640px; margin: 0 auto 48px; text-align: center; color: #A8A39A; font-size: 15px; line-height: 1.7; }
     .problemas-proximo .all-projects-label { color: #8a8478; }
+    /* dos tracks, lado a lado y del mismo tamaño */
+    .problemas-wrap .projects-grid { grid-template-columns: 1fr 1fr; }
+    .problemas-wrap .project-card.wide { grid-column: auto; }
+    @media (max-width: 900px) { .problemas-wrap .projects-grid { grid-template-columns: 1fr; } .problemas-wrap .project-card.wide { aspect-ratio: 3 / 2; } }
     /* Llega desde la portada blanca: fondo blanco y la grilla no se ve
        mientras entran las tarjetas */
     html, body { background: var(--white); }
@@ -1415,11 +1419,25 @@
           </div>
         </div>
 
-        <!-- SQUARE: próximos tracks -->
-        <div class="project-card square project-card--all problemas-proximo entra" style="cursor:default;--i:4">
-          <div class="project-img-ph" style="background:#0e0e0e; min-height:100%;"></div>
-          <div class="all-projects-content">
-            <div class="all-projects-label">Próximos<br/>tracks</div>
+        <!-- Track 02: completar badge, nombre y descripción cuando se conozca -->
+        <div class="project-card wide entra" style="--i:4">
+          <div class="project-img-ph" style="background:linear-gradient(135deg,#14110c 0%,#2a2214 100%);">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:56px;height:56px;stroke:#5C4A2E;stroke-width:1.2">
+              <circle cx="24" cy="24" r="16"/>
+              <ellipse cx="24" cy="24" rx="16" ry="5" stroke-dasharray="2 2"/>
+              <path d="M24 24 L32 12"/><circle cx="24" cy="24" r="1.6"/>
+            </svg>
+          </div>
+          <div class="project-curtain">
+            <div class="curtain-badge">Track 02</div>
+            <div class="curtain-name">Por anunciar</div>
+            <div class="curtain-desc">El segundo problema del hackathon se publicará aquí en cuanto esté definido.</div>
+            <span class="curtain-link" style="cursor:default">Próximamente</span>
+          </div>
+          <div class="project-info-always">
+            <div class="project-badge">Track 02</div>
+            <div class="project-name">Por anunciar</div>
+            <div class="project-year">Próximamente</div>
           </div>
         </div>
 
