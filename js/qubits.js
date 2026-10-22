@@ -12,6 +12,9 @@
 // cada par es la media anchura en píxeles desde el centro y la altura en
 // fracción de la sección. Con data-linea="selector" se traza una línea fina
 // y corta sobre ese elemento, centrada, con un cuadrito.
+// Con data-qft="pagina.html", después de medir la QFT se dejan ver los
+// rojos y azules 2 s, las esferas salen de escena hacia la derecha (el
+// canvas avisa con el evento 'qft-salida') y luego se pasa a esa página.
 (function () {
   var R = 8, DX = 26, DY = DX * Math.sqrt(3) / 2;
   var SPIN = 3.2, TAU = Math.PI * 2;
@@ -352,32 +355,42 @@
         var letra = bl.texto[Math.floor(gx / 6)], col = gx % 6;
         return !!letra && col < 5 && LETRAS[letra][gy][col] === '#';
       }
-      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY;
+      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY, fin = 0;
       qubits.forEach(function (q) {
         var d = Math.sqrt((q.x - cx) * (q.x - cx) + (q.y - cy) * (q.y - cy));
         q.hAt = 0; q.resetAt = 0;
         q.forzado = enLetra(q) ? '0' : '1';
         q.collapseAt = t0 + d * 0.9;
+        fin = Math.max(fin, d * 0.9);
       });
       current.forEach(function (q) { q.hot = false; }); current = [];
       qftActivo = false; anclado = false; collapsed = true;
       start();
+      // con data-qft, los rojos y azules se disfrutan 2 s antes de salir
+      if (destino) setTimeout(salir, (still ? 0 : fin) + DISFRUTE);
     }
     function qftAll() {
       if (qftActivo) return mensaje();
       qftActivo = true;
-      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY, fin = 0;
+      var t0 = performance.now(), cx = w / 2 + meterOff, cy = lineY;
       qubits.forEach(function (q) {
         var d = Math.sqrt((q.x - cx) * (q.x - cx) + (q.y - cy) * (q.y - cy));
         q.collapseAt = 0; q.resetAt = 0;
         q.hAt = t0 + d * 0.9;
-        fin = Math.max(fin, d * 0.9);
       });
       current.forEach(function (q) { q.hot = false; }); current = [];
       collapsed = false;
       start();
-      // con data-qft="pagina.html", al terminar la onda de H se va a esa página
-      if (destino) setTimeout(function () { window.location.href = destino; }, (still ? 0 : fin) + 700);
+    }
+    // salida de escena: cada esfera acelera hacia la derecha, primero las de
+    // la derecha, y al terminar se pasa a la página de destino
+    var DISFRUTE = 2000, SALIDA = 1100, saliendo = 0;
+    function salir() {
+      saliendo = performance.now();
+      qubits.forEach(function (q) { q.outAt = saliendo + (1 - q.x / w) * 350; });
+      canvas.dispatchEvent(new CustomEvent('qft-salida', { bubbles: true, detail: { duracion: SALIDA } }));
+      start();
+      setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA);
     }
     function hadamard(q) {
       q.frozen = 'H'; q.masivo = false; q.hot = false; q.hAt = 0;
@@ -406,6 +419,9 @@
       ctx.clearRect(0, 0, w, h);
       var span = lineY !== null && spanAt(lineY);
       if (span) {
+        // al salir de escena la línea y la compuerta se desvanecen
+        ctx.save();
+        if (saliendo) ctx.globalAlpha = Math.max(0, 1 - (performance.now() - saliendo) / 450);
         ctx.strokeStyle = LINE; ctx.lineWidth = 1;
         var half = Math.min(105, (span[1] - span[0]) / 2 - 16);
         lineHalf = half;
@@ -414,6 +430,7 @@
         ctx.beginPath(); ctx.moveTo(w / 2 - half, lineY); ctx.lineTo(w / 2 + half, lineY); ctx.stroke();
         var sup = drawTally(half, dt, performance.now());
         drawMeter(performance.now(), sup);
+        ctx.restore();
       }
       var now = performance.now();
       for (var i = 0; i < qubits.length; i++) {
@@ -429,6 +446,13 @@
         else if (q.frozen === 'H') q.phi = (q.phi - SPIN * dt / 1000) % TAU;
         else if (!q.frozen) q.phi += q.drift * dt;
 
+        var ox = 0, alfa = 1;
+        if (q.outAt && now > q.outAt) {
+          var u = (now - q.outAt) / 750;
+          ox = u * u * w * 0.9; alfa = Math.max(0, 1 - u);
+          if (!alfa) continue;
+        }
+        ctx.save(); ctx.translate(ox, 0); ctx.globalAlpha = alfa;
         var on = q.hot || q.frozen;
         var col = q.frozen === 'H' ? MUSTARD : q.frozen === '1' ? RED : q.frozen === '0' ? BLUE : GOLD;
         ctx.strokeStyle = ctx.fillStyle = 'rgba(' + col + ',' + (on ? 1 : 0.35) + ')';
@@ -454,6 +478,7 @@
         ctx.lineTo(ex - 2.6 * Math.cos(a + 0.5), ey - 2.6 * Math.sin(a + 0.5));
         ctx.closePath(); ctx.fill();
         if (q.frozen) label(q);
+        ctx.restore();
       }
     }
 
@@ -484,7 +509,7 @@
       var dt = last ? Math.min(t - last, 50) : 16;
       last = t;
       draw(dt);
-      var pendientes = drag || (!anclado && Math.abs(meterOff) > 0.3) || qubits.some(function (q) { return q.collapseAt || q.resetAt || q.hAt; });
+      var pendientes = saliendo || drag || (!anclado && Math.abs(meterOff) > 0.3) || qubits.some(function (q) { return q.collapseAt || q.resetAt || q.hAt; });
       if (visible && (!still || current.length || pendientes)) raf = requestAnimationFrame(loop);
       else { raf = 0; last = 0; }
     }

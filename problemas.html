@@ -1324,6 +1324,14 @@
     .problemas-wrap { padding-top: 120px; }
     .problemas-intro { max-width: 640px; margin: 0 auto 48px; text-align: center; color: #A8A39A; font-size: 15px; line-height: 1.7; }
     .problemas-proximo .all-projects-label { color: #8a8478; }
+    /* Llega desde el telón oscuro de la portada: el fondo ya es oscuro y la
+       grilla no se ve mientras entran las tarjetas */
+    html, body { background: var(--bg-dark); }
+    .problemas-wrap .projects-grid { background: transparent; }
+    /* Entrada: cada parte se desliza desde la izquierda, una tras otra */
+    @keyframes desdeIzq { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .entra { animation: desdeIzq 0.8s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 0.12s + 0.1s); }
+    @media (prefers-reduced-motion: reduce) { .entra { animation: none; } }
     /* una sola fila: el track ancho y la tarjeta de próximos */
     @media (min-width: 901px) {
       .problemas-wrap .projects-grid { grid-template-rows: max(300px, calc(100vh - 340px)); }
@@ -1337,7 +1345,7 @@
 </head>
 <body>
 
-  <header class="header">
+  <header class="header entra" style="--i:0">
     <div class="header-inner">
       <nav class="main-nav">
         <a href="index.html">Portada</a>
@@ -1353,17 +1361,17 @@
 
   <section class="projects-wrap problemas-wrap">
     <div class="projects-inner">
-      <div class="section-header">
+      <div class="section-header entra" style="--i:1">
         <h2 class="section-title">Problemas a <em>resolver</em></h2>
       </div>
-      <p class="problemas-intro">Resumen de los tracks del hackathon Qiskit Fall Fest 2026 que se desarrollan en este espacio, con fines de referencia y didácticos.</p>
+      <p class="problemas-intro entra" style="--i:2">Resumen de los tracks del hackathon Qiskit Fall Fest 2026 que se desarrollan en este espacio, con fines de referencia y didácticos.</p>
     </div>
 
     <div style="max-width:1280px;margin:0 auto;padding:0 48px;">
       <div class="projects-grid">
 
         <!-- WIDE: Swaptions -->
-        <div class="project-card wide">
+        <div class="project-card wide entra" style="--i:3">
           <div class="project-img-ph" style="background:linear-gradient(135deg,#0d1117 0%,#1a2634 100%);">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:56px;height:56px;stroke:#2E4A5C;stroke-width:1.2">
               <path d="M6 40h36M6 40V8"/>
@@ -1386,7 +1394,7 @@
         </div>
 
         <!-- SQUARE: próximos tracks -->
-        <div class="project-card square project-card--all problemas-proximo" style="cursor:default">
+        <div class="project-card square project-card--all problemas-proximo entra" style="cursor:default;--i:4">
           <div class="project-img-ph" style="background:#0e0e0e; min-height:100%;"></div>
           <div class="all-projects-content">
             <div class="all-projects-label">Próximos<br/>tracks</div>
