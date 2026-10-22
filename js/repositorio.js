@@ -1,31 +1,49 @@
 // Página del repositorio: intro dibujada y pista horizontal de las 4 etapas.
 (function () {
-  // ── intro: negro → trazos blancos y dorados → contenido desde la derecha ──
+  // ── intro: negro → el circuito se dibuja (blanco y dorado) → textos ──
   var raizHtml = document.documentElement;
   if (raizHtml.classList.contains('rp-intro')) {
-    var TRAZO_0 = 600, TRAZO_PASO = 250, TRAZO_DUR = 1400, MENU = 3600, FIN = 5400;
-    var paneles = Array.prototype.slice.call(document.querySelectorAll('.repo-panel'));
+    var INICIO = 500, DUR = 2800, MENU = 3400, FIN = 4600;
     var ver = function (el, ms) { if (el) setTimeout(function () { el.classList.add('ver'); }, ms); };
     ver(document.querySelector('.repo-cabecera'), 200);
-    paneles.forEach(function (p, i) {
-      var d = TRAZO_0 + i * TRAZO_PASO;
-      // pathLength=1000 deja medir el borde en unidades fijas aunque el panel
-      // cambie de alto cuando llegan los datos de GitHub
-      p.insertAdjacentHTML('afterbegin',
-        '<svg class="rp-trazo" style="--d:' + d + 'ms" aria-hidden="true">' +
-        '<rect class="blanco" x="0.5" y="0.5" width="100%" height="100%" pathLength="1000"/>' +
-        '<rect class="oro" x="0.5" y="0.5" width="100%" height="100%" pathLength="1000"/></svg>');
-      ver(p, d + TRAZO_DUR - 200);
-    });
-    ver(document.querySelector('.header'), MENU);
-    // al terminar vuelven el fondo y el borde normales y el trazo se apaga
-    setTimeout(function () {
-      raizHtml.classList.remove('rp-intro');
-      Array.prototype.forEach.call(document.querySelectorAll('.rp-trazo'), function (t) {
-        t.classList.add('fuera');
-        setTimeout(function () { t.remove(); }, 1300);
+    var tarjetas = Array.prototype.slice.call(document.querySelectorAll('.etapa'));
+    if (tarjetas.length) {
+      var x0 = tarjetas[0].offsetLeft;
+      var ultima = tarjetas[tarjetas.length - 1];
+      var total = ultima.offsetLeft + ultima.offsetWidth - x0;
+      // el trazo avanza a velocidad constante a lo largo de todo el circuito
+      var cuando = function (x) { return INICIO + Math.max(0, x) / total * DUR; };
+      var cuanto = function (ancho) { return Math.max(120, ancho / total * DUR); };
+      tarjetas.forEach(function (t) {
+        var bx = t.offsetLeft - x0;
+        Array.prototype.forEach.call(t.querySelectorAll('.etapa-circuito *'), function (el) {
+          if (el.tagName === 'tspan') return;
+          var b;
+          try { b = el.getBBox(); } catch (e) { return; }
+          var del = cuando(bx + b.x);
+          var guion = getComputedStyle(el).strokeDasharray;
+          if (el.tagName === 'text' || (guion && guion !== 'none')) {
+            // textos y trazos ya punteados (ansatz, realimentación) aparecen al paso
+            el.classList.add('fad');
+          } else {
+            el.setAttribute('pathLength', '1');
+            el.classList.add('dib');
+            // las compuertas y figuras se dibujan con duración mínima propia
+            el.style.setProperty('--dur', (b.width > 60 && b.height < 6 ? cuanto(b.width) : 450) + 'ms');
+          }
+          el.style.setProperty('--del', del + 'ms');
+        });
+        // tramos de cable entre tarjetas, en el momento en que el trazo llega
+        var fin = bx + t.offsetWidth;
+        t.style.setProperty('--sdel', cuando(fin) + 'ms');
+        t.style.setProperty('--sdur', cuanto(42) + 'ms');
+        t.style.setProperty('--bdel', cuando(bx - 42) + 'ms');
+        // número, título y pregunta, cuando el trazo va por la mitad de su etapa
+        ver(t, cuando(bx + t.offsetWidth * 0.5));
       });
-    }, FIN);
+    }
+    ver(document.querySelector('.header'), MENU);
+    setTimeout(function () { raizHtml.classList.remove('rp-intro'); }, FIN);
   }
 
   // franjas que solo se mueven en el eje x: arrastrando, con la rueda o con
