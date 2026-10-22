@@ -67,6 +67,7 @@
     // la rueda vertical se convierte en desplazamiento horizontal; si la franja
     // no tiene a dónde moverse, la rueda sigue bajando la página
     el.addEventListener('wheel', function (e) {
+      if (el.classList.contains('enfoque')) { e.preventDefault(); return; }
       var d = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       if (e.deltaMode === 1) d *= 32;
       var max = el.scrollWidth - el.clientWidth;
@@ -77,7 +78,7 @@
     // arrastrar con el mouse (en pantallas táctiles el desplazamiento es nativo)
     var ini = null, recien = false;
     el.addEventListener('pointerdown', function (e) {
-      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      if (e.pointerType !== 'mouse' || e.button !== 0 || el.classList.contains('enfoque')) return;
       ini = { x: e.clientX, s: el.scrollLeft, movio: false };
     });
     window.addEventListener('pointermove', function (e) {
@@ -105,12 +106,14 @@
   if (pista) {
     var arrastro = soloEnX(pista, document.querySelector('.pista-progreso span'));
 
-    // clic en una etapa: su detalle (guardado en <template id="etapa-N-detalle">)
-    // se abre en la sección de abajo; otro clic en la misma etapa la cierra
-    var seccion = document.querySelector('.etapa-abierta');
-    var cab = seccion.querySelector('.ea-cab');
-    var columnas = seccion.querySelector('.ea-columnas');
-    soloEnX(columnas, null);
+    // clic en una etapa: la pista la lleva al inicio, se queda quieta y un
+    // panel blanco cubre el resto del circuito con su explicación (guardada en
+    // <template id="etapa-N-detalle">). Se cierra con ×, con Esc o con otro clic
+    // en la misma etapa
+    var etapasCaja = document.querySelector('.etapas');
+    var panel = document.querySelector('.etapa-panel');
+    var pCab = panel.querySelector('.ep-cab');
+    var pCuerpo = panel.querySelector('.ep-cuerpo');
     var etapas = Array.prototype.slice.call(pista.querySelectorAll('.etapa'));
     var actual = null, version = 0;
 
@@ -118,35 +121,39 @@
       var v = ++version;
       if (actual) { actual.classList.remove('activa'); actual.setAttribute('aria-expanded', 'false'); }
       actual = null;
-      seccion.classList.remove('abierta');
-      setTimeout(function () { if (v === version) { columnas.innerHTML = ''; cab.innerHTML = ''; } }, 500);
+      panel.classList.remove('ver'); panel.setAttribute('aria-hidden', 'true');
+      setTimeout(function () {
+        if (v !== version) return;
+        pista.classList.remove('enfoque'); etapasCaja.classList.remove('enfocada');
+        pCab.innerHTML = ''; pCuerpo.innerHTML = '';
+      }, 450);
     }
     function abrir(et) {
-      ++version;
+      var v = ++version;
       if (actual) { actual.classList.remove('activa'); actual.setAttribute('aria-expanded', 'false'); }
       actual = et;
       et.classList.add('activa'); et.setAttribute('aria-expanded', 'true');
-      var n = et.getAttribute('data-etapa');
-      var t = document.getElementById('etapa-' + n + '-detalle');
-      cab.innerHTML = '';
-      cab.appendChild(et.querySelector('.etapa-cab').cloneNode(true));
+      // 1. la etapa elegida viaja al inicio y la pista deja de moverse
+      pista.classList.add('enfoque'); etapasCaja.classList.add('enfocada');
+      panel.classList.remove('ver');
+      pista.scrollTo({ left: et.offsetLeft - 2, behavior: still ? 'auto' : 'smooth' });
+      // 2. el panel blanco entra justo antes de la etapa y la explica
+      pCab.innerHTML = '';
+      pCab.appendChild(et.querySelector('.etapa-cab').cloneNode(true));
       var titulo = document.createElement('div');
-      titulo.className = 'ea-titulo';
-      // el título completo de la etapa solo aparece en el detalle desplegado
+      titulo.className = 'ep-titulo';
       titulo.textContent = et.getAttribute('data-titulo');
-      cab.appendChild(titulo);
-      columnas.innerHTML = '';
-      if (t) columnas.appendChild(t.content.cloneNode(true));
-      columnas.scrollLeft = 0;
-      // reinicia la entrada del contenido aunque ya estuviera abierta
-      seccion.classList.remove('cambia'); void seccion.offsetWidth; seccion.classList.add('cambia');
-      seccion.classList.add('abierta');
-      // la página baja suave hasta que el detalle quede a la vista
+      pCab.appendChild(titulo);
+      pCuerpo.innerHTML = '';
+      var t = document.getElementById('etapa-' + et.getAttribute('data-etapa') + '-detalle');
+      if (t) pCuerpo.appendChild(t.content.cloneNode(true));
+      panel.scrollTop = 0;
       setTimeout(function () {
-        var r = seccion.getBoundingClientRect();
-        if (r.bottom > window.innerHeight) window.scrollBy({ top: r.bottom - window.innerHeight + 24, behavior: 'smooth' });
-      }, 420);
+        if (v !== version) return;
+        panel.classList.add('ver'); panel.setAttribute('aria-hidden', 'false');
+      }, still ? 0 : 520);
     }
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     etapas.forEach(function (et) {
       function alternar() {
         if (arrastro()) return;
@@ -157,7 +164,7 @@
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alternar(); }
       });
     });
-    var x = seccion.querySelector('.ea-cerrar');
-    if (x) x.addEventListener('click', cerrar);
+    panel.querySelector('.ep-cerrar').addEventListener('click', cerrar);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && actual) cerrar(); });
   }
 })();

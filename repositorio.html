@@ -1499,24 +1499,30 @@
     .etapa .etapa-titulo { transition: color .3s; }
     .etapa.activa .etapa-titulo, .etapa:hover .etapa-titulo { color: #fff; }
 
-    /* sección del detalle, debajo del circuito: se despliega hacia abajo */
-    .etapa-abierta { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.16,1,.3,1); }
-    .etapa-abierta.abierta { grid-template-rows: 1fr; }
-    .ea-marco { min-height: 0; overflow: hidden; }
-    .ea-interior { margin-top: 18px; border-top: 1px solid rgba(200,169,110,.45); padding: 20px 0 6px; }
-    .etapa-abierta.cambia .ea-interior { animation: eaEntra .55s cubic-bezier(.16,1,.3,1); }
-    @keyframes eaEntra { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
-    .ea-barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-    .ea-cab { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-    .ea-cab .etapa-cab { margin: 0; }
-    .ea-cab .etapa-num { font-size: 30px; }
-    .ea-titulo { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600; color: #F2EEE6; }
-    .ea-cerrar { background: none; border: none; color: #8a8478; font-size: 26px; line-height: 1; cursor: pointer; }
-    .ea-cerrar:hover { color: var(--gold); }
-    .ea-columnas { display: flex; gap: 28px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; cursor: grab; outline: none; padding-bottom: 4px; }
-    .ea-columnas::-webkit-scrollbar { display: none; }
-    .ea-columnas.arrastrando { cursor: grabbing; user-select: none; }
-    .ea-columnas > .etapa-col:first-child { border-left: none; padding-left: 0; }
+    /* explicación de una etapa: la pista lleva la etapa elegida al inicio,
+       se queda quieta y un panel blanco cubre el resto del circuito */
+    .etapas-ventana { position: relative; }
+    .etapas-pista.enfoque { overflow-x: hidden; cursor: default; }
+    .etapas-pista.enfoque .etapas-fila { padding-right: 100vw; }
+    .etapa-panel {
+      position: absolute; top: 0; bottom: 0; left: 470px; right: 0; z-index: 3;
+      background: #fff; border-left: 2px solid var(--gold); box-shadow: -30px 0 40px -20px rgba(255,255,255,1);
+      padding: 24px 32px 20px 40px; overflow-y: auto; scrollbar-width: thin;
+      opacity: 0; transform: translateX(60px); pointer-events: none;
+      transition: opacity .45s ease, transform .6s cubic-bezier(.16,1,.3,1);
+    }
+    .etapa-panel.ver { opacity: 1; transform: none; pointer-events: auto; }
+    .ep-cerrar { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 28px; line-height: 1; color: #8a8478; cursor: pointer; }
+    .ep-cerrar:hover { color: var(--gold); }
+    .ep-cab { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; padding-right: 40px; }
+    .ep-cab .etapa-cab { margin: 0; }
+    .ep-cab .etapa-num { font-size: 34px; }
+    .ep-titulo { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; line-height: 1.15; color: var(--black); flex-basis: 100%; }
+    .ep-cuerpo { display: flex; flex-wrap: wrap; gap: 22px 32px; }
+    .ep-cuerpo > .etapa-col { flex: 1 1 260px; border-left: none; padding-left: 0; }
+    .ep-cuerpo > .etapa-col.etapa-ancha { flex: 2 1 400px; }
+    .etapas.enfocada .etapas-pie { opacity: 0; pointer-events: none; }
+    .etapas-pie { transition: opacity .3s; }
     .etapas-pie { display: flex; align-items: center; gap: 16px; padding-top: 10px; }
     .pista-progreso { flex: 1; height: 1px; background: #2c2a26; position: relative; }
     .pista-progreso span { position: absolute; left: 0; top: -1px; height: 3px; width: 0; background: var(--gold); }
@@ -1577,7 +1583,6 @@
     .pista-progreso { background: var(--linea-clara); }
     .pista-pista { color: #8a8478; }
     /* detalle desplegado sobre blanco */
-    .ea-titulo { color: var(--black); }
     .etapa-lista li { color: #333; }
     .etapa-col + .etapa-col { border-left-color: var(--linea-clara); }
     .etapa-nota { color: #4A4A4A; }
@@ -1652,9 +1657,10 @@
         <!-- las 4 etapas del proyecto, en una pista horizontal: se arrastra
              o se recorre con la rueda del mouse, solo en el eje x -->
         <div class="etapas">
+          <div class="etapas-ventana">
           <div class="etapas-pista" tabindex="0" aria-label="Las 4 etapas del proyecto">
             <div class="etapas-fila">
-              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1880 256" width="1880" height="256" aria-hidden="true"><rect class="region region-enc" x="150" y="30" width="200" height="196" rx="6"/><text class="region-titulo" x="250.0" y="231">Encoding · U<tspan class="ind">enc</tspan>(<tspan class="var">x</tspan>)</text><rect class="region region-ans" x="520" y="30" width="260" height="196" rx="6"/><text class="region-titulo" x="650.0" y="231">Ansatz · U(<tspan class="var">θ</tspan>)</text><rect class="region region-med" x="970" y="30" width="210" height="196" rx="6"/><text class="region-titulo" x="1075.0" y="231">Medición</text><line class="cable" x1="44" y1="60" x2="1090" y2="60"/><line class="cable" x1="44" y1="92" x2="1090" y2="92"/><line class="cable" x1="44" y1="124" x2="1090" y2="124"/><line class="cable" x1="44" y1="182" x2="1090" y2="182"/><text class="ket" x="12" y="66">|0⟩</text><text class="ket" x="12" y="98">|0⟩</text><text class="ket" x="12" y="130">|0⟩</text><text class="ket" x="12" y="188">|0⟩</text><text class="puntos" x="26" y="159">⋮</text><rect class="compuerta" x="213.0" y="48.0" width="74" height="24"/><text class="puerta" x="250" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">1</tspan>)</text><rect class="compuerta" x="213.0" y="80.0" width="74" height="24"/><text class="puerta" x="250" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">2</tspan>)</text><rect class="compuerta" x="213.0" y="112.0" width="74" height="24"/><text class="puerta" x="250" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">3</tspan>)</text><rect class="compuerta" x="213.0" y="170.0" width="74" height="24"/><text class="puerta" x="250" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">n</tspan>)</text><text class="puntos" x="250" y="159">⋮</text><rect class="compuerta" x="568.0" y="48.0" width="44" height="24"/><text class="puerta" x="590" y="65"><tspan class="var">θ</tspan><tspan class="ind">1</tspan></text><rect class="compuerta" x="568.0" y="80.0" width="44" height="24"/><text class="puerta" x="590" y="97"><tspan class="var">θ</tspan><tspan class="ind">2</tspan></text><rect class="compuerta" x="568.0" y="112.0" width="44" height="24"/><text class="puerta" x="590" y="129"><tspan class="var">θ</tspan><tspan class="ind">3</tspan></text><rect class="compuerta" x="568.0" y="170.0" width="44" height="24"/><text class="puerta" x="590" y="187"><tspan class="var">θ</tspan><tspan class="ind">n</tspan></text><text class="puntos" x="590" y="159">⋮</text><rect class="compuerta" x="672" y="42" width="52" height="158"/><text class="puerta puerta-grande" x="698" y="128.0"><tspan class="var">θ</tspan><tspan class="ind">i</tspan></text><rect class="compuerta" x="1000.0" y="48.0" width="40" height="24"/><text class="puerta" x="1020" y="65">M<tspan class="ind">1</tspan></text><rect class="compuerta" x="1000.0" y="80.0" width="40" height="24"/><text class="puerta" x="1020" y="97">M<tspan class="ind">2</tspan></text><rect class="compuerta" x="1000.0" y="112.0" width="40" height="24"/><text class="puerta" x="1020" y="129">M<tspan class="ind">3</tspan></text><rect class="compuerta" x="1000.0" y="170.0" width="40" height="24"/><text class="puerta" x="1020" y="187">M<tspan class="ind">n</tspan></text><text class="puntos" x="1020" y="159">⋮</text><rect class="compuerta" x="1077" y="48" width="26" height="24"/><path class="aguja" d="M1082 66 A9 9 0 0 1 1098 66 M1090 66 L1096 54"/><rect class="compuerta" x="1077" y="80" width="26" height="24"/><path class="aguja" d="M1082 98 A9 9 0 0 1 1098 98 M1090 98 L1096 86"/><rect class="compuerta" x="1077" y="112" width="26" height="24"/><path class="aguja" d="M1082 130 A9 9 0 0 1 1098 130 M1090 130 L1096 118"/><rect class="compuerta" x="1077" y="170" width="26" height="24"/><path class="aguja" d="M1082 188 A9 9 0 0 1 1098 188 M1090 188 L1096 176"/><text class="puntos" x="1090" y="159">⋮</text><line class="cable" x1="1103" y1="60" x2="1156" y2="124"/><line class="cable" x1="1103" y1="92" x2="1156" y2="124"/><line class="cable" x1="1103" y1="124" x2="1156" y2="124"/><line class="cable" x1="1103" y1="182" x2="1156" y2="124"/><circle class="control" cx="1156" cy="124" r="2.5"/><line class="clasico" x1="1156" y1="122" x2="1222" y2="122"/><line class="clasico" x1="1156" y1="126" x2="1222" y2="126"/><text class="valor" x="1200" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="1222" y="72" width="150" height="104" rx="4"/><rect class="pc-pantalla" x="1232" y="82" width="130" height="76"/><path class="pc-pie" d="M1284 176 L1278 188 L1316 188 L1310 176"/><text class="pc-txt" x="1297" y="118">optimizador</text><text class="pc-txt" x="1297" y="136">costo · iteraciones</text><line class="clasico" x1="1372" y1="122" x2="1532" y2="122"/><line class="clasico" x1="1372" y1="126" x2="1532" y2="126"/><path class="lazo" d="M1297 188 V248 H650 V238"/><path class="punta" d="M646 243 L650 237 L654 243"/><text class="lazo-txt" x="973.5" y="252">Actualizar <tspan class="var">θ</tspan></text><rect class="pc" x="1532" y="64" width="250" height="120" rx="4"/><rect class="pc-pantalla" x="1542" y="74" width="230" height="100"/><path class="pc-pie" d="M1640 184 L1634 200 L1680 200 L1674 184"/><line class="eje" x1="1560" y1="152" x2="1756" y2="152"/><rect class="barra" x="1580" y="114" width="34" height="38"/><rect class="barra barra-q" x="1640" y="100" width="34" height="52"/><rect class="barra" x="1700" y="92" width="34" height="60"/><text class="pc-txt" x="1597" y="164">C</text><text class="pc-txt" x="1657" y="164">Q</text><text class="pc-txt" x="1717" y="164">H</text><text class="rotulo" x="1657" y="56">benchmark</text><path class="check" d="M1806 120 L1816 132 L1838 106"/><text class="rotulo" x="1822" y="152">¿ventaja?</text></svg>
+              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1880 256" width="1880" height="256" aria-hidden="true"><rect class="region region-enc" x="150" y="30" width="200" height="196" rx="6"/><rect class="region region-ans" x="520" y="30" width="260" height="196" rx="6"/><rect class="region region-med" x="970" y="30" width="210" height="196" rx="6"/><line class="cable" x1="44" y1="60" x2="1090" y2="60"/><line class="cable" x1="44" y1="92" x2="1090" y2="92"/><line class="cable" x1="44" y1="124" x2="1090" y2="124"/><line class="cable" x1="44" y1="182" x2="1090" y2="182"/><text class="ket" x="12" y="66">|0⟩</text><text class="ket" x="12" y="98">|0⟩</text><text class="ket" x="12" y="130">|0⟩</text><text class="ket" x="12" y="188">|0⟩</text><text class="puntos" x="26" y="159">⋮</text><rect class="compuerta" x="213.0" y="48.0" width="74" height="24"/><text class="puerta" x="250" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">1</tspan>)</text><rect class="compuerta" x="213.0" y="80.0" width="74" height="24"/><text class="puerta" x="250" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">2</tspan>)</text><rect class="compuerta" x="213.0" y="112.0" width="74" height="24"/><text class="puerta" x="250" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">3</tspan>)</text><rect class="compuerta" x="213.0" y="170.0" width="74" height="24"/><text class="puerta" x="250" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">n</tspan>)</text><text class="puntos" x="250" y="159">⋮</text><rect class="compuerta" x="568.0" y="48.0" width="44" height="24"/><text class="puerta" x="590" y="65"><tspan class="var">θ</tspan><tspan class="ind">1</tspan></text><rect class="compuerta" x="568.0" y="80.0" width="44" height="24"/><text class="puerta" x="590" y="97"><tspan class="var">θ</tspan><tspan class="ind">2</tspan></text><rect class="compuerta" x="568.0" y="112.0" width="44" height="24"/><text class="puerta" x="590" y="129"><tspan class="var">θ</tspan><tspan class="ind">3</tspan></text><rect class="compuerta" x="568.0" y="170.0" width="44" height="24"/><text class="puerta" x="590" y="187"><tspan class="var">θ</tspan><tspan class="ind">n</tspan></text><text class="puntos" x="590" y="159">⋮</text><rect class="compuerta" x="672" y="42" width="52" height="158"/><text class="puerta puerta-grande" x="698" y="128.0"><tspan class="var">θ</tspan><tspan class="ind">i</tspan></text><rect class="compuerta" x="1000.0" y="48.0" width="40" height="24"/><text class="puerta" x="1020" y="65">M<tspan class="ind">1</tspan></text><rect class="compuerta" x="1000.0" y="80.0" width="40" height="24"/><text class="puerta" x="1020" y="97">M<tspan class="ind">2</tspan></text><rect class="compuerta" x="1000.0" y="112.0" width="40" height="24"/><text class="puerta" x="1020" y="129">M<tspan class="ind">3</tspan></text><rect class="compuerta" x="1000.0" y="170.0" width="40" height="24"/><text class="puerta" x="1020" y="187">M<tspan class="ind">n</tspan></text><text class="puntos" x="1020" y="159">⋮</text><rect class="compuerta" x="1077" y="48" width="26" height="24"/><path class="aguja" d="M1082 66 A9 9 0 0 1 1098 66 M1090 66 L1096 54"/><rect class="compuerta" x="1077" y="80" width="26" height="24"/><path class="aguja" d="M1082 98 A9 9 0 0 1 1098 98 M1090 98 L1096 86"/><rect class="compuerta" x="1077" y="112" width="26" height="24"/><path class="aguja" d="M1082 130 A9 9 0 0 1 1098 130 M1090 130 L1096 118"/><rect class="compuerta" x="1077" y="170" width="26" height="24"/><path class="aguja" d="M1082 188 A9 9 0 0 1 1098 188 M1090 188 L1096 176"/><text class="puntos" x="1090" y="159">⋮</text><line class="cable" x1="1103" y1="60" x2="1156" y2="124"/><line class="cable" x1="1103" y1="92" x2="1156" y2="124"/><line class="cable" x1="1103" y1="124" x2="1156" y2="124"/><line class="cable" x1="1103" y1="182" x2="1156" y2="124"/><circle class="control" cx="1156" cy="124" r="2.5"/><line class="clasico" x1="1156" y1="122" x2="1222" y2="122"/><line class="clasico" x1="1156" y1="126" x2="1222" y2="126"/><text class="valor" x="1200" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="1222" y="72" width="150" height="104" rx="4"/><rect class="pc-pantalla" x="1232" y="82" width="130" height="76"/><path class="pc-pie" d="M1284 176 L1278 188 L1316 188 L1310 176"/><text class="pc-txt" x="1297" y="118">optimizador</text><text class="pc-txt" x="1297" y="136">costo · iteraciones</text><line class="clasico" x1="1372" y1="122" x2="1532" y2="122"/><line class="clasico" x1="1372" y1="126" x2="1532" y2="126"/><path class="lazo" d="M1297 188 V248 H650 V238"/><path class="punta" d="M646 243 L650 237 L654 243"/><text class="lazo-txt" x="973.5" y="252">Actualizar <tspan class="var">θ</tspan></text><rect class="pc" x="1532" y="64" width="250" height="120" rx="4"/><rect class="pc-pantalla" x="1542" y="74" width="230" height="100"/><path class="pc-pie" d="M1640 184 L1634 200 L1680 200 L1674 184"/><line class="eje" x1="1560" y1="152" x2="1756" y2="152"/><rect class="barra" x="1580" y="114" width="34" height="38"/><rect class="barra barra-q" x="1640" y="100" width="34" height="52"/><rect class="barra" x="1700" y="92" width="34" height="60"/><text class="pc-txt" x="1597" y="164">C</text><text class="pc-txt" x="1657" y="164">Q</text><text class="pc-txt" x="1717" y="164">H</text><text class="rotulo" x="1657" y="56">benchmark</text><path class="check" d="M1806 120 L1816 132 L1838 106"/><text class="rotulo" x="1822" y="152">¿ventaja?</text></svg>
             <article class="repo-panel etapa" data-etapa="1" tabindex="0" role="button" aria-expanded="false" data-titulo="Encoding y representación cuántica de datos">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
@@ -1688,19 +1694,17 @@
             </article>
             </div>
           </div>
+            <!-- al elegir una etapa, este panel blanco cubre el resto del circuito y la explica -->
+            <aside class="etapa-panel" aria-live="polite" aria-hidden="true">
+              <button type="button" class="ep-cerrar" aria-label="Cerrar explicación">×</button>
+              <div class="ep-cab"></div>
+              <div class="ep-cuerpo"></div>
+            </aside>
+          </div>
           <div class="etapas-pie">
             <div class="pista-progreso"><span></span></div>
             <div class="pista-pista">Arrastra o gira la rueda →</div>
           </div>
-          <!-- aquí se abre el detalle de la etapa elegida -->
-          <section class="etapa-abierta" aria-live="polite">
-            <div class="ea-marco">
-              <div class="ea-interior">
-                <div class="ea-barra"><div class="ea-cab"></div><button type="button" class="ea-cerrar" aria-label="Cerrar detalle">×</button></div>
-                <div class="ea-columnas" tabindex="0"></div>
-              </div>
-            </div>
-          </section>
         </div>
 
       </div>
@@ -1798,6 +1802,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/repositorio.js?v=15"></script>
+  <script src="js/repositorio.js?v=16"></script>
 </body>
 </html>
