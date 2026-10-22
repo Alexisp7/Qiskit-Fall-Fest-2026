@@ -1538,9 +1538,7 @@
     .eb-cuerpo > .etapa-col.etapa-ancha { flex: 2 1 520px; }
     /* etapa 03: VQE */
     .vqe-formula { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: var(--black); margin: 4px 0 8px; font-variant-numeric: lining-nums; }
-    .vqe-pasos { margin: 0; padding-left: 20px; color: #333; font-size: 14px; line-height: 1.6; }
-    .vqe-pasos li { margin-bottom: 6px; }
-    .vqe-pasos li::marker { color: #8C6D33; font-family: 'Space Mono', monospace; font-size: 11px; }
+
     .etapas-pie { transition: opacity .3s; }
     .etapas-pie { display: flex; align-items: center; gap: 16px; padding-top: 10px; }
     .pista-progreso { flex: 1; height: 1px; background: #2c2a26; position: relative; }
@@ -1631,6 +1629,7 @@
     .etapa-circuito .pc-pantalla { fill: #F2F6FB; stroke: var(--azul); }
     .etapa-circuito .pc-pie { stroke: var(--tinta); stroke-opacity: 1; }
     .etapa-circuito .pc-txt { fill: var(--tinta); }
+    .etapa-circuito .pc-vqe { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 26px; letter-spacing: .06em; fill: var(--azul); text-anchor: middle; }
     .etapa-circuito .eje { stroke: var(--tinta); }
     .etapa-circuito .barra { fill: #A9B3C4; }
     .etapa-circuito .barra-q { fill: var(--azul); }
@@ -1679,7 +1678,7 @@
           <div class="etapas-ventana">
           <div class="etapas-pista" tabindex="0" aria-label="Las 4 etapas del proyecto">
             <div class="etapas-fila">
-              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1480 256" width="1480" height="256" aria-hidden="true"><rect class="region region-enc" x="66" y="30" width="208" height="196" rx="6"/><rect class="region region-ans" x="324" y="30" width="248" height="196" rx="6"/><rect class="region region-med" x="624" y="30" width="210" height="196" rx="6"/><line class="cable" x1="40" y1="60" x2="744" y2="60"/><line class="cable" x1="40" y1="92" x2="744" y2="92"/><line class="cable" x1="40" y1="124" x2="744" y2="124"/><line class="cable" x1="40" y1="182" x2="744" y2="182"/><text class="ket" x="10" y="66">|0⟩</text><text class="ket" x="10" y="98">|0⟩</text><text class="ket" x="10" y="130">|0⟩</text><text class="ket" x="10" y="188">|0⟩</text><text class="puntos" x="22" y="159">⋮</text><rect class="compuerta" x="133.0" y="48.0" width="74" height="24"/><text class="puerta" x="170" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">1</tspan>)</text><rect class="compuerta" x="133.0" y="80.0" width="74" height="24"/><text class="puerta" x="170" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">2</tspan>)</text><rect class="compuerta" x="133.0" y="112.0" width="74" height="24"/><text class="puerta" x="170" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">3</tspan>)</text><rect class="compuerta" x="133.0" y="170.0" width="74" height="24"/><text class="puerta" x="170" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">n</tspan>)</text><text class="puntos" x="170" y="159">⋮</text><rect class="compuerta" x="362.0" y="48.0" width="44" height="24"/><text class="puerta" x="384" y="65"><tspan class="var">θ</tspan><tspan class="ind">1</tspan></text><rect class="compuerta" x="362.0" y="80.0" width="44" height="24"/><text class="puerta" x="384" y="97"><tspan class="var">θ</tspan><tspan class="ind">2</tspan></text><rect class="compuerta" x="362.0" y="112.0" width="44" height="24"/><text class="puerta" x="384" y="129"><tspan class="var">θ</tspan><tspan class="ind">3</tspan></text><rect class="compuerta" x="362.0" y="170.0" width="44" height="24"/><text class="puerta" x="384" y="187"><tspan class="var">θ</tspan><tspan class="ind">n</tspan></text><text class="puntos" x="384" y="159">⋮</text><rect class="compuerta" x="470" y="42" width="52" height="158"/><text class="puerta puerta-grande" x="496" y="128.0"><tspan class="var">θ</tspan><tspan class="ind">i</tspan></text><rect class="compuerta" x="654.0" y="48.0" width="40" height="24"/><text class="puerta" x="674" y="65">M<tspan class="ind">1</tspan></text><rect class="compuerta" x="654.0" y="80.0" width="40" height="24"/><text class="puerta" x="674" y="97">M<tspan class="ind">2</tspan></text><rect class="compuerta" x="654.0" y="112.0" width="40" height="24"/><text class="puerta" x="674" y="129">M<tspan class="ind">3</tspan></text><rect class="compuerta" x="654.0" y="170.0" width="40" height="24"/><text class="puerta" x="674" y="187">M<tspan class="ind">n</tspan></text><text class="puntos" x="674" y="159">⋮</text><rect class="compuerta" x="731" y="48" width="26" height="24"/><path class="aguja" d="M736 66 A9 9 0 0 1 752 66 M744 66 L750 54"/><rect class="compuerta" x="731" y="80" width="26" height="24"/><path class="aguja" d="M736 98 A9 9 0 0 1 752 98 M744 98 L750 86"/><rect class="compuerta" x="731" y="112" width="26" height="24"/><path class="aguja" d="M736 130 A9 9 0 0 1 752 130 M744 130 L750 118"/><rect class="compuerta" x="731" y="170" width="26" height="24"/><path class="aguja" d="M736 188 A9 9 0 0 1 752 188 M744 188 L750 176"/><text class="puntos" x="744" y="159">⋮</text><line class="cable" x1="757" y1="60" x2="810" y2="124"/><line class="cable" x1="757" y1="92" x2="810" y2="124"/><line class="cable" x1="757" y1="124" x2="810" y2="124"/><line class="cable" x1="757" y1="182" x2="810" y2="124"/><circle class="control" cx="810" cy="124" r="2.5"/><line class="clasico" x1="810" y1="122" x2="882" y2="122"/><line class="clasico" x1="810" y1="126" x2="882" y2="126"/><text class="valor" x="858" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="882" y="72" width="150" height="104" rx="4"/><rect class="pc-pantalla" x="892" y="82" width="130" height="76"/><path class="pc-pie" d="M944 176 L938 188 L976 188 L970 176"/><text class="pc-txt" x="957" y="118">optimizador</text><text class="pc-txt" x="957" y="136">costo · iteraciones</text><line class="clasico" x1="1032" y1="122" x2="1120" y2="122"/><line class="clasico" x1="1032" y1="126" x2="1120" y2="126"/><path class="lazo" d="M957 188 V248 H448 V238"/><path class="punta" d="M444 243 L448 237 L452 243"/><text class="lazo-txt" x="702.5" y="252">Actualizar <tspan class="var">θ</tspan></text><rect class="pc" x="1120" y="64" width="250" height="120" rx="4"/><rect class="pc-pantalla" x="1130" y="74" width="230" height="100"/><path class="pc-pie" d="M1228 184 L1222 200 L1268 200 L1262 184"/><line class="eje" x1="1148" y1="152" x2="1344" y2="152"/><rect class="barra" x="1168" y="114" width="34" height="38"/><rect class="barra barra-q" x="1228" y="100" width="34" height="52"/><rect class="barra" x="1288" y="92" width="34" height="60"/><text class="pc-txt" x="1185" y="164">C</text><text class="pc-txt" x="1245" y="164">Q</text><text class="pc-txt" x="1305" y="164">H</text><text class="rotulo" x="1245" y="56">benchmark</text><path class="check" d="M1386 120 L1396 132 L1418 106"/><text class="rotulo" x="1402" y="152">¿ventaja?</text></svg>
+              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1480 256" width="1480" height="256" aria-hidden="true"><rect class="region region-enc" x="66" y="30" width="208" height="196" rx="6"/><rect class="region region-ans" x="324" y="30" width="248" height="196" rx="6"/><rect class="region region-med" x="624" y="30" width="210" height="196" rx="6"/><line class="cable" x1="40" y1="60" x2="744" y2="60"/><line class="cable" x1="40" y1="92" x2="744" y2="92"/><line class="cable" x1="40" y1="124" x2="744" y2="124"/><line class="cable" x1="40" y1="182" x2="744" y2="182"/><text class="ket" x="10" y="66">|0⟩</text><text class="ket" x="10" y="98">|0⟩</text><text class="ket" x="10" y="130">|0⟩</text><text class="ket" x="10" y="188">|0⟩</text><text class="puntos" x="22" y="159">⋮</text><rect class="compuerta" x="133.0" y="48.0" width="74" height="24"/><text class="puerta" x="170" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">1</tspan>)</text><rect class="compuerta" x="133.0" y="80.0" width="74" height="24"/><text class="puerta" x="170" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">2</tspan>)</text><rect class="compuerta" x="133.0" y="112.0" width="74" height="24"/><text class="puerta" x="170" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">3</tspan>)</text><rect class="compuerta" x="133.0" y="170.0" width="74" height="24"/><text class="puerta" x="170" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">x</tspan><tspan class="ind">n</tspan>)</text><text class="puntos" x="170" y="159">⋮</text><rect class="compuerta" x="362.0" y="48.0" width="44" height="24"/><text class="puerta" x="384" y="65"><tspan class="var">θ</tspan><tspan class="ind">1</tspan></text><rect class="compuerta" x="362.0" y="80.0" width="44" height="24"/><text class="puerta" x="384" y="97"><tspan class="var">θ</tspan><tspan class="ind">2</tspan></text><rect class="compuerta" x="362.0" y="112.0" width="44" height="24"/><text class="puerta" x="384" y="129"><tspan class="var">θ</tspan><tspan class="ind">3</tspan></text><rect class="compuerta" x="362.0" y="170.0" width="44" height="24"/><text class="puerta" x="384" y="187"><tspan class="var">θ</tspan><tspan class="ind">n</tspan></text><text class="puntos" x="384" y="159">⋮</text><rect class="compuerta" x="470" y="42" width="52" height="158"/><text class="puerta puerta-grande" x="496" y="128.0"><tspan class="var">θ</tspan><tspan class="ind">i</tspan></text><rect class="compuerta" x="654.0" y="48.0" width="40" height="24"/><text class="puerta" x="674" y="65">M<tspan class="ind">1</tspan></text><rect class="compuerta" x="654.0" y="80.0" width="40" height="24"/><text class="puerta" x="674" y="97">M<tspan class="ind">2</tspan></text><rect class="compuerta" x="654.0" y="112.0" width="40" height="24"/><text class="puerta" x="674" y="129">M<tspan class="ind">3</tspan></text><rect class="compuerta" x="654.0" y="170.0" width="40" height="24"/><text class="puerta" x="674" y="187">M<tspan class="ind">n</tspan></text><text class="puntos" x="674" y="159">⋮</text><rect class="compuerta" x="731" y="48" width="26" height="24"/><path class="aguja" d="M736 66 A9 9 0 0 1 752 66 M744 66 L750 54"/><rect class="compuerta" x="731" y="80" width="26" height="24"/><path class="aguja" d="M736 98 A9 9 0 0 1 752 98 M744 98 L750 86"/><rect class="compuerta" x="731" y="112" width="26" height="24"/><path class="aguja" d="M736 130 A9 9 0 0 1 752 130 M744 130 L750 118"/><rect class="compuerta" x="731" y="170" width="26" height="24"/><path class="aguja" d="M736 188 A9 9 0 0 1 752 188 M744 188 L750 176"/><text class="puntos" x="744" y="159">⋮</text><line class="cable" x1="757" y1="60" x2="810" y2="124"/><line class="cable" x1="757" y1="92" x2="810" y2="124"/><line class="cable" x1="757" y1="124" x2="810" y2="124"/><line class="cable" x1="757" y1="182" x2="810" y2="124"/><circle class="control" cx="810" cy="124" r="2.5"/><line class="clasico" x1="810" y1="122" x2="882" y2="122"/><line class="clasico" x1="810" y1="126" x2="882" y2="126"/><text class="valor" x="858" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="882" y="72" width="150" height="104" rx="4"/><rect class="pc-pantalla" x="892" y="82" width="130" height="76"/><path class="pc-pie" d="M944 176 L938 188 L976 188 L970 176"/><text class="pc-vqe" x="957" y="122">VQE</text><text class="pc-txt" x="957" y="142">min E(θ) · optimizador</text><line class="clasico" x1="1032" y1="122" x2="1120" y2="122"/><line class="clasico" x1="1032" y1="126" x2="1120" y2="126"/><path class="lazo" d="M957 188 V248 H448 V238"/><path class="punta" d="M444 243 L448 237 L452 243"/><text class="lazo-txt" x="702.5" y="252">Actualizar <tspan class="var">θ</tspan></text><rect class="pc" x="1120" y="64" width="250" height="120" rx="4"/><rect class="pc-pantalla" x="1130" y="74" width="230" height="100"/><path class="pc-pie" d="M1228 184 L1222 200 L1268 200 L1262 184"/><line class="eje" x1="1148" y1="152" x2="1344" y2="152"/><rect class="barra" x="1168" y="114" width="34" height="38"/><rect class="barra barra-q" x="1228" y="100" width="34" height="52"/><rect class="barra" x="1288" y="92" width="34" height="60"/><text class="pc-txt" x="1185" y="164">C</text><text class="pc-txt" x="1245" y="164">Q</text><text class="pc-txt" x="1305" y="164">H</text><text class="rotulo" x="1245" y="56">benchmark</text><path class="check" d="M1386 120 L1396 132 L1418 106"/><text class="rotulo" x="1402" y="152">¿ventaja?</text></svg>
             <article class="repo-panel etapa" data-etapa="1" tabindex="0" role="button" aria-expanded="false" data-titulo="Encoding y representación cuántica de datos">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
@@ -1696,11 +1695,11 @@
               </div>
             </article>
 
-            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Solucionador: VQE, Variational Quantum Eigensolver">
+            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Solucionadores cuánticos e integración de ciclos computacionales">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
                 <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
-                <p class="etapa-pregunta">¿Cómo encuentra el VQE la energía mínima?</p>
+                <p class="etapa-pregunta">¿Cómo se ejecuta, se mide y se optimiza?</p>
               </div>
             </article>
 
@@ -1761,31 +1760,37 @@
   </template>
   <!-- detalle de la etapa 3: se despliega dentro de la tarjeta al hacer clic -->
   <template id="etapa-3-detalle">
+
               <div class="etapa-col">
-                <div class="etapa-sub">Qué hace el VQE</div>
+                <div class="etapa-sub">Qué incluye</div>
                 <ul class="etapa-lista">
-                  <li>Prepara el estado |ψ(θ)⟩ con el ansatz.</li>
-                  <li>Mide la energía ⟨H⟩<sub>θ</sub> término a término.</li>
-                  <li>Un optimizador clásico ajusta θ para bajarla.</li>
-                  <li>Repite hasta converger a la energía mínima.</li>
+                  <li>VQE, QAOA, Grover, quantum annealing u otros métodos.</li>
+                  <li>Reservorios cuánticos y modelos híbridos.</li>
+                  <li>Función de costo, optimizadores y criterios de parada, cuando corresponda.</li>
+                  <li>Iteraciones, mediciones y realimentación.</li>
                 </ul>
               </div>
-              <div class="etapa-col">
-                <div class="etapa-sub">La cuenta</div>
-                <p class="vqe-formula">E(θ) = ⟨ψ(θ)| Ĥ |ψ(θ)⟩ ≥ E<sub>0</sub></p>
-                <p class="etapa-nota">Por el principio variacional, ninguna elección de θ da una energía menor que la del estado fundamental E<sub>0</sub>: minimizar E(θ) nos acerca a él desde arriba.</p>
-                <p class="vqe-formula">Ĥ = Σ<sub>k</sub> c<sub>k</sub> P<sub>k</sub></p>
-                <p class="etapa-nota">El Hamiltoniano se escribe como suma de cadenas de Pauli. Cada P<sub>k</sub> se mide rotando a su base: esas son las compuertas M<sub>i</sub> antes de los medidores.</p>
+              <div class="etapa-col etapa-ancha">
+                <div class="etapa-sub">No todos funcionan como VQE · ¿qué realiza el bloque 3?</div>
+                <table class="detalle-tabla">
+                  <tbody>
+                    <tr><td>VQE</td><td>Minimiza la energía mediante un ciclo cuántico-clásico que actualiza parámetros. <span class="ref">Nature Communications</span></td></tr>
+                    <tr><td>QAOA</td><td>Optimiza los parámetros del circuito para mejorar una función objetivo.</td></tr>
+                    <tr><td>Grover</td><td>Aplica iteraciones de amplificación de amplitud; no requiere un optimizador clásico.</td></tr>
+                    <tr><td>Reservorio cuántico</td><td>Usa una dinámica cuántica, generalmente fija, para extraer características y entrenar una capa de salida clásica. <span class="ref">npj Quantum Information</span></td></tr>
+                    <tr><td>QML variacional</td><td>Entrena parámetros para minimizar una función de pérdida.</td></tr>
+                    <tr><td>Quantum annealing</td><td>No usa compuertas: evoluciona lentamente de un Hamiltoniano inicial al del problema (QUBO–Ising) para terminar cerca de su mínimo; lo clásico ajusta el programa y lee las muestras.</td></tr>
+                  </tbody>
+                </table>
               </div>
               <div class="etapa-col">
-                <div class="etapa-sub">El ciclo, paso a paso</div>
-                <ol class="vqe-pasos">
-                  <li>Elegir θ inicial.</li>
-                  <li>Ejecutar el circuito con muchos <i>shots</i> y estimar cada ⟨P<sub>k</sub>⟩.</li>
-                  <li>Sumar c<sub>k</sub>⟨P<sub>k</sub>⟩ para obtener E(θ).</li>
-                  <li>El optimizador propone un nuevo θ (por ejemplo COBYLA o SPSA).</li>
-                  <li>Parar cuando E(θ) deja de bajar o se agota el presupuesto de iteraciones.</li>
-                </ol>
+                <div class="etapa-sub">En el dibujo: un VQE</div>
+                <p class="vqe-formula">E(θ) = ⟨ψ(θ)| Ĥ |ψ(θ)⟩ ≥ E<sub>0</sub></p>
+                <p class="etapa-nota">El ansatz prepara |ψ(θ)⟩, las compuertas M<sub>i</sub> rotan a la base de cada término de Ĥ = Σ c<sub>k</sub> P<sub>k</sub>, se mide ⟨H⟩<sub>θ</sub> y el optimizador actualiza θ hasta llegar a la energía mínima.</p>
+              </div>
+              <div class="etapa-col">
+                <div class="etapa-sub">En reservorios cuánticos</div>
+                <p class="etapa-nota">El bucle puede recorrer las muestras o una secuencia temporal para construir las características medidas y entrenar un readout clásico. No necesariamente modifica los parámetros del circuito cuántico.</p>
               </div>
   </template>
   <!-- detalle de la etapa 4: se despliega dentro de la tarjeta al hacer clic -->
