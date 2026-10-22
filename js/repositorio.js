@@ -114,6 +114,8 @@
     var panel = document.querySelector('.etapa-panel');
     var pCab = panel.querySelector('.ep-cab');
     var pCuerpo = panel.querySelector('.ep-cuerpo');
+    var abajo = document.querySelector('.etapa-abajo');
+    var bCuerpo = abajo.querySelector('.eb-cuerpo');
     var etapas = Array.prototype.slice.call(pista.querySelectorAll('.etapa'));
     var actual = null, version = 0;
 
@@ -122,11 +124,12 @@
       if (actual) { actual.classList.remove('activa'); actual.setAttribute('aria-expanded', 'false'); }
       actual = null;
       panel.classList.remove('ver'); panel.setAttribute('aria-hidden', 'true');
+      abajo.classList.remove('ver');
       setTimeout(function () {
         if (v !== version) return;
         pista.classList.remove('enfoque'); etapasCaja.classList.remove('enfocada');
-        pCab.innerHTML = ''; pCuerpo.innerHTML = '';
-      }, 450);
+        pCab.innerHTML = ''; pCuerpo.innerHTML = ''; bCuerpo.innerHTML = '';
+      }, 600);
     }
     function abrir(et) {
       var v = ++version;
@@ -145,13 +148,26 @@
       titulo.className = 'ep-titulo';
       titulo.textContent = et.getAttribute('data-titulo');
       pCab.appendChild(titulo);
-      pCuerpo.innerHTML = '';
+      // la primera parte va al costado; el resto, debajo (sin barras de scroll)
+      pCuerpo.innerHTML = ''; bCuerpo.innerHTML = '';
+      abajo.classList.remove('ver');
       var t = document.getElementById('etapa-' + et.getAttribute('data-etapa') + '-detalle');
-      if (t) pCuerpo.appendChild(t.content.cloneNode(true));
-      panel.scrollTop = 0;
+      if (t) {
+        var partes = Array.prototype.slice.call(t.content.cloneNode(true).children);
+        partes.forEach(function (el, i) { (i === 0 ? pCuerpo : bCuerpo).appendChild(el); });
+      }
       setTimeout(function () {
         if (v !== version) return;
         panel.classList.add('ver'); panel.setAttribute('aria-hidden', 'false');
+        if (bCuerpo.childElementCount) {
+          abajo.classList.add('ver');
+          // la página baja lo justo para mostrar el comienzo de lo de abajo
+          setTimeout(function () {
+            var r = abajo.getBoundingClientRect();
+            var falta = Math.min(r.bottom, r.top + 260) - window.innerHeight + 24;
+            if (falta > 0) window.scrollBy({ top: falta, behavior: still ? 'auto' : 'smooth' });
+          }, 450);
+        }
       }, still ? 0 : 520);
     }
     var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
