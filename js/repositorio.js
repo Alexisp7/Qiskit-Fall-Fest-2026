@@ -83,7 +83,6 @@
       setTimeout(function () {
         if (et._v !== v) return;
         et.classList.remove('abierta'); et.setAttribute('aria-expanded', 'false');
-        et.querySelector('.etapa-despliega').textContent = 'Desplegar →';
         det.style.width = ''; avance();
       }, 450);
     }
@@ -96,7 +95,6 @@
         if (t) det.appendChild(t.content.cloneNode(true));
       }
       et.classList.add('abierta'); et.setAttribute('aria-expanded', 'true');
-      et.querySelector('.etapa-despliega').textContent = '← Cerrar';
       // de 0 al ancho natural del detalle
       det.style.width = 'auto';
       var ancho = det.scrollWidth;
