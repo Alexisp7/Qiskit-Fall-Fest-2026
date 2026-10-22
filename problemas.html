@@ -1321,7 +1321,11 @@
     }
     .hero-pista b { color: var(--gold); font-weight: 700; }
     /* Resumen de problemas */
-    .problemas-wrap { padding-top: 120px; }
+    /* el contenido arranca cerca del menú, sin centrarse en la pantalla */
+    .problemas-wrap { padding-top: 40px; justify-content: flex-start !important; }
+    /* sin el ajuste de scroll heredado: hundía el título bajo el menú fijo */
+    html { scroll-snap-type: none !important; }
+    .problemas-wrap { scroll-snap-align: none !important; }
     .problemas-intro { max-width: 640px; margin: 0 auto 48px; text-align: center; color: #A8A39A; font-size: 15px; line-height: 1.7; }
     .problemas-proximo .all-projects-label { color: #8a8478; }
     /* Llega desde la portada blanca: fondo blanco y la grilla no se ve
