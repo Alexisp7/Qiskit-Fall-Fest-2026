@@ -1324,14 +1324,20 @@
     .problemas-wrap { padding-top: 120px; }
     .problemas-intro { max-width: 640px; margin: 0 auto 48px; text-align: center; color: #A8A39A; font-size: 15px; line-height: 1.7; }
     .problemas-proximo .all-projects-label { color: #8a8478; }
-    /* Llega desde el telón oscuro de la portada: el fondo ya es oscuro y la
-       grilla no se ve mientras entran las tarjetas */
-    html, body { background: var(--bg-dark); }
+    /* Llega desde la portada blanca: fondo blanco y la grilla no se ve
+       mientras entran las tarjetas */
+    html, body { background: var(--white); }
+    .problemas-wrap { background: var(--white); }
     .problemas-wrap .projects-grid { background: transparent; }
+    .problemas-wrap .projects-inner .section-title { color: var(--black); }
+    .problemas-intro { color: var(--gray); }
     /* Entrada: cada parte se desliza desde la izquierda, una tras otra */
     @keyframes desdeIzq { from { transform: translateX(-90px); opacity: 0; } to { transform: none; opacity: 1; } }
     .entra { animation: desdeIzq 0.8s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--i, 0) * 0.12s + 0.1s); }
-    @media (prefers-reduced-motion: reduce) { .entra { animation: none; } }
+    /* el menú baja suave desde arriba */
+    @keyframes desdeArriba { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
+    .header.entra { animation: desdeArriba 0.9s cubic-bezier(.2,.7,.2,1) both; animation-delay: 0.15s; }
+    @media (prefers-reduced-motion: reduce) { .entra, .header.entra { animation: none; } }
     /* una sola fila: el track ancho y la tarjeta de próximos */
     @media (min-width: 901px) {
       .problemas-wrap .projects-grid { grid-template-rows: max(300px, calc(100vh - 340px)); }

@@ -13,8 +13,8 @@
 // fracción de la sección. Con data-linea="selector" se traza una línea fina
 // y corta sobre ese elemento, centrada, con un cuadrito.
 // Con data-qft="pagina.html", después de medir la QFT se dejan ver los
-// rojos y azules 2 s, las esferas salen de escena hacia la derecha (el
-// canvas avisa con el evento 'qft-salida') y luego se pasa a esa página.
+// rojos y azules 2 s, las esferas se desvanecen en su sitio (el canvas
+// avisa con el evento 'qft-salida') y luego se pasa a esa página.
 (function () {
   var R = 8, DX = 26, DY = DX * Math.sqrt(3) / 2;
   var SPIN = 3.2, TAU = Math.PI * 2;
@@ -382,12 +382,12 @@
       collapsed = false;
       start();
     }
-    // salida de escena: cada esfera acelera hacia la derecha, primero las de
-    // la derecha, y al terminar se pasa a la página de destino
-    var DISFRUTE = 2000, SALIDA = 1100, saliendo = 0;
+    // salida de escena: cada esfera se vuelve transparente sin moverse, con
+    // un pequeño desfase al azar, y al terminar se pasa a la página de destino
+    var DISFRUTE = 2000, SALIDA = 1300, saliendo = 0;
     function salir() {
       saliendo = performance.now();
-      qubits.forEach(function (q) { q.outAt = saliendo + (1 - q.x / w) * 350; });
+      qubits.forEach(function (q) { q.outAt = saliendo + Math.random() * 450; });
       canvas.dispatchEvent(new CustomEvent('qft-salida', { bubbles: true, detail: { duracion: SALIDA } }));
       start();
       setTimeout(function () { window.location.href = destino; }, still ? 0 : SALIDA);
@@ -446,13 +446,12 @@
         else if (q.frozen === 'H') q.phi = (q.phi - SPIN * dt / 1000) % TAU;
         else if (!q.frozen) q.phi += q.drift * dt;
 
-        var ox = 0, alfa = 1;
+        var alfa = 1;
         if (q.outAt && now > q.outAt) {
-          var u = (now - q.outAt) / 750;
-          ox = u * u * w * 0.9; alfa = Math.max(0, 1 - u);
+          alfa = Math.max(0, 1 - (now - q.outAt) / 750);
           if (!alfa) continue;
         }
-        ctx.save(); ctx.translate(ox, 0); ctx.globalAlpha = alfa;
+        ctx.save(); ctx.globalAlpha = alfa;
         var on = q.hot || q.frozen;
         var col = q.frozen === 'H' ? MUSTARD : q.frozen === '1' ? RED : q.frozen === '0' ? BLUE : GOLD;
         ctx.strokeStyle = ctx.fillStyle = 'rgba(' + col + ',' + (on ? 1 : 0.35) + ')';

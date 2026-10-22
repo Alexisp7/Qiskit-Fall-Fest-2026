@@ -1327,16 +1327,9 @@
     @media (prefers-reduced-motion: reduce) { .hero-pista { animation: none; } }
     .hero-qubits .hero-stats { padding-top: 28px; }
     .hero-pista b { color: var(--gold); font-weight: 700; }
-    /* Salida tras la QFT: el texto se va a la derecha con las esferas y un
-       telón oscuro entra desde la izquierda hacia la página de problemas */
-    .hero-qubits .hero-text { transition: transform 0.9s cubic-bezier(.55,0,.8,.3), opacity 0.7s ease-in; }
-    .saliendo .hero-qubits .hero-text { transform: translateX(45vw); opacity: 0; }
-    .telon {
-      position: fixed; inset: 0; z-index: 50; background: var(--bg-dark);
-      transform: translateX(-100%); pointer-events: none;
-      transition: transform 0.6s cubic-bezier(.7,0,.3,1) 0.45s;
-    }
-    .saliendo .telon { transform: translateX(0); }
+    /* Salida tras la QFT: el texto se desvanece junto con las esferas */
+    .hero-qubits .hero-text { transition: opacity 0.9s ease-in 0.2s; }
+    .saliendo .hero-qubits .hero-text { opacity: 0; }
   </style>
 </head>
 <body>
@@ -1376,12 +1369,11 @@
   </div>
 
 
-  <div class="telon" aria-hidden="true"></div>
   <script>
     document.addEventListener('qft-salida', function () { document.body.classList.add('saliendo'); });
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022g"></script>
+  <script src="js/qubits.js?v=20261022h"></script>
 </body>
 </html>
