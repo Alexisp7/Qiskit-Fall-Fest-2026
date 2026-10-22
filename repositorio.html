@@ -1413,28 +1413,71 @@
     @keyframes trazar { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
     @keyframes cometa { 0% { stroke-dashoffset: 70; opacity: 1; } 85% { opacity: 1; } 100% { stroke-dashoffset: -930; opacity: 0; } }
     .rp-trazo.fuera { opacity: 0; }
-    /* Escritorio: todo el repositorio cabe en una sola vista. Encabezado en
-       una franja y tres columnas: explicación y clonar | archivos | cambios.
-       Si el árbol o los commits crecen, se desplazan dentro de su panel */
+    /* ── Las 4 etapas del proyecto ── */
+    .etapa { display: flex; flex-direction: column; }
+    .etapa-cab { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+    .etapa-num { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; line-height: 1; color: var(--gold); font-variant-numeric: lining-nums; }
+    .etapa-tag { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; color: #111; background: var(--gold); padding: 3px 7px; }
+    .repo-panel h2.etapa-titulo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #F2EEE6; line-height: 1.15; margin: 0 0 8px; display: block; }
+    .etapa-desc { color: #A8A39A; font-size: 13px; line-height: 1.55; margin: 0 0 10px; }
+    .etapa-lista { list-style: none; margin: 0; padding: 0; }
+    .etapa-lista li { position: relative; padding-left: 16px; color: #CFC9BD; font-size: 12.5px; line-height: 1.5; margin-bottom: 4px; }
+    .etapa-lista li::before { content: ''; position: absolute; left: 0; top: .62em; width: 7px; height: 1px; background: var(--gold); }
+    .etapa-mas { align-self: flex-start; margin-top: auto; padding-top: 10px; background: none; border: none; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+    .etapa-mas:hover { color: #F2EEE6; }
+    /* flecha dorada entre una etapa y la siguiente */
+    .etapa:not([data-etapa="4"])::after { content: '→'; position: absolute; right: -11px; top: 22px; z-index: 2; width: 20px; height: 20px; line-height: 19px; text-align: center; font-size: 12px; color: #111; background: var(--gold); border-radius: 50%; }
+
+    /* detalle ampliado de las etapas 03 y 04 */
+    /* margin: auto centra el diálogo (el reseteo global lo dejaba en 0) */
+    .detalle { margin: auto; max-width: 680px; width: calc(100% - 32px); max-height: calc(100vh - 64px); overflow: auto; box-sizing: border-box; background: #141414; color: #E9E2D3; border: 1px solid rgba(200,169,110,.5); padding: 32px 36px; }
+    .detalle::backdrop { background: rgba(8,8,8,.72); }
+    .detalle[open] { animation: detalleEntra .45s cubic-bezier(.16,1,.3,1); }
+    @keyframes detalleEntra { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .detalle-cerrar { position: absolute; top: 12px; right: 16px; background: none; border: none; color: #8a8478; font-size: 26px; line-height: 1; cursor: pointer; }
+    .detalle-cerrar:hover { color: var(--gold); }
+    .detalle-titulo { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; line-height: 1.15; margin: 0 0 14px; color: #F2EEE6; }
+    .detalle p { color: #B5B0A6; font-size: 14px; line-height: 1.7; margin: 0 0 14px; }
+    .detalle-tabla { width: 100%; border-collapse: collapse; margin: 4px 0 18px; font-size: 13px; }
+    .detalle-tabla th { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); text-align: left; padding: 0 10px 8px 0; border-bottom: 1px solid #2c2a26; }
+    .detalle-tabla td { padding: 10px 10px 10px 0; border-bottom: 1px solid #222; color: #CFC9BD; line-height: 1.5; vertical-align: top; }
+    .detalle-tabla td:first-child { color: #F2EEE6; font-weight: 600; white-space: nowrap; }
+    .ref { display: inline-block; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .08em; color: #8a8478; border: 1px solid #2c2a26; padding: 1px 5px; margin-left: 4px; }
+    .experimentos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 4px 0 18px; }
+    .experimentos div { background: #1B1B1B; border-top: 2px solid var(--gold); padding: 14px 16px; }
+    .experimentos b { display: block; font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: #F2EEE6; }
+    .experimentos span { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: #8a8478; }
+    .detalle p.pregunta-central { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; line-height: 1.3; color: var(--gold); }
+
+    /* Escritorio: todo cabe en una sola vista. Arriba las 4 etapas como un
+       flujo; abajo archivos, cambios y clonar. Si algo crece, se desplaza
+       dentro de su panel */
     @media (min-width: 901px) {
-      .repo-wrap { height: calc(100vh - 72px); min-height: 600px; box-sizing: border-box; padding: 18px 48px; display: flex; flex-direction: column; }
+      .repo-wrap { height: calc(100vh - 72px); min-height: 600px; box-sizing: border-box; padding: 16px 48px; display: flex; flex-direction: column; }
       .repo-inner { width: 100%; max-width: 1280px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
-      .repo-cabecera { display: grid; grid-template-columns: auto 1fr; column-gap: 40px; align-items: end; text-align: left; margin-bottom: 16px; }
+      .repo-cabecera { display: grid; grid-template-columns: auto 1fr; column-gap: 40px; align-items: end; text-align: left; margin-bottom: 14px; }
       .repo-kicker { grid-column: 1; grid-row: 1; }
-      .repo-titulo { grid-column: 1; grid-row: 2; font-size: 46px; margin: 6px 0 0; }
-      .repo-intro { grid-column: 2; grid-row: 1 / 3; justify-self: end; text-align: right; max-width: 520px; margin: 0 0 4px; font-size: 14px; line-height: 1.6; }
-      .repo-grid { flex: 1; min-height: 0; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr auto; }
-      .repo-panel { min-height: 0; overflow: auto; padding: 22px 24px; }
-      .repo-panel:nth-child(1) { grid-column: 1; grid-row: 1; }
-      .repo-panel:nth-child(2) { grid-column: 2; grid-row: 1 / 3; }
-      .repo-panel:nth-child(3) { grid-column: 3; grid-row: 1 / 3; }
-      .repo-panel:nth-child(4) { grid-column: 1; grid-row: 2; }
-      .repo-explica p { font-size: 14px; }
-      .repo-acciones { margin-top: 14px; }
-      /* en la columna angosta el comando se parte en vez de desplazarse */
+      .repo-titulo { grid-column: 1; grid-row: 2; font-size: 44px; margin: 6px 0 0; }
+      .repo-intro { grid-column: 2; grid-row: 1 / 3; justify-self: end; text-align: right; max-width: 560px; margin: 0 0 4px; font-size: 13.5px; line-height: 1.6; }
+      .repo-grid { flex: 1; min-height: 0; grid-template-columns: repeat(4, 1fr); grid-template-rows: minmax(0, 1.55fr) minmax(0, 1fr); }
+      .repo-panel { min-height: 0; overflow: auto; padding: 18px 22px; }
+      .etapa { overflow: visible; }
+      .panel-cambios { grid-column: span 2; }
       .clonar code { white-space: normal; word-break: break-all; overflow: visible; }
+      .repo-acciones { margin-top: 10px; }
+      .panel-clonar .clonar code { font-size: 11px; padding: 10px 12px; }
+      .panel-clonar .boton-gh { padding: 10px 18px; font-size: 10px; }
     }
-      /* ítem del menú bloqueado: candado dorado al lado */
+    @media (min-width: 901px) and (max-height: 780px) {
+      .etapa-desc { display: none; }
+      .repo-panel h2.etapa-titulo { font-size: 20px; }
+      .panel-clonar h2 { margin-bottom: 10px; }
+      .panel-clonar { padding-top: 14px; padding-bottom: 14px; }
+    }
+    @media (max-width: 900px) {
+      .etapa:not([data-etapa="4"])::after { right: auto; left: 22px; top: auto; bottom: -11px; content: '↓'; }
+    }
+    /* ítem del menú bloqueado: candado dorado al lado */
     .candado { width: 9px; height: 11px; margin-left: 5px; vertical-align: -1px; fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; }
     nav.main-nav a.active .candado { stroke: var(--gold); }
     nav.main-nav a.nav-bloqueado { opacity: .75; }
@@ -1465,27 +1508,71 @@
       <div class="repo-cabecera">
         <div class="repo-kicker">Alexisp7 / Qiskit-Fall-Fest-2026</div>
         <h1 class="repo-titulo">El <em>repositorio</em></h1>
-        <p class="repo-intro">Todo lo que construimos para el hackathon vive en un repositorio público: el código de cada track y esta misma página.</p>
+        <p class="repo-intro">Cuatro etapas, del dato clásico a la evaluación de la ventaja: código reutilizable para cualquier track, con la implementación del algoritmo separada de la demostración de su utilidad.</p>
       </div>
 
       <div class="repo-grid">
-        <!-- explicación del equipo: reemplazar el texto pendiente -->
-        <div class="repo-panel repo-explica">
-          <h2>Qué tenemos aquí</h2>
-          <p class="pendiente">Aquí explicaremos cómo está organizado el repositorio y qué encontrarás en cada carpeta.</p>
-        </div>
+        <!-- las 4 etapas del proyecto, en orden de flujo -->
+        <article class="repo-panel etapa" data-etapa="1">
+          <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Input</span></div>
+          <h2 class="etapa-titulo">Encoding: clásico → cuántico</h2>
+          <p class="etapa-desc">Partimos de datos o de una instancia matemática del problema. Los procesamos y elegimos cómo representarlos en un sistema cuántico.</p>
+          <ul class="etapa-lista">
+            <li>Preparación y normalización de datos.</li>
+            <li>Codificación angular, de amplitudes, de base o QUBO–Ising, según corresponda.</li>
+            <li>Definición del estado inicial, operadores y recursos necesarios.</li>
+          </ul>
+        </article>
 
-        <div class="repo-panel">
+        <article class="repo-panel etapa" data-etapa="2">
+          <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Quantum</span></div>
+          <h2 class="etapa-titulo">Construcción de circuitos cuánticos</h2>
+          <p class="etapa-desc">Diseñamos los circuitos requeridos por el problema y por el algoritmo que vamos a utilizar.</p>
+          <ul class="etapa-lista">
+            <li>Preparación de estados.</li>
+            <li>Circuitos parametrizados y ansätze.</li>
+            <li>Evolución cuántica, entrelazamiento y operadores específicos.</li>
+            <li>Circuitos de medición de observables.</li>
+          </ul>
+        </article>
+
+        <article class="repo-panel etapa" data-etapa="3">
+          <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
+          <h2 class="etapa-titulo">Solucionador y ciclo computacional</h2>
+          <p class="etapa-desc">Integramos los circuitos en el algoritmo completo: ejecución, extracción de resultados, entrenamiento u optimización, y los bucles que correspondan.</p>
+          <ul class="etapa-lista">
+            <li>VQE, QAOA, Grover u otros métodos.</li>
+            <li>Reservorios cuánticos y modelos híbridos.</li>
+            <li>Función de costo, optimizadores y criterios de parada, cuando corresponda.</li>
+            <li>Iteraciones, mediciones y realimentación.</li>
+          </ul>
+          <button type="button" class="etapa-mas" data-abre="detalle-3">Ver detalle →</button>
+        </article>
+
+        <article class="repo-panel etapa" data-etapa="4">
+          <div class="etapa-cab"><span class="etapa-num">04</span><span class="etapa-tag">Validation</span></div>
+          <h2 class="etapa-titulo">Benchmark y utilidad real</h2>
+          <p class="etapa-desc">Comparamos la solución cuántica contra una clásica y evaluamos si el componente cuántico aporta valor por sí mismo o como mejora de un método clásico.</p>
+          <ul class="etapa-lista">
+            <li>Precisión, error y calidad del resultado.</li>
+            <li>Tiempo de ejecución y consumo de recursos.</li>
+            <li>Comparación clásico, cuántico e híbrido.</li>
+            <li>Gráficas de convergencia, escalabilidad y mejora obtenida.</li>
+          </ul>
+          <button type="button" class="etapa-mas" data-abre="detalle-4">Ver detalle →</button>
+        </article>
+
+        <div class="repo-panel panel-archivos">
           <h2>Archivos <span id="arbol-rama">main</span></h2>
           <ul class="arbol" id="arbol"><li class="repo-estado">Cargando desde GitHub…</li></ul>
         </div>
 
-        <div class="repo-panel">
+        <div class="repo-panel panel-cambios">
           <h2>Últimos cambios</h2>
           <ul class="commits" id="commits"><li class="repo-estado">Cargando desde GitHub…</li></ul>
         </div>
 
-        <div class="repo-panel repo-explica">
+        <div class="repo-panel panel-clonar">
           <h2>Clonar</h2>
           <div class="clonar">
             <code id="cmd-clonar">git clone https://github.com/Alexisp7/Qiskit-Fall-Fest-2026.git</code>
@@ -1499,6 +1586,41 @@
     </div>
   </section>
 
+  <!-- detalle de la etapa 03 -->
+  <dialog class="detalle" id="detalle-3" aria-labelledby="detalle-3-titulo">
+    <button type="button" class="detalle-cerrar" aria-label="Cerrar">×</button>
+    <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Solver</span></div>
+    <h2 class="detalle-titulo" id="detalle-3-titulo">Solucionadores cuánticos e integración de ciclos computacionales</h2>
+    <p>No todos los solucionadores funcionan como VQE. Por eso este bloque debe ser lo bastante general.</p>
+    <table class="detalle-tabla">
+      <thead><tr><th>Algoritmo</th><th>¿Qué realiza el bloque 3?</th></tr></thead>
+      <tbody>
+        <tr><td>VQE</td><td>Minimiza la energía mediante un ciclo cuántico-clásico que actualiza parámetros. <span class="ref">Nature Communications</span></td></tr>
+        <tr><td>QAOA</td><td>Optimiza los parámetros del circuito para mejorar una función objetivo.</td></tr>
+        <tr><td>Grover</td><td>Aplica iteraciones de amplificación de amplitud; no requiere un optimizador clásico.</td></tr>
+        <tr><td>Quantum Reservoir Computing</td><td>Utiliza una dinámica cuántica, generalmente fija, para extraer características y entrenar una capa de salida clásica. <span class="ref">npj Quantum Information</span></td></tr>
+        <tr><td>QML variacional</td><td>Entrena parámetros para minimizar una función de pérdida.</td></tr>
+      </tbody>
+    </table>
+    <p>En reservorios cuánticos, por ejemplo, el bucle puede recorrer las muestras o una secuencia temporal para construir las características medidas y entrenar un readout clásico. No necesariamente modifica los parámetros del circuito cuántico.</p>
+  </dialog>
+
+  <!-- detalle de la etapa 04 -->
+  <dialog class="detalle" id="detalle-4" aria-labelledby="detalle-4-titulo">
+    <button type="button" class="detalle-cerrar" aria-label="Cerrar">×</button>
+    <div class="etapa-cab"><span class="etapa-num">04</span><span class="etapa-tag">Validation</span></div>
+    <h2 class="detalle-titulo" id="detalle-4-titulo">Benchmarking, validación y evaluación de ventaja cuántica o híbrida</h2>
+    <p>La parte que puede ganar el hackathon. Tres experimentos, siempre que sean aplicables:</p>
+    <div class="experimentos">
+      <div><b>Clásico</b><span>Referencia</span></div>
+      <div><b>Cuántico</b><span>Método propuesto</span></div>
+      <div><b>Híbrido</b><span>Clásico + cuántico</span></div>
+    </div>
+    <p class="pregunta-central">¿Qué ganamos realmente al incorporar el componente cuántico?</p>
+    <p>Si el método cuántico no supera al clásico por sí solo, todavía podemos estudiar si mejora un procesamiento clásico existente. Para demostrarlo hay que comparar con el mismo método clásico sin el componente cuántico, con datos y condiciones equivalentes.</p>
+    <p>Una mejora en precisión tampoco implica automáticamente una ventaja computacional: hay que considerar el costo del encoding, las mediciones, el entrenamiento y la ejecución.</p>
+  </dialog>
+
   <hr class="gold-line"/>
 
   <footer class="footer-wrap" id="contacto">
@@ -1508,6 +1630,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/repositorio.js?v=2"></script>
+  <script src="js/repositorio.js?v=3"></script>
 </body>
 </html>

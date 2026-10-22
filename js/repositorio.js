@@ -88,6 +88,16 @@
     })
     .catch(function () { aviso(commits); });
 
+  // detalle ampliado de las etapas (diálogo nativo)
+  Array.prototype.forEach.call(document.querySelectorAll('[data-abre]'), function (b) {
+    var d = document.getElementById(b.getAttribute('data-abre'));
+    if (!d || !d.showModal) return;
+    b.addEventListener('click', function () { d.showModal(); });
+    d.querySelector('.detalle-cerrar').addEventListener('click', function () { d.close(); });
+    // clic fuera del cuadro: cierra
+    d.addEventListener('click', function (e) { if (e.target === d) d.close(); });
+  });
+
   // copiar el comando de clonado
   var boton = document.getElementById('copiar');
   if (boton) boton.addEventListener('click', function () {
