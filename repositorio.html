@@ -1446,21 +1446,21 @@
     .etapa-circuito { display: block; width: 440px; height: 150px; flex: 0 0 auto; margin: calc(-1 * var(--py) + 6px) calc(-1 * var(--px)) 18px; overflow: visible; }
     .etapa-circuito .cable { stroke: rgba(242,238,230,.38); stroke-width: 1; }
     .etapa-circuito .clasico { stroke: rgba(242,238,230,.38); stroke-width: 1; }
-    .etapa-circuito .compuerta { fill: #111; stroke: var(--gold); stroke-width: 1.2; }
+    .etapa-circuito .compuerta { fill: var(--bg-dark); stroke: var(--gold); stroke-width: 1.2; }
     .etapa-circuito .ansatz { fill: none; stroke: rgba(200,169,110,.45); stroke-dasharray: 3 4; }
     .etapa-circuito .puerta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 17px; fill: var(--gold); text-anchor: middle; }
     .etapa-circuito .puerta .ind { font-size: 11px; baseline-shift: sub; }
     .etapa-circuito .ket { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; fill: #E9E2D3; font-variant-numeric: lining-nums; }
     .etapa-circuito .rotulo { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .14em; fill: #8a8478; text-anchor: middle; }
     .etapa-circuito .enlace, .etapa-circuito .objetivo { stroke: var(--gold); stroke-width: 1.2; fill: none; }
-    .etapa-circuito .objetivo { fill: #111; }
+    .etapa-circuito .objetivo { fill: var(--bg-dark); }
     .etapa-circuito .control { fill: var(--gold); }
     .etapa-circuito .aguja { fill: none; stroke: var(--gold); stroke-width: 1.2; }
     .etapa-circuito .flujo { stroke: #8a8478; }
     .etapa-circuito .punta { fill: none; stroke: var(--gold); stroke-width: 1.2; }
     .etapa-circuito .lazo { stroke: var(--gold); stroke-width: 1; stroke-dasharray: 4 4; }
-    .etapa-circuito .pc { fill: #161616; stroke: #F2EEE6; stroke-opacity: .55; stroke-width: 1.2; }
-    .etapa-circuito .pc-pantalla { fill: #0c0c0c; stroke: rgba(200,169,110,.5); }
+    .etapa-circuito .pc { fill: #0b0b10; stroke: #F2EEE6; stroke-opacity: .55; stroke-width: 1.2; }
+    .etapa-circuito .pc-pantalla { fill: #020203; stroke: rgba(200,169,110,.5); }
     .etapa-circuito .pc-pie { fill: none; stroke: #F2EEE6; stroke-opacity: .45; }
     .etapa-circuito .pc-txt { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .1em; fill: #CFC9BD; text-anchor: middle; }
     .etapa-circuito .eje { stroke: rgba(242,238,230,.3); }
@@ -1558,9 +1558,12 @@
       .etapa-num { font-size: 46px; }
       .etapa-desc { font-size: 14px; line-height: 1.55; }
     }
+    /* negro noche: más profundo que el gris oscuro del resto del sitio */
+    :root { --bg-dark: #050507; }
+    .footer-wrap { background: var(--bg-dark); }
     /* repositorio en negro de punta a punta: el menú también es oscuro,
        con el ítem activo en dorado */
-    .header { background: var(--bg-dark); border-bottom-color: #1f1f1f; }
+    .header { background: var(--bg-dark); border-bottom-color: #14141a; }
     nav.main-nav a { color: #A8A39A; }
     nav.main-nav a::before { background: var(--gold); }
     nav.main-nav a:hover, nav.main-nav a.active { color: #111; }
