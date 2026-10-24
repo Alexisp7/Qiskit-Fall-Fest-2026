@@ -56,6 +56,7 @@ USAR_VQE = False     # ni simular con Statevector en un computador normal
 # Con True se reemplaza por el triangulo d12 = 5, d23 = 7, d13 = 9, donde
 # el metodo exacto y el VQE si corren (exacto: ruta 1 -> 2 -> 3, energia 12).
 CASO_TRIANGULO = False
+aristas_mina = list(aristas)    # la etapa Resultado siempre usa la red minera
 
 if CASO_TRIANGULO:
     aristas = [(1, 2, 5), (2, 3, 7), (1, 3, 9)]
@@ -584,3 +585,180 @@ if USAR_VQE:
 
     if USAR_EXACTO:
         print("Coincide con el exacto:", np.isclose(res["energia"], E_ex))
+
+
+# ## 6 · Resultado: los 8 lugares de la mina
+# Las hojas 3, 4, 6 y 7 pasan a un costo fijo de ida y vuelta (1,614 km) y el núcleo 1, 2, 5, 8 se completa con las distancias mínimas. El QUBO reducido tiene 16 qubits: el exacto revisa sus 65 536 estados y el VQE usa el mismo ansatz. Resultado: 7,314 km en 13 pasos.
+
+
+# ---- A · Reducción: hojas colapsadas y cierre métrico ----------------------
+# ---------- Reducción: hojas colapsadas + cierre métrico ----------
+aristas = aristas_mina
+grafo = nx.Graph()
+grafo.add_weighted_edges_from(aristas)
+
+hojas  = [v for v in grafo.nodes if grafo.degree(v) == 1]      # 3, 4, 6, 7
+nucleo = sorted(v for v in grafo.nodes if v not in hojas)       # 1, 2, 5, 8
+
+# Costo fijo de las excursiones: ida y vuelta de cada hoja a su nodo vecino
+hub_de = {h: next(iter(grafo[h])) for h in hojas}
+costo_hojas = sum(2 * grafo[h][hub_de[h]]["weight"] for h in hojas)   # 1.614
+
+# Cierre métrico: distancia mínima entre pares del núcleo (grafo completo)
+d = dict(nx.all_pairs_dijkstra_path_length(grafo))
+grafo_red = nx.Graph()
+for i, j in itertools.combinations(nucleo, 2):
+    grafo_red.add_edge(i, j, weight=d[i][j])
+
+T_red = len(nucleo)              # 4 tiempos
+A = 10                           # cualquier violación cuesta >= A; la mejor ruta válida cuesta 5.7
+base = 1
+prob = Problema(grafo_red, T=T_red)
+print(prob.n_qubits, "qubits | núcleo:", nucleo, "| hojas:", hojas, "| costo hojas:", costo_hojas)
+
+
+# ---- B · Pieza de cierre y Hamiltoniano reducido ---------------------------
+def coste_cierre(prob, base, d):
+    """Σ_i d(i, base) · x(i, T): costo de volver a la base desde el último lugar."""
+    Q = QUBO(prob.n_qubits)
+    for i in prob.nodos:
+        if i != base:
+            Q.agregar_lineal(prob.q(i, prob.T), d[i][base])
+    return Q
+
+piezas = {
+    "coste_distancia":     (1.0, coste_distancia(prob)),
+    "coste_cierre":        (1.0, coste_cierre(prob, base, d)),
+    "un_lugar_por_tiempo": (A,   un_lugar_por_tiempo(prob)),
+    "visitar_una_vez":     (A,   visitar_una_vez(prob)),
+    "empezar_en_1":        (A,   empezar_en(prob, base)),
+}
+# saltos_prohibidos y terminar_en ya no hacen falta: el grafo es completo y el cierre es un costo.
+qubo = armar_hamiltoniano(piezas)
+H, offset = qubo.a_ising()
+
+
+# ---- C · Exacto: los 65 536 estados ----------------------------------------
+def decodificar(prob, idx):
+    bits = [(idx >> k) & 1 for k in range(prob.n_qubits)]
+    return [[prob.var(k)[0] for k in range(prob.n_qubits) if bits[k] and prob.var(k)[1] == t]
+            for t in prob.tiempos]
+
+e = qubo.energias_todas()                      # bit k del índice = qubit k
+E_min = e.min()
+optimos = np.flatnonzero(np.isclose(e, E_min))
+print("E mínima:", E_min, "| total con hojas:", E_min + costo_hojas)
+for idx in optimos:
+    print(decodificar(prob, idx))
+
+
+# ---- Validación: fórmulas cerradas y H(z) = Q(x) ---------------------------
+def cerrada(prob, d, base, A):
+    """cte, h, J de las fórmulas cerradas (orden k = (t-1)N + p)."""
+    N, T, nodos = prob.N, prob.T, prob.nodos
+    D = np.array([[0.0 if i == j else d[i][j] for j in nodos] for i in nodos])
+    I, U = np.eye(N), np.ones((N, N))
+    J = np.zeros((N*T, N*T)); h = np.zeros(N*T)
+    for t in range(T):
+        sl = slice(t*N, (t+1)*N)
+        J[sl, sl] = (A/2) * (U - I)
+        for t2 in range(t+1, T):
+            s2 = slice(t2*N, (t2+1)*N)
+            B = (A/2) * I + (D/4 if t2 == t+1 else 0)
+            J[sl, s2] = B
+            J[s2, sl] = B.T
+    a = D.sum(axis=1)
+    for t in range(1, T+1):
+        for p, i in enumerate(nodos):
+            k = prob.q(i, t)
+            h[k] = A*(2 - (N+T)/2) - (a[p]/4)*((t < T) + (t > 1))
+            if t == T and i != base:
+                h[k] -= d[i][base]/2
+            if t == 1 and i == base:
+                h[k] += A/2
+    cte = ((T-1)/4)*D.sum() + sum(d[i][base] for i in nodos if i != base)/2 \
+          + A*(T*(N**2-3*N+4)/4 + N*(T**2-3*T+4)/4 + 0.5)
+    return cte, h, J
+
+cte, h, J = cerrada(prob, d, base, A)
+print("offset de a_ising vs cte:", offset, cte)          # ambos 182.7
+
+# 1) Espectro completo: H(z) = Q(x) en los 2^16 estados
+n = prob.n_qubits
+bits = (np.arange(2**n, dtype=np.int64)[:, None] >> np.arange(n)) & 1
+Z = 1 - 2*bits
+E_z = cte + Z @ h + 0.5*np.einsum("si,ij,sj->s", Z, J, Z)
+print("máx |H(z) - Q(x)| en los 65536 estados:", np.abs(E_z - qubo.energias_todas()).max())
+
+# 2) Tres rutas: la óptima, una que rompe la regla de lugar y otra la de tiempo
+def x_de(prob, estados):
+    x = np.zeros(prob.n_qubits, dtype=int)
+    for t, nodos_t in enumerate(estados, start=1):
+        for i in nodos_t:
+            x[prob.q(i, t)] = 1
+    return x
+
+casos = {"óptima":    [[1], [2], [8], [5]],
+         "espacial":  [[1], [2], [1], [5]],
+         "temporal":  [[1, 2], [8], [], [5]]}
+for nombre, est in casos.items():
+    x = x_de(prob, est); z = 1 - 2*x
+    print(f"{nombre}: Q = {qubo.energia(x):.3f} | H = {cte + h@z + 0.5*z@J@z:.3f} | "
+          f"h·z = {h@z:.2f} | zJz/2 = {0.5*z@J@z:.2f}")
+
+
+# ---- D · VQE con el ansatz del cuaderno (Statevector) ----------------------
+def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):
+    n = qubo.n
+    e = qubo.energias_todas()
+    qc = ansatz(n, capas)
+    npar = len(qc.parameters)
+    def f(theta):                                  # H es diagonal: E = p · e
+        p = Statevector(qc.assign_parameters(theta)).probabilities()
+        return float(p @ e)
+    rng = np.random.default_rng(semilla)
+    mejor = None
+    for r in range(arranques):
+        x0 = rng.uniform(0, 2 * np.pi, npar)
+        res = minimize(f, x0, method="COBYLA", options={"maxiter": maxiter, "rhobeg": 0.5})
+        print(f"arranque {r}: E = {res.fun:.4f}")
+        if mejor is None or res.fun < mejor.fun:
+            mejor = res
+    p = Statevector(qc.assign_parameters(mejor.x)).probabilities()
+    return mejor, p, e
+
+# Consistencia entre el diagonal y el SparsePauliOp (con un θ cualquiera)
+qc_t = ansatz(prob.n_qubits, 1)
+th = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))
+sv = Statevector(qc_t.assign_parameters(th))
+print(np.isclose(sv.expectation_value(H).real + offset, sv.probabilities() @ e))   # True
+
+res, p, e = vqe(qubo)
+top = int(np.argmax(p))
+print("VQE: E =", res.fun, "| estado más probable:", decodificar(prob, top),
+      "| E(estado) =", e[top], "| P =", p[top])
+print("P de los óptimos exactos:", p[optimos].sum())
+
+
+# ---- E · La ruta de 13 pasos -----------------------------------------------
+def expandir(ruta_nucleo):
+    """Ruta del núcleo (cerrada) -> caminata completa con excursiones a las hojas."""
+    ruta = ruta_nucleo + [ruta_nucleo[0]]
+    camino = [ruta[0]]
+    for a, b in zip(ruta, ruta[1:]):
+        camino += nx.shortest_path(grafo, a, b, weight="weight")[1:]
+    out, hecho = [], set()
+    for v in camino:
+        out.append(v)
+        if v not in hecho:
+            hecho.add(v)
+            for h in hojas:
+                if hub_de[h] == v:
+                    out += [h, v]          # ida y vuelta a la hoja
+    return out
+
+for idx in optimos:
+    ruta_nuc = [t[0] for t in decodificar(prob, int(idx))]
+    ruta = expandir(ruta_nuc)
+    km = sum(grafo[a][b]["weight"] for a, b in zip(ruta, ruta[1:]))
+    print(ruta, "|", len(ruta), "pasos |", round(km, 3), "km")

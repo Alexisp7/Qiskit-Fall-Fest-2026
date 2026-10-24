@@ -48,6 +48,12 @@
     correr: { t: 'Se corre el VQE con el Hamiltoniano armado y se muestran la ruta, la matriz x(i,t), el desglose, la convergencia y si coincide con el exacto.' },
     exacto: { t: 'Revisa los 2<sup>n</sup> estados y los ordena por energía. Con los 128 qubits de la red no se puede: por eso la celda de datos lo deja apagado.', f: ['x* = argmin<sub>x ∈ {0,1}<sup>n</sup></sub> E(x)'] },
     referencia: { t: 'La red es un árbol con un ciclo central 1–2–8–5–1: se recorre el ciclo (5,7 km) y se entra y sale de cada hoja (1,614 km). Son 7,314 km con todas las restricciones en 0. Una búsqueda exacta por programación dinámica confirma que es el óptimo con T = 13.', f: ['5,7 + 2·(0,072 + 0,035 + 0,2 + 0,5) = 7,314 km'] },
+    reduccion: { t: 'Las hojas 3, 4, 6 y 7 solo tienen un camino: cualquier ruta entra y sale por él, así que pagan un costo fijo de ida y vuelta (1,614 km). Queda el núcleo 1, 2, 5, 8, que se completa con las distancias mínimas (cierre métrico). Con 4 lugares y 4 tiempos son 16 qubits.', f: ['mín = mín<sub>núcleo</sub> + 2 Σ<sub>ℓ</sub> w<sub>ℓ,h(ℓ)</sub>', 'd<sub>18</sub> = 1,7 + 1,0 = 2,7 (1 → 5 → 8)'] },
+    cierre: { t: 'Una pieza nueva: el costo de volver a la planta desde el último lugar del núcleo. Reemplaza a terminar_en. Como el grafo reducido es completo, saltos_prohibidos ya no hace falta, y con 4 tiempos para 4 lugares «exactamente una vez» vuelve a ser correcto.', f: ['Q<sub>cierre</sub> = Σ<sub>i≠b</sub> d<sub>i,b</sub> x<sub>i,T</sub>', 'A = 10 > 5,7'] },
+    exactored: { t: 'Con 16 qubits se pueden revisar los 2<sup>16</sup> = 65 536 estados. La energía mínima es 5,7, empatada en dos ciclos que son la misma ruta en sentidos opuestos: 1 → 2 → 8 → 5 y 1 → 5 → 8 → 2. Con las hojas: 7,314 km.', f: ['E<sub>mín</sub> = 5,7 &nbsp;·&nbsp; 5,7 + 1,614 = 7,314 km'] },
+    cerrada: { t: 'Las fórmulas cerradas de c, h y J reproducen el Hamiltoniano que arma a_ising: la misma constante (182,7) y la misma energía en los 65 536 estados, con diferencia de 10<sup>−13</sup>.', f: ['c = 182,7', 'máx |H(z) − Q(x)| ≈ 2·10<sup>−13</sup>'] },
+    vqered: { t: 'El VQE con el ansatz del cuaderno. Como H es diagonal, la energía es p · e: las probabilidades del estado por la energía de cada configuración, igual que el valor esperado del SparsePauliOp.', f: ['E(θ) = Σ<sub>b</sub> p<sub>b</sub>(θ) e<sub>b</sub>'] },
+    expandir: { t: 'La ruta del núcleo se completa: cada tramo se recorre por el camino mínimo y, la primera vez que se pasa por un nodo con hojas, se entra y sale de cada una. Sale la caminata de 13 pasos y 7,314 km.', f: ['1 → 2 → 3 → 2 → 4 → 2 → 8 → 5 → 6 → 5 → 7 → 5 → 1'] },
     lectura: { t: 'Traduce los bits a la ruta: en cada tiempo, el lugar cuyo qubit vale 1. matriz_x ordena los mismos bits como lugares × tiempos.' },
     desglose: { t: 'El aporte de cada pieza para una solución. Con el camino cualquiera: la distancia, más A por cada regla que rompe.' },
     compara: { t: 'Lista las mejores soluciones exactas y su desglose; la celda del VQE termina comparando su energía con la exacta.' }
@@ -296,6 +302,13 @@
       rutaGrafo(g, RREF, 'ej-ruta', nuevo);
       tx(g, 'ej-nota', 446, GY - 16, 'ruta de referencia · 7,314 km').setAttribute('text-anchor', 'end');
     },
+    nucleo: function (g) {   // el núcleo 1, 2, 5, 8 y el cierre métrico 1–8
+      [1, 2, 5, 8].forEach(function (k, n) { el('circle', { 'class': 'ej-nucleo ent', cx: G[k][0], cy: G[k][1], r: 15, style: '--d:' + n * .08 + 's' }, g); });
+      el('line', trazo({ 'class': 'ej-cierre', x1: G[1][0], y1: G[1][1], x2: G[8][0], y2: G[8][1] }, true, .3), g);
+      tx(g, 'ej-nota', (G[1][0] + G[8][0]) / 2, (G[1][1] + G[8][1]) / 2 + 14, 'd₁₈ = 2,7 (1 → 5 → 8)').setAttribute('text-anchor', 'middle');
+      tx(g, 'ej-nota', 24, 172, 'núcleo: 1, 2, 5, 8 (16 qubits)');
+      tx(g, 'ej-nota', 24, 188, 'hojas 3, 4, 6, 7: ida y vuelta fija = 1,614 km');
+    },
     chequeoElegibles: function (g) {
       var s = celda(1, 1), f = celda(1, T), u = celda(P[T - 1], T);
       el('rect', { 'class': 'ej-marca bien ent', x: s[0] - 3, y: s[1] - 3, width: CW + 3, height: CH + 3, rx: 4 }, g);
@@ -477,7 +490,9 @@
     por4: [['circuito', 'cadena'], 'orden'], por5: [['circuito', 'ry2'], 'diag'], por6: ['circuito', 'tamano'],
     vqe1: [['grafo', 1], 'circuito', 'chip'], vqe2: ['circuito', 'thetas', 'medidor'], vqe3: [['grafo', 1], 'curvas'], vqe4: [['grafo', 1], 'histo'],
     correr: [['grafo', 1], 'histo', 'histoSel', 'bitsFila'], exacto: [['grafo', 1], 'puntos'], lectura: ['grafo', 'malla', 'camino'],
-    desglose: [['grafo', 1], 'piezas'], compara: [['grafo', 1], 'comparar']
+    desglose: [['grafo', 1], 'piezas'], compara: [['grafo', 1], 'comparar'],
+    reduccion: ['grafo', 'nucleo'], cierre: ['grafo', 'nucleo'], exactored: [['grafo', 1], 'puntos'], cerrada: ['grafo', 'nucleo'],
+    vqered: [['grafo', 1], 'curvas'], expandir: ['grafo', 'malla', 'rutaRef']
   };
   function dibujarEjemplo(svg, clave, previas) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
@@ -519,7 +534,7 @@
     var nb = document.querySelector('.nb[data-nb="' + etapa + '"]');
     var celdas = (window.CELDAS || {})[etapa];
     if (!nb || !celdas || nb.childElementCount) return;
-    var orden = ['inicializar', 'ansatz', 'solver', 'validacion'], base = 0;
+    var orden = ['inicializar', 'ansatz', 'solver', 'validacion', 'resultado'], base = 0;
     for (var o = 0; o < orden.indexOf(etapa); o++) base += window.CELDAS[orden[o]].filter(function (c) { return c.tipo !== 'md'; }).length;
     var col = document.createElement('div'); col.className = 'nb-celdas';
     var nIn = 0;
@@ -553,6 +568,10 @@
     if (etapa === 'ansatz' && window.montarAnsatzMat) {
       var az = document.createElement('section'); az.className = 'nb-deriva nb-ansatz-mat'; az.id = 'celda-ansatz-mat';
       nb.appendChild(az); window.montarAnsatzMat(az);
+    }
+    if (etapa === 'resultado' && window.montarResultadoMat) {
+      var rs = document.createElement('section'); rs.className = 'nb-deriva nb-resultado-mat'; rs.id = 'celda-resultado-mat';
+      nb.appendChild(rs); window.montarResultadoMat(rs);
     }
     if (etapa === 'solver' && window.montarVQEMat) {
       var vq = document.createElement('section'); vq.className = 'nb-deriva nb-ansatz-mat'; vq.id = 'celda-vqe-mat';

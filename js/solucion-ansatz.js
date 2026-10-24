@@ -493,18 +493,25 @@
       // 2 · la energía
       '<div class="vq-paso"><span>2</span>La energía: el promedio de H(b) en los disparos</div>' +
       '<div class="vq-energia" data-az="energia"></div>' +
+      '<div class="vq-sub">La misma energía con las matrices J y h: los valores esperados ⟨z<sub>k</sub>⟩ y ⟨z<sub>k</sub>z<sub>l</sub>⟩</div>' +
+      '<div class="vq-formula" data-az="formula"></div>' +
+      '<div class="vq-mats2"><div class="vq-bloque"><div class="vq-rot">h<sub>k</sub> y ⟨z<sub>k</sub>⟩</div><table class="vq-tabla vq-num" data-az="h"></table></div>' +
+      '<div class="vq-bloque"><div class="vq-rot">J<sub>kl</sub> (k &lt; l)</div><table class="vq-tabla vq-num" data-az="J"></table></div>' +
+      '<div class="vq-bloque"><div class="vq-rot">⟨z<sub>k</sub>z<sub>l</sub>⟩ (k &lt; l)</div><table class="vq-tabla vq-num" data-az="zz"></table></div></div>' +
+      '<div class="vq-suma" data-az="suma"></div>' +
       '<p class="vq-fund"><b>Fundamento.</b> El valor esperado de Ĥ en el estado es la energía: E(θ) = ⟨ψ(θ)|Ĥ|ψ(θ)⟩ = Σ<sub>b</sub> P(b) H(b). Un chip no la da de una vez: se repite el circuito y se promedia H(b) sobre los disparos. Es el número que el optimizador quiere bajar. (En otros ansatz, como QAOA, Ĥ también entra dentro del circuito como compuertas e<sup>−iγĤ</sup>; en este ansatz solo se mide.)</p>' +
       // 3 · COBYLA
-      '<div class="vq-paso"><span>3</span>COBYLA decide cómo cambiar los ángulos</div>' +
+      '<div class="vq-paso"><span>3</span>COBYLA decide cómo cambiar los ángulos, y el ciclo vuelve a empezar</div>' +
+      '<div class="vq-flujo"><span>θ</span>→<span>ansatz U(θ)</span>→<span>medir Ĥ: P(b) y H(b)</span>→<span>promedio: E(θ) = ⟨Ĥ⟩</span>→<span>COBYLA cambia θ</span>→<span>vuelve a empezar</span></div>' +
       '<div class="vq-cobyla"><div><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg></div><div class="vq-decision" data-az="decision"></div></div>' +
       '<div class="vq-log" data-az="log"></div>' +
       '<p class="vq-fund"><b>Fundamento.</b> COBYLA no usa derivadas. Evalúa E en un símplex de 19 puntos (θ y θ + ρ en cada ángulo) y ajusta un plano: E(θ + d) ≈ E(θ) + g·d. Su pendiente g reemplaza al gradiente. El paso va en contra de g, con largo ρ (la región de confianza): d = −ρ g/|g|. Si la energía baja menos del 10 % de lo que predijo el plano, ρ se reduce a la mitad. Si un vértice del símplex queda muy lejos (η &gt; 2,1ρ) o casi sobre su cara opuesta (σ &lt; 0,25ρ), lo repara con un paso de geometría, también de largo ρ y hacia donde baja el plano. Con 18 ángulos el símplex se deforma seguido: en esta implementación, unas 9 de cada 10 evaluaciones son pasos de geometría. Como en el cuaderno (SciPy), se detiene a las ' + MAXFUN + ' evaluaciones; desde los mismos 200 arranques, sus resultados en el triángulo son equivalentes a los del COBYLA de SciPy (27 contra 22 llegan a E = 12).</p>' +
-      '<div class="vq-paso"><span>4</span>El ciclo completo</div>' +
-      '<div class="vq-flujo"><span>θ</span>→<span>ansatz U(θ)</span>→<span>medir Ĥ: P(b) y H(b)</span>→<span>promedio: E(θ) = ⟨Ĥ⟩</span>→<span>COBYLA cambia θ</span>→<span>vuelve a empezar</span></div></div>';
+      '</div>';
     function $(k) { return caja.querySelector('[data-az="' + k + '"]'); }
     (function listo() {
       if (!window.katex) { setTimeout(listo, 300); return; }
       caja.querySelector('.az-texto').innerHTML = pintarTexto();
+      $('formula').innerHTML = tex(String.raw`E(\boldsymbol\theta) = c + \sum_{k} h_k\,\langle z_k\rangle + \sum_{k<l} J_{kl}\,\langle z_k z_l\rangle, \qquad \langle z_k\rangle = \sum_b P(b)\, z_k(b), \quad \langle z_k z_l\rangle = \sum_b P(b)\, z_k(b)\, z_l(b), \quad z = 1 - 2x`, true);
       $('ampF').innerHTML = [String.raw`|\psi_1\rangle = \bigotimes_{k=1}^{9} R_Y(\theta_k)|0\rangle = \bigotimes_{k=1}^{9}\begin{pmatrix}\cos\frac{\theta_k}{2}\\ \sin\frac{\theta_k}{2}\end{pmatrix}, \qquad \psi_1(b) = \prod_{k=1}^{9} a_k(b_k),\quad a_k(0) = \cos\tfrac{\theta_k}{2},\ a_k(1) = \sin\tfrac{\theta_k}{2}`,
         String.raw`\psi_2(b) = (-1)^{\,b_1b_2 + b_2b_3 + \cdots + b_8b_9}\;\psi_1(b)`,
         String.raw`\psi(b) = \sum_{b'} \Big[\prod_{k=1}^{9} R_Y(\varphi_k)_{b_k b'_k}\Big]\,\psi_2(b'), \qquad R_Y(\varphi) = \begin{pmatrix}\cos\frac{\varphi}{2} & -\sin\frac{\varphi}{2}\\ \sin\frac{\varphi}{2} & \cos\frac{\varphi}{2}\end{pmatrix}`,
@@ -593,11 +600,44 @@
         '<div class="vq-e gris"><span>E exacta</span><b>' + f2(ex) + '</b><small>Σ P(b) · H(b)</small></div>' +
         '<div class="vq-e-txt"><b>E exacta</b> = Σ<sub>b</sub> P(b)·H(b) sobre las 512 configuraciones, con P(b) = ψ(b)² del vector de estado, sin sortear disparos: = ' + terminos + ' + … = ' + f2(ex) + '. Es lo que daría un número infinito de disparos. <b>E medida</b> usa las ' + n + ' veces que salió cada b; difiere de la exacta en ' + f2(em - ex) + ' por el azar de los disparos. COBYLA minimiza la exacta, como Statevector en el cuaderno.</div>';
     }
+    // ⟨z_k⟩ y ⟨z_k z_l⟩ con las probabilidades exactas, en el orden de las matrices (por lugar)
+    function esperados(Pv) {
+      var n = sim.n, ez = new Float64Array(n), ezz = [], z = new Array(n);
+      for (var a = 0; a < n; a++) ezz.push(new Float64Array(n));
+      for (var s = 0; s < Pv.length; s++) {
+        var p = Pv[s]; if (p < 1e-15) continue;
+        for (var q = 0; q < n; q++) z[sim.kDe[q]] = ((s >> q) & 1) ? -1 : 1;
+        for (var a2 = 0; a2 < n; a2++) { ez[a2] += p * z[a2]; for (var b = a2 + 1; b < n; b++) ezz[a2][b] += p * z[a2] * z[b]; }
+      }
+      var hz = 0, jzz = 0;
+      for (var a3 = 0; a3 < n; a3++) { hz += H0.h[a3] * ez[a3]; for (var b2 = a3 + 1; b2 < n; b2++) jzz += H0.J[a3][b2] * ezz[a3][b2]; }
+      return { ez: ez, ezz: ezz, hz: hz, jzz: jzz };
+    }
+    function etq(a) { return 'z<sub>' + (Math.floor(a / 3) + 1) + (a % 3 + 1) + '</sub>'; }   // matrices por lugar: a = (i − 1)T + (t − 1)
+    function pintarMatrices() {
+      var r = esperados(P), n = sim.n, ex = 0;
+      for (var s = 0; s < P.length; s++) ex += P[s] * sim.E[s];
+      var h = '<tr><th></th><th>h<sub>k</sub></th><th>⟨z<sub>k</sub>⟩</th><th>h<sub>k</sub>⟨z<sub>k</sub>⟩</th></tr>';
+      for (var a = 0; a < n; a++) h += '<tr><th>' + etq(a) + '</th><td>' + f2(H0.h[a]) + '</td><td>' + f3(r.ez[a]) + '</td><td>' + f2(H0.h[a] * r.ez[a]) + '</td></tr>';
+      h += '<tr class="vq-tot"><th>Σ</th><td></td><td></td><td>' + f2(r.hz) + '</td></tr>';
+      $('h').innerHTML = h;
+      function mat(val, dec) {
+        var t = '<tr><th></th>' + Array.from({ length: n }, function (_, b) { return '<th>' + etq(b) + '</th>'; }).join('') + '</tr>';
+        for (var a = 0; a < n; a++) { t += '<tr><th>' + etq(a) + '</th>'; for (var b = 0; b < n; b++) t += b > a ? '<td>' + dec(val(a, b)) + '</td>' : '<td class="vq-bajo"></td>'; t += '</tr>'; }
+        return t;
+      }
+      $('J').innerHTML = mat(function (a, b) { return H0.J[a][b]; }, function (v) { return v ? f2(v) : '0'; });
+      $('zz').innerHTML = mat(function (a, b) { return r.ezz[a][b]; }, f3);
+      $('suma').innerHTML =
+        '<div class="vq-linea"><span>Con J y h:</span> E(θ) = c + Σ h<sub>k</sub>⟨z<sub>k</sub>⟩ + Σ<sub>k&lt;l</sub> J<sub>kl</sub>⟨z<sub>k</sub>z<sub>l</sub>⟩ = ' + f2(H0.cte) + ' ' + (r.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.hz)) + ' ' + (r.jzz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.jzz)) + ' = <b>' + f2(H0.cte + r.hz + r.jzz) + '</b></div>' +
+        '<div class="vq-linea"><span>Comprobación:</span> Σ<sub>b</sub> P(b)·H(b) = <b>' + f2(ex) + '</b> · diferencia ' + Math.abs(H0.cte + r.hz + r.jzz - ex).toExponential(1).replace('.', ',') + '</div>' +
+        '<p class="vq-pnota">Cada ⟨z<sub>k</sub>⟩ va de −1 (la variable x<sub>k</sub> siempre vale 1) a +1 (siempre vale 0); ⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 si las dos variables salen siempre iguales y −1 si salen siempre distintas. Las matrices van por lugar, como en Inicializar: z<sub>it</sub> es el lugar i en el tiempo t. Al minimizar, COBYLA mueve estos valores esperados hasta que c + Σh⟨z⟩ + ΣJ⟨zz⟩ llega al mínimo.</p>';
+    }
     function medir() {
       var psi = estado(sim, th);
       P = new Float64Array(psi.length); for (var s = 0; s < psi.length; s++) P[s] = psi[s] * psi[s];
       cuenta = contar(P, DISPAROS);
-      var orden = pintarProb(); pintarAmp(orden); pintarEnergia(orden);
+      var orden = pintarProb(); pintarAmp(orden); pintarEnergia(orden); pintarMatrices();
     }
     // ── 3 · COBYLA ──
     function top(v, n) { return v.map(function (x, j) { return j; }).sort(function (a, b) { return Math.abs(v[b]) - Math.abs(v[a]); }).slice(0, n); }
@@ -625,8 +665,8 @@
       $('decision').innerHTML = h;
     }
     function pintarLog() {
-      $('log').innerHTML = '<table class="vq-tabla vq-tlog"><tr><th>#</th><th>qué hizo</th><th>ρ</th><th>|g|</th><th>baja prevista</th><th>baja real</th><th>E</th></tr>' +
-        (log.length ? log.slice(-8).reverse().map(function (r) { return '<tr class="' + (r.mejora ? 'vq-mejora' : '') + '"><td>' + r.k + '</td><td>' + r.que + '</td><td>' + r.rho + '</td><td>' + r.gn + '</td><td>' + r.pred + '</td><td>' + r.real + '</td><td>' + f2(r.f) + '</td></tr>'; }).join('') : '<tr><td colspan="7" class="vq-vacio">Las últimas 8 iteraciones aparecerán aquí.</td></tr>') + '</table>';
+      $('log').innerHTML = '<table class="vq-tabla vq-tlog"><tr><th>#</th><th>qué hizo</th><th>ρ</th><th>|g|</th><th>baja prevista</th><th>baja real</th><th>Σ h⟨z⟩</th><th>Σ J⟨zz⟩</th><th>E = c + …</th></tr>' +
+        (log.length ? log.slice(-8).reverse().map(function (r) { return '<tr class="' + (r.mejora ? 'vq-mejora' : '') + '"><td>' + r.k + '</td><td>' + r.que + '</td><td>' + r.rho + '</td><td>' + r.gn + '</td><td>' + r.pred + '</td><td>' + r.real + '</td><td>' + r.hz + '</td><td>' + r.jzz + '</td><td>' + f2(r.f) + '</td></tr>'; }).join('') : '<tr><td colspan="9" class="vq-vacio">Las últimas 8 iteraciones aparecerán aquí.</td></tr>') + '</table>';
     }
     function pintarCurva() {
       var svg = caja.querySelector('.az-curva'), NS = 'http://www.w3.org/2000/svg';
@@ -662,7 +702,8 @@
       ultima = info;
       if (info.tipo !== 'reduce') evals.push({ f: info.f });
       var que = info.tipo === 'simplex' ? (info.i === 0 ? 'símplex: θ₀' : 'símplex: θ₀ + ρ en ' + nomParam(info.i - 1)) : info.tipo === 'geometria' ? 'geometría' : info.tipo === 'reduce' ? 'ρ a la mitad' : (info.fallo ? 'paso · no rinde' : 'paso · baja E');
-      log.push({ k: info.k, que: que, rho: fr(info.rho), gn: info.gn != null ? f2(info.gn) : '—', pred: info.pred != null ? f2(info.pred) : '—', real: info.f0 != null ? f2(info.f0 - info.f) : '—', f: info.f, mejora: info.tipo === 'paso' && info.mejora });
+      var pz = null; if (info.tipo !== 'reduce') { var ps = estado(sim, th), Pi = new Float64Array(ps.length); for (var s9 = 0; s9 < ps.length; s9++) Pi[s9] = ps[s9] * ps[s9]; pz = esperados(Pi); }
+      log.push({ hz: pz ? f2(pz.hz) : '—', jzz: pz ? f2(pz.jzz) : '—', k: info.k, que: que, rho: fr(info.rho), gn: info.gn != null ? f2(info.gn) : '—', pred: info.pred != null ? f2(info.pred) : '—', real: info.f0 != null ? f2(info.f0 - info.f) : '—', f: info.f, mejora: info.tipo === 'paso' && info.mejora });
       return true;
     }
     function correr() {

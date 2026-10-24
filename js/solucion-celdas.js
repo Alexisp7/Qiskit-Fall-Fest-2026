@@ -212,5 +212,49 @@ window.CELDAS = {
    "clave": false,
    "tipo": "code"
   }
+ ],
+ "resultado": [
+  {
+   "id": "reduccion",
+   "titulo": "A · Reducción: hojas colapsadas y cierre métrico",
+   "clave": true,
+   "tipo": "code",
+   "codigo": "# ---------- Reducción: hojas colapsadas + cierre métrico ----------\ngrafo = nx.Graph()\ngrafo.add_weighted_edges_from(aristas)\n\nhojas  = [v for v in grafo.nodes if grafo.degree(v) == 1]      # 3, 4, 6, 7\nnucleo = sorted(v for v in grafo.nodes if v not in hojas)       # 1, 2, 5, 8\n\n# Costo fijo de las excursiones: ida y vuelta de cada hoja a su nodo vecino\nhub_de = {h: next(iter(grafo[h])) for h in hojas}\ncosto_hojas = sum(2 * grafo[h][hub_de[h]][\"weight\"] for h in hojas)   # 1.614\n\n# Cierre métrico: distancia mínima entre pares del núcleo (grafo completo)\nd = dict(nx.all_pairs_dijkstra_path_length(grafo))\ngrafo_red = nx.Graph()\nfor i, j in itertools.combinations(nucleo, 2):\n    grafo_red.add_edge(i, j, weight=d[i][j])\n\nT_red = len(nucleo)              # 4 tiempos\nA = 10                           # cualquier violación cuesta >= A; la mejor ruta válida cuesta 5.7\nbase = 1\nprob = Problema(grafo_red, T=T_red)\nprint(prob.n_qubits, \"qubits | núcleo:\", nucleo, \"| hojas:\", hojas, \"| costo hojas:\", costo_hojas)\n"
+  },
+  {
+   "id": "cierre",
+   "titulo": "B · Pieza de cierre y Hamiltoniano reducido",
+   "clave": false,
+   "tipo": "code",
+   "codigo": "def coste_cierre(prob, base, d):\n    \"\"\"Σ_i d(i, base) · x(i, T): costo de volver a la base desde el último lugar.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for i in prob.nodos:\n        if i != base:\n            Q.agregar_lineal(prob.q(i, prob.T), d[i][base])\n    return Q\n\npiezas = {\n    \"coste_distancia\":     (1.0, coste_distancia(prob)),\n    \"coste_cierre\":        (1.0, coste_cierre(prob, base, d)),\n    \"un_lugar_por_tiempo\": (A,   un_lugar_por_tiempo(prob)),\n    \"visitar_una_vez\":     (A,   visitar_una_vez(prob)),\n    \"empezar_en_1\":        (A,   empezar_en(prob, base)),\n}\n# saltos_prohibidos y terminar_en ya no hacen falta: el grafo es completo y el cierre es un costo.\nqubo = armar_hamiltoniano(piezas)\nH, offset = qubo.a_ising()\n"
+  },
+  {
+   "id": "exactored",
+   "titulo": "C · Exacto: los 65 536 estados",
+   "clave": true,
+   "tipo": "code",
+   "codigo": "def decodificar(prob, idx):\n    bits = [(idx >> k) & 1 for k in range(prob.n_qubits)]\n    return [[prob.var(k)[0] for k in range(prob.n_qubits) if bits[k] and prob.var(k)[1] == t]\n            for t in prob.tiempos]\n\ne = qubo.energias_todas()                      # bit k del índice = qubit k\nE_min = e.min()\noptimos = np.flatnonzero(np.isclose(e, E_min))\nprint(\"E mínima:\", E_min, \"| total con hojas:\", E_min + costo_hojas)\nfor idx in optimos:\n    print(decodificar(prob, idx))\n"
+  },
+  {
+   "id": "cerrada",
+   "titulo": "Validación: fórmulas cerradas y H(z) = Q(x)",
+   "clave": false,
+   "tipo": "code",
+   "codigo": "def cerrada(prob, d, base, A):\n    \"\"\"cte, h, J de las fórmulas cerradas (orden k = (t-1)N + p).\"\"\"\n    N, T, nodos = prob.N, prob.T, prob.nodos\n    D = np.array([[0.0 if i == j else d[i][j] for j in nodos] for i in nodos])\n    I, U = np.eye(N), np.ones((N, N))\n    J = np.zeros((N*T, N*T)); h = np.zeros(N*T)\n    for t in range(T):\n        sl = slice(t*N, (t+1)*N)\n        J[sl, sl] = (A/2) * (U - I)\n        for t2 in range(t+1, T):\n            s2 = slice(t2*N, (t2+1)*N)\n            B = (A/2) * I + (D/4 if t2 == t+1 else 0)\n            J[sl, s2] = B\n            J[s2, sl] = B.T\n    a = D.sum(axis=1)\n    for t in range(1, T+1):\n        for p, i in enumerate(nodos):\n            k = prob.q(i, t)\n            h[k] = A*(2 - (N+T)/2) - (a[p]/4)*((t < T) + (t > 1))\n            if t == T and i != base:\n                h[k] -= d[i][base]/2\n            if t == 1 and i == base:\n                h[k] += A/2\n    cte = ((T-1)/4)*D.sum() + sum(d[i][base] for i in nodos if i != base)/2 \\\n          + A*(T*(N**2-3*N+4)/4 + N*(T**2-3*T+4)/4 + 0.5)\n    return cte, h, J\n\ncte, h, J = cerrada(prob, d, base, A)\nprint(\"offset de a_ising vs cte:\", offset, cte)          # ambos 182.7\n\n# 1) Espectro completo: H(z) = Q(x) en los 2^16 estados\nn = prob.n_qubits\nbits = (np.arange(2**n, dtype=np.int64)[:, None] >> np.arange(n)) & 1\nZ = 1 - 2*bits\nE_z = cte + Z @ h + 0.5*np.einsum(\"si,ij,sj->s\", Z, J, Z)\nprint(\"máx |H(z) - Q(x)| en los 65536 estados:\", np.abs(E_z - qubo.energias_todas()).max())\n\n# 2) Tres rutas: la óptima, una que rompe la regla de lugar y otra la de tiempo\ndef x_de(prob, estados):\n    x = np.zeros(prob.n_qubits, dtype=int)\n    for t, nodos_t in enumerate(estados, start=1):\n        for i in nodos_t:\n            x[prob.q(i, t)] = 1\n    return x\n\ncasos = {\"óptima\":    [[1], [2], [8], [5]],\n         \"espacial\":  [[1], [2], [1], [5]],\n         \"temporal\":  [[1, 2], [8], [], [5]]}\nfor nombre, est in casos.items():\n    x = x_de(prob, est); z = 1 - 2*x\n    print(f\"{nombre}: Q = {qubo.energia(x):.3f} | H = {cte + h@z + 0.5*z@J@z:.3f} | \"\n          f\"h·z = {h@z:.2f} | zJz/2 = {0.5*z@J@z:.2f}\")\n"
+  },
+  {
+   "id": "vqered",
+   "titulo": "D · VQE con el ansatz del cuaderno (Statevector)",
+   "clave": true,
+   "tipo": "code",
+   "codigo": "def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):\n    n = qubo.n\n    e = qubo.energias_todas()\n    qc = ansatz(n, capas)\n    npar = len(qc.parameters)\n    def f(theta):                                  # H es diagonal: E = p · e\n        p = Statevector(qc.assign_parameters(theta)).probabilities()\n        return float(p @ e)\n    rng = np.random.default_rng(semilla)\n    mejor = None\n    for r in range(arranques):\n        x0 = rng.uniform(0, 2 * np.pi, npar)\n        res = minimize(f, x0, method=\"COBYLA\", options={\"maxiter\": maxiter, \"rhobeg\": 0.5})\n        print(f\"arranque {r}: E = {res.fun:.4f}\")\n        if mejor is None or res.fun < mejor.fun:\n            mejor = res\n    p = Statevector(qc.assign_parameters(mejor.x)).probabilities()\n    return mejor, p, e\n\n# Consistencia entre el diagonal y el SparsePauliOp (con un θ cualquiera)\nqc_t = ansatz(prob.n_qubits, 1)\nth = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))\nsv = Statevector(qc_t.assign_parameters(th))\nprint(np.isclose(sv.expectation_value(H).real + offset, sv.probabilities() @ e))   # True\n\nres, p, e = vqe(qubo)\ntop = int(np.argmax(p))\nprint(\"VQE: E =\", res.fun, \"| estado más probable:\", decodificar(prob, top),\n      \"| E(estado) =\", e[top], \"| P =\", p[top])\nprint(\"P de los óptimos exactos:\", p[optimos].sum())\n"
+  },
+  {
+   "id": "expandir",
+   "titulo": "E · La ruta de 13 pasos",
+   "clave": true,
+   "tipo": "code",
+   "codigo": "def expandir(ruta_nucleo):\n    \"\"\"Ruta del núcleo (cerrada) -> caminata completa con excursiones a las hojas.\"\"\"\n    ruta = ruta_nucleo + [ruta_nucleo[0]]\n    camino = [ruta[0]]\n    for a, b in zip(ruta, ruta[1:]):\n        camino += nx.shortest_path(grafo, a, b, weight=\"weight\")[1:]\n    out, hecho = [], set()\n    for v in camino:\n        out.append(v)\n        if v not in hecho:\n            hecho.add(v)\n            for h in hojas:\n                if hub_de[h] == v:\n                    out += [h, v]          # ida y vuelta a la hoja\n    return out\n\nfor idx in optimos:\n    ruta_nuc = [t[0] for t in decodificar(prob, int(idx))]\n    ruta = expandir(ruta_nuc)\n    km = sum(grafo[a][b][\"weight\"] for a, b in zip(ruta, ruta[1:]))\n    print(ruta, \"|\", len(ruta), \"pasos |\", round(km, 3), \"km\")\n"
+  }
  ]
 };
