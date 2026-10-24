@@ -1778,6 +1778,18 @@
     /* dirección del recorrido */
     .tm-dir { stroke: #8C6D33; stroke-width: 1.6; }
     .tm-punta { fill: #8C6D33; }
+    /* sumatoria expandida: el valor de cada x_{i,t} encima, sin tachados; los
+       pares que valen 0 quedan transparentes y los que suman se ven normales */
+    .tm-terminos { line-height: 2.2; row-gap: 0; }
+    .tm-par.nulo::after { content: none; }
+    .tm-par.nulo { opacity: .32; color: var(--black); }
+    .tm-par.nulo .tm-d, .tm-term { color: var(--black); }
+    .tm-d.on, .tm-term.on { background: none; padding: 0; }
+    .tm-term.on { font-weight: 600; }
+    .tm-d.on { color: #8C6D33; font-weight: 700; }
+    .tm-x { position: relative; display: inline-block; }
+    .tm-x-val { position: absolute; left: 50%; top: -.95em; transform: translateX(-50%); font-family: 'Space Mono', monospace; font-style: normal; font-size: 10px; line-height: 1; color: #9a958c; }
+    .tm-x-val.uno { color: #8C6D33; font-weight: 700; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1892,6 +1904,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=12"></script>
+  <script src="js/problemas.js?v=13"></script>
 </body>
 </html>

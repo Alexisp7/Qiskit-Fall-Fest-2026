@@ -87,6 +87,8 @@
     var r = RUTAS[elegida], B = Number(document.getElementById('tm-b').value) || 0;
     function x(i, t) { return r[t - 1] === L[i - 1] ? 1 : 0; }
     function xs(i, t) { return 'x' + sub(i + ',' + t); }
+    // x_{i,t} con su valor (0 o 1) escrito encima, en gris
+    function xv(i, t) { var v = x(i, t); return '<span class="tm-x"><span class="tm-x-val' + (v ? ' uno' : '') + '">' + v + '</span>' + xs(i, t) + '</span>'; }
     var a = IDX[r[0]], b = IDX[r[1]], c = IDX[r[2]];
     var v1 = d(r[0], r[1]), v2 = d(r[1], r[2]), total = B * (v1 + v2);
     var abre = B === 1 ? '' : B + ' (', cierra = B === 1 ? '' : ')';
@@ -101,7 +103,7 @@
       for (var t = 1; t < T; t++) {
         var on = x(i, t) === 1 && x(j, t + 1) === 1;
         if (on) vivo = true;
-        terms.push('<span class="tm-term' + (on ? ' on' : '') + '">' + xs(i, t) + xs(j, t + 1) + '</span>');
+        terms.push('<span class="tm-term' + (on ? ' on' : '') + '">' + xv(i, t) + xv(j, t + 1) + '</span>');
       }
       html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span>(' + terms.join(' + ') + ')</div>';
     }
