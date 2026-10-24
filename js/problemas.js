@@ -40,22 +40,23 @@
     enRuta[[r[0], r[1]].sort().join('')] = 1; enRuta[[r[1], r[2]].sort().join('')] = 2;
     [['A', 'B'], ['B', 'C'], ['A', 'C']].forEach(function (p) {
       var a = POS[p[0]], b = POS[p[1]], k = p.join('');
+      // las aristas de la ruta se dibujan solo con su resalte y su flecha
       if (enRuta[k]) el('line', { 'class': 'tm-resalte', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
-      el('line', { 'class': 'tm-arista', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+      else el('line', { 'class': 'tm-arista', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
       var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey);
       var lado = k === 'AC' ? -1 : 1; // cada peso por fuera del triángulo
       el('text', { 'class': 'tm-peso', x: mx + lado * ey / l * 16, y: my - lado * ex / l * 16 + 6 }).textContent = d(p[0], p[1]);
     });
     // flechas del recorrido: de cada nodo al siguiente, cortadas en el borde del círculo
     [[r[0], r[1]], [r[1], r[2]]].forEach(function (tr) {
-      var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 21;
+      var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 27;
       el('line', { 'class': 'tm-dir', x1: a[0] + ex / l * R0, y1: a[1] + ey / l * R0, x2: b[0] - ex / l * (R0 + 2), y2: b[1] - ey / l * (R0 + 2), 'marker-end': 'url(#tm-flecha)' });
     });
     L.forEach(function (k, n) {
       var p = POS[k], paso = r.indexOf(k) + 1;
-      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 19 });
-      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 10 }).textContent = k;
-      var t = el('text', { 'class': 'tm-xit', x: p[0], y: p[1] + 4 });
+      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 24 });
+      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 15 }).textContent = k;
+      var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 });
       t.appendChild(document.createTextNode('x'));
       var sb = el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t);
       sb.textContent = (n + 1) + ',' + paso;
@@ -88,7 +89,7 @@
     function x(i, t) { return r[t - 1] === L[i - 1] ? 1 : 0; }
     function xs(i, t) { return 'x' + sub(i + ',' + t); }
     // x_{i,t} con su valor (0 o 1) escrito encima, en gris
-    function xv(i, t) { var v = x(i, t); return '<span class="tm-x' + (v ? '' : ' cero') + '"><span class="tm-x-val' + (v ? ' uno' : '') + '">' + v + '</span>' + xs(i, t) + '</span>'; }
+    function xv(i, t) { var v = x(i, t); return '<span class="tm-x' + (v ? '' : ' cero') + '"><span class="tm-x-val' + (v ? ' uno' : '') + '">' + v + '</span><span class="tm-x-glifo">' + xs(i, t) + '</span></span>'; }
     var a = IDX[r[0]], b = IDX[r[1]], c = IDX[r[2]];
     var v1 = d(r[0], r[1]), v2 = d(r[1], r[2]), total = B * (v1 + v2);
     var abre = B === 1 ? '' : B + ' (', cierra = B === 1 ? '' : ')';
@@ -105,7 +106,7 @@
         if (on) vivo = true;
         terms.push('<span class="tm-term' + (on ? ' on' : '') + '">' + xv(i, t) + xv(j, t + 1) + '</span>');
       }
-      html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span>(' + terms.join(' + ') + ')</div>';
+      html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span><span class="tm-par-p">(</span>' + terms.join('<span class="tm-mas">+</span>') + '<span class="tm-par-p">)</span></div>';
     }
     outT.innerHTML = html;
     // la ruta como matriz x_{i,t}: de aquí sale la sumatoria de la derecha
