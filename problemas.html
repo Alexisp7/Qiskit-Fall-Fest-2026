@@ -1771,6 +1771,13 @@
       .tm-grafo-fila { flex-direction: column; align-items: stretch; }
       .tm-abajo { grid-template-columns: 1fr; }
     }
+    /* nodos: x_{i,t} al frente y la letra de la ubicación en gris, de fondo */
+    .tm-letra-fondo { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700; text-anchor: middle; fill: #1B2A4A; opacity: .2; }
+    .tm-xit { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; font-weight: 600; text-anchor: middle; fill: #1B2A4A; }
+    .tm-xit-sub { font-size: 9.5px; font-style: normal; }
+    /* dirección del recorrido */
+    .tm-dir { stroke: #8C6D33; stroke-width: 1.6; }
+    .tm-punta { fill: #8C6D33; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1814,9 +1821,9 @@
               <div class="tm-sub">Usando rutas pequeñas</div>
               <div class="tm-grafo-fila">
                 <div class="tm-distancias">
-                  <label>d<sub>AB</sub> = <input type="number" min="0" step="1" value="5" data-par="AB" aria-label="Distancia de A a B"></label>
-                  <label>d<sub>BC</sub> = <input type="number" min="0" step="1" value="7" data-par="BC" aria-label="Distancia de B a C"></label>
-                  <label>d<sub>AC</sub> = <input type="number" min="0" step="1" value="9" data-par="AC" aria-label="Distancia de A a C"></label>
+                  <label>d<sub>12</sub> = <input type="number" min="0" step="1" value="5" data-par="AB" aria-label="Distancia de A a B"></label>
+                  <label>d<sub>23</sub> = <input type="number" min="0" step="1" value="7" data-par="BC" aria-label="Distancia de B a C"></label>
+                  <label>d<sub>13</sub> = <input type="number" min="0" step="1" value="9" data-par="AC" aria-label="Distancia de A a C"></label>
                   <label class="tm-b">B = <input type="number" min="0" step="0.5" value="1" id="tm-b" aria-label="Peso B"></label>
                 </div>
                 <svg class="tm-grafo" id="tm-grafo" viewBox="0 0 300 200" aria-label="Triángulo A, B, C con sus distancias"></svg>
@@ -1885,6 +1892,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=11"></script>
+  <script src="js/problemas.js?v=12"></script>
 </body>
 </html>

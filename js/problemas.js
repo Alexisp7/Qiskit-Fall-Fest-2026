@@ -27,10 +27,15 @@
   function coste(r) { return d(r[0], r[1]) + d(r[1], r[2]); }
   var elegida = 0;
 
-  // ── triángulo con la ruta elegida resaltada ──
+  // ── triángulo dirigido: la ruta elegida lleva flechas en el sentido del
+  // recorrido (A→B→C y C→B→A cuestan lo mismo, pero van al revés). Cada nodo
+  // muestra su x_{i,t} (ubicación i visitada en el paso t) y, en gris, su letra
   function grafo() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var r = RUTAS[elegida];
+    var defs = el('defs', {});
+    var m = el('marker', { id: 'tm-flecha', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'tm-punta' }, m);
     var enRuta = {};
     enRuta[[r[0], r[1]].sort().join('')] = 1; enRuta[[r[1], r[2]].sort().join('')] = 2;
     [['A', 'B'], ['B', 'C'], ['A', 'C']].forEach(function (p) {
@@ -41,11 +46,19 @@
       var lado = k === 'AC' ? -1 : 1; // cada peso por fuera del triángulo
       el('text', { 'class': 'tm-peso', x: mx + lado * ey / l * 16, y: my - lado * ex / l * 16 + 6 }).textContent = d(p[0], p[1]);
     });
-    L.forEach(function (k) {
+    // flechas del recorrido: de cada nodo al siguiente, cortadas en el borde del círculo
+    [[r[0], r[1]], [r[1], r[2]]].forEach(function (tr) {
+      var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 21;
+      el('line', { 'class': 'tm-dir', x1: a[0] + ex / l * R0, y1: a[1] + ey / l * R0, x2: b[0] - ex / l * (R0 + 2), y2: b[1] - ey / l * (R0 + 2), 'marker-end': 'url(#tm-flecha)' });
+    });
+    L.forEach(function (k, n) {
       var p = POS[k], paso = r.indexOf(k) + 1;
-      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 18 });
-      el('text', { 'class': 'tm-letra', x: p[0], y: p[1] + 6 }).textContent = k;
-      el('text', { 'class': 'tm-paso', x: p[0], y: p[1] + 34 }).textContent = 't=' + paso;
+      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 19 });
+      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 10 }).textContent = k;
+      var t = el('text', { 'class': 'tm-xit', x: p[0], y: p[1] + 4 });
+      t.appendChild(document.createTextNode('x'));
+      var sb = el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t);
+      sb.textContent = (n + 1) + ',' + paso;
     });
   }
 
