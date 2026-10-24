@@ -1684,51 +1684,65 @@
       .tm-terminos { grid-template-columns: 1fr; }
       .tm-rutas { grid-template-columns: 1fr; }
     }
-    /* sin huecos: rutas junto al grafo y la tabla sol junto a los términos */
-    .problemas-wrap .section-header { margin-bottom: 18px; }
-    .tm-medio { grid-template-columns: auto auto; justify-content: start; column-gap: 56px; }
-    .tm-rutas { grid-template-columns: repeat(2, 230px); }
-    .tm-detalle { grid-template-columns: auto auto; justify-content: start; column-gap: 64px; }
-    .tm-coste { grid-template-columns: auto auto; justify-content: start; }
-    /* una sola vista: el planteamiento a la izquierda y el cálculo a la derecha */
-    @media (min-width: 1000px) {
-      .problemas-wrap { padding-top: 22px !important; }
-      .problemas-wrap .section-header { margin-bottom: 10px; }
-      .tm { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "tit tit" "coste detalle" "medio detalle"; column-gap: 48px; align-items: start; margin-bottom: 20px; }
-      .tm-titulo { grid-area: tit; margin-bottom: 14px; font-size: 22px; }
-      .tm-coste { grid-area: coste; grid-template-columns: auto; gap: 8px; margin-bottom: 14px; }
-      .tm-formula { font-size: 30px; }
-      .tm-x-def { font-size: 22px; }
-      .tm-llave { font-size: 15px; line-height: 1.4; }
-      .tm-castigo { margin-top: 4px; font-size: 11.5px; }
-      .tm-medio { grid-area: medio; grid-template-columns: auto; row-gap: 10px; margin-bottom: 0; }
-      .tm-sub { font-size: 20px; margin-bottom: 4px; }
-      .tm-grafo { max-width: 250px; }
-      .tm-distancias { font-size: 19px; gap: 2px; }
-      .tm-distancias input { font-size: 19px; }
-      .tm-ruta button { padding: 6px 10px; }
-      .tm-rutas { gap: 6px; }
-      .tm-detalle { grid-area: detalle; grid-template-columns: auto; row-gap: 14px; border-top: none; padding-top: 0; padding-left: 40px; border-left: 1px solid #E5E2DC; align-self: stretch; }
-      .tm-q { font-size: 24px; }
-      .tm-terminos { font-size: 17px; gap: 2px 20px; }
-      .tm-tabla { font-size: 18px; }
-      .tm-tabla th, .tm-tabla td { padding: 3px 12px; }
+    /* ── nuevo orden: grafo grande arriba con las rutas al lado; abajo las d
+       junto a las sumatorias y la tabla de solución grande ── */
+    .tm { display: block; }
+    .problemas-wrap { padding-top: 22px !important; }
+    .problemas-wrap .section-header { margin-bottom: 8px; }
+    .tm-titulo { margin-bottom: 12px; font-size: 22px; }
+    .tm-arriba { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+    .tm-grafo-caja .tm-sub { margin-bottom: 0; }
+    .tm-grafo { width: 100%; max-width: 520px; height: auto; display: block; margin: 0 auto; }
+    .tm-lado .tm-recuadro { display: inline-block; margin-top: 10px; padding: 12px 22px 10px; }
+    .tm-lado .tm-formula { font-size: 30px; }
+    .tm-lado .tm-x-def { font-size: 22px; margin-top: 10px; }
+    .tm-lado .tm-llave { font-size: 15px; line-height: 1.4; }
+    .tm-lado .tm-castigo { margin: 4px 0 12px; font-size: 11.5px; }
+    .tm-lado .tm-sub { font-size: 20px; margin-bottom: 4px; }
+    .tm-rutas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .tm-ruta button { padding: 6px 10px; }
+    .tm-abajo { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: start; border-top: 1px solid #E5E2DC; padding-top: 14px; margin-top: 8px; }
+    .tm-dcalc { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; }
+    .tm-distancias { font-size: 21px; gap: 4px; padding-right: 24px; border-right: 1px solid #E5E2DC; }
+    .tm-distancias input { font-size: 21px; }
+    .tm-q { font-size: 25px; margin-bottom: 8px; }
+    .tm-terminos { font-size: 17px; gap: 2px 22px; }
+    /* tabla de solución, más grande */
+    .tm-sol .tm-sub { font-size: 22px; margin-bottom: 2px; }
+    .tm-tabla { font-size: 24px; }
+    .tm-tabla th { padding: 4px 16px; font-size: 20px; }
+    .tm-tabla td { padding: 6px 20px; min-width: 30px; }
+    @media (min-width: 1000px) and (max-height: 760px) {
+      .tm-grafo { max-width: 430px; }
+      .tm-lado .tm-formula { font-size: 27px; }
+      .tm-q { font-size: 22px; }
+      .tm-terminos { font-size: 16px; }
+      .tm-tabla { font-size: 21px; }
+      .tm-tabla td { padding: 3px 18px; }
+      .tm-tabla th { padding: 2px 14px; }
     }
+    @media (max-width: 900px) {
+      .tm-arriba, .tm-abajo, .tm-dcalc { grid-template-columns: 1fr; gap: 16px; }
+      .tm-distancias { border-right: none; padding-right: 0; }
+    }
+    /* ajuste fino para que todo quepa en una vista */
     @media (min-width: 1000px) {
-      .tm { grid-template-areas: "tit tit" "coste posibles" "pequenas detalle"; }
-      .tm-medio { display: contents; }
-      .tm-pequenas { grid-area: pequenas; }
-      .tm-posibles { grid-area: posibles; padding-left: 40px; border-left: 1px solid #E5E2DC; padding-bottom: 14px; }
-      .tm-detalle { align-content: start; align-self: start; }
+      .tm-grafo { max-width: 470px; }
+      .tm-lado .tm-recuadro { margin-top: 4px; }
+      .tm-lado .tm-x-def { margin-top: 6px; }
+      .tm-lado .tm-castigo { margin-bottom: 8px; }
+      .tm-tabla { font-size: 22px; }
+      .tm-tabla th { padding: 2px 16px; font-size: 18px; }
+      .tm-tabla td { padding: 3px 20px; }
+      .tm-abajo { padding-top: 10px; margin-top: 4px; }
     }
     @media (min-width: 1000px) and (max-height: 760px) {
-      .tm-titulo { margin-bottom: 8px; }
-      .tm-q { font-size: 22px; margin-bottom: 6px; }
-      .tm-terminos { font-size: 16px; }
-      .tm-detalle { row-gap: 8px; }
-      .tm-tabla { font-size: 16px; }
-      .tm-tabla th, .tm-tabla td { padding: 1px 10px; }
-      .tm-posibles { padding-bottom: 8px; }
+      .tm-grafo { max-width: 400px; }
+      .tm-lado .tm-formula { font-size: 26px; }
+      .tm-lado .tm-castigo { display: none; }
+      .tm-tabla { font-size: 20px; }
+      .tm-tabla td { padding: 2px 18px; }
+      .tm-titulo { margin-bottom: 6px; }
     }
 </style>
   <script>
@@ -1765,40 +1779,39 @@
     <div class="tm entra" style="--i:4">
       <div class="tm-titulo"><span></span>Ejemplo rápido: trayectoria mínima<span></span></div>
 
-      <div class="tm-coste">
-        <div class="tm-recuadro">
-          <div class="tm-rot">Función de coste</div>
-          <div class="tm-formula">Q<sub>C</sub> = B <span class="tm-sigma"><sup>N</sup>Σ<sub>i,j</sub></span> d<sub>ij</sub> <span class="tm-sigma"><sup>T−1</sup>Σ<sub>t=1</sub></span> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
-        </div>
-        <div class="tm-x">
-          <div class="tm-x-def">x<sub>i,t</sub> = <span class="tm-llave"><span>1 &nbsp;si el camión visita la ubicación <i>i</i> en el paso <i>t</i></span><span>0 &nbsp;si no</span></span></div>
-          <p class="tm-castigo">* Las reglas (cada ubicación una vez y una sola por paso) se suman como castigos. Una ruta válida los evita naturalmente, así que solo queda el término de distancias.</p>
-        </div>
-      </div>
-
-      <div class="tm-medio">
-        <div class="tm-pequenas">
+      <!-- arriba: el grafo grande y, a su lado, la función de coste y las rutas posibles -->
+      <div class="tm-arriba">
+        <div class="tm-grafo-caja">
           <div class="tm-sub">Usando rutas pequeñas</div>
-          <div class="tm-pequenas-fila">
-            <div class="tm-distancias">
-              <label>d<sub>AB</sub> = <input type="number" min="0" step="1" value="5" data-par="AB" aria-label="Distancia de A a B"></label>
-              <label>d<sub>BC</sub> = <input type="number" min="0" step="1" value="7" data-par="BC" aria-label="Distancia de B a C"></label>
-              <label>d<sub>AC</sub> = <input type="number" min="0" step="1" value="9" data-par="AC" aria-label="Distancia de A a C"></label>
-              <label class="tm-b">B = <input type="number" min="0" step="0.5" value="1" id="tm-b" aria-label="Peso B"></label>
-            </div>
-            <svg class="tm-grafo" id="tm-grafo" viewBox="0 0 300 200" aria-label="Triángulo A, B, C con sus distancias"></svg>
+          <svg class="tm-grafo" id="tm-grafo" viewBox="0 0 300 200" aria-label="Triángulo A, B, C con sus distancias"></svg>
+        </div>
+        <div class="tm-lado">
+          <div class="tm-recuadro">
+            <div class="tm-rot">Función de coste</div>
+            <div class="tm-formula">Q<sub>C</sub> = B <span class="tm-sigma"><sup>N</sup>Σ<sub>i,j</sub></span> d<sub>ij</sub> <span class="tm-sigma"><sup>T−1</sup>Σ<sub>t=1</sub></span> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
+          </div>
+          <div class="tm-x-def">x<sub>i,t</sub> = <span class="tm-llave"><span>1 &nbsp;si el camión visita la ubicación <i>i</i> en el paso <i>t</i></span><span>0 &nbsp;si no</span></span></div>
+          <p class="tm-castigo">* Las reglas (cada ubicación una vez y una sola por paso) se suman como castigos; una ruta válida los evita naturalmente.</p>
+          <div class="tm-posibles">
+            <div class="tm-sub">Posibles rutas <span class="tm-sub-nota">· 3! = 6 órdenes, elige una</span></div>
+            <ol class="tm-rutas" id="tm-rutas"></ol>
           </div>
         </div>
-        <div class="tm-posibles">
-          <div class="tm-sub">Posibles rutas <span class="tm-sub-nota">· 3! = 6 órdenes, elige una</span></div>
-          <ol class="tm-rutas" id="tm-rutas"></ol>
-        </div>
       </div>
 
-      <div class="tm-detalle" aria-live="polite">
-        <div class="tm-calc">
-          <div class="tm-q" id="tm-q"></div>
-          <div class="tm-terminos" id="tm-terminos"></div>
+      <!-- abajo: las distancias d junto a las sumatorias, y la tabla de solución -->
+      <div class="tm-abajo" aria-live="polite">
+        <div class="tm-dcalc">
+          <div class="tm-distancias">
+            <label>d<sub>AB</sub> = <input type="number" min="0" step="1" value="5" data-par="AB" aria-label="Distancia de A a B"></label>
+            <label>d<sub>BC</sub> = <input type="number" min="0" step="1" value="7" data-par="BC" aria-label="Distancia de B a C"></label>
+            <label>d<sub>AC</sub> = <input type="number" min="0" step="1" value="9" data-par="AC" aria-label="Distancia de A a C"></label>
+            <label class="tm-b">B = <input type="number" min="0" step="0.5" value="1" id="tm-b" aria-label="Peso B"></label>
+          </div>
+          <div class="tm-calc">
+            <div class="tm-q" id="tm-q"></div>
+            <div class="tm-terminos" id="tm-terminos"></div>
+          </div>
         </div>
         <div class="tm-sol">
           <div class="tm-sub">sol</div>
