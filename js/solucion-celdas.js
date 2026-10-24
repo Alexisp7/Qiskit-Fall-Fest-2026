@@ -211,9 +211,14 @@ window.CELDAS = {
    "codigo": "if USAR_EXACTO:\n    bits_ex, E_ex, mejores = resolver_exacto(qubo, top=5)\n    print(\"Mejores soluciones (metodo exacto):\")\n    for b, e in mejores:\n        print(f\"  ruta {bits_a_ruta(prob, b)}   energia {e:.1f}\")\n    print()\n    desglose(piezas, bits_ex)\n    dibujar_ruta(prob, bits_a_ruta(prob, bits_ex), posiciones, \"Ruta exacta\")\n",
    "clave": false,
    "tipo": "code"
-  }
- ],
- "resultado": [
+  },
+  {
+   "id": "res0",
+   "titulo": "Resultado: los 8 lugares de la mina",
+   "tipo": "md",
+   "clave": false,
+   "codigo": "Hasta aquí, el método se valida donde se puede simular. La red completa necesita 128 qubits; para resolverla, se reduce sin perder exactitud: las hojas pasan a un costo fijo y el núcleo de 4 lugares se completa con las distancias mínimas. Quedan 16 qubits: el exacto revisa sus 65 536 estados, el VQE usa el mismo ansatz y la ruta se expande a los 13 pasos."
+  },
   {
    "id": "reduccion",
    "titulo": "A · Reducción: hojas colapsadas y cierre métrico",
