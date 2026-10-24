@@ -106,7 +106,7 @@ window.CELDAS = {
   {
    "id": "por3",
    "titulo": "¿Por qué entrelazar?",
-   "codigo": "Sin compuertas de dos qubits el estado es un producto y la energía queda multilineal en cos θ<sub>k</sub>: su mínimo está en una esquina, cos θ<sub>k</sub> = ±1, es decir, en una cadena de bits. Así que el campo medio también puede representar la ruta óptima; el entrelazamiento no hace falta para <i>alcanzarla</i>. Lo que cambia es el camino del optimizador: cada ruta válida es un mínimo local para movimientos de un qubit a la vez (pasar a otra ruta exige cambiar varios bits juntos y cada cambio suelto rompe una regla, que cuesta A). La cascada de CZ agrega direcciones correlacionadas que pueden ayudar a salir de esos mínimos. En el triángulo, desde 300 arranques al azar, llegan al óptimo 38 % con CZ y 31 % sin CZ: ayuda, pero no lo garantiza.",
+   "codigo": "Sin compuertas de dos qubits el estado es un producto y la energía queda multilineal en cos θ<sub>k</sub>: su mínimo está en una esquina, cos θ<sub>k</sub> = ±1, es decir, en una cadena de bits. Así que el campo medio también puede representar la ruta óptima; el entrelazamiento no hace falta para <i>alcanzarla</i>. Lo que cambia es el camino del optimizador: cada ruta válida es un mínimo local para movimientos de un qubit a la vez (pasar a otra ruta exige cambiar varios bits juntos y cada cambio suelto rompe una regla, que cuesta A). La cascada de CZ agrega direcciones correlacionadas que pueden ayudar a salir de esos mínimos. En el triángulo, desde 2000 arranques al azar, llegan al óptimo 35 % con CZ y 32 % sin CZ: ayuda, pero no lo garantiza.",
    "clave": true,
    "tipo": "md"
   },

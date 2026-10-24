@@ -2034,6 +2034,17 @@
     .az-2q-num-tit { font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #6b665e; margin-bottom: 2px; }
     .az-2q-conc { margin-top: 8px; padding-top: 8px; border-top: 1px solid #EFECE6; }
     .az-2q-conc span { display: block; font-size: 11px; color: #9a958c; }
+    .az-2q.sin { border-style: dashed; }
+    .azc-hueco { fill: none; stroke: #B3362B; stroke-width: 1.2; stroke-dasharray: 4 4; }
+    .az-2q-barra { position: relative; }
+    .az-2q-marca { position: absolute; top: -3px; width: 3px; height: 16px; margin-left: -1.5px; background: var(--gold); display: block; }
+    .az-cmp-caja { overflow-x: auto; margin: 4px 0 6px; }
+    .az-cmp table { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 13px; color: #1a1a1a; }
+    .az-cmp th { text-align: left; font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6b665e; border-bottom: 1px solid #1a1a1a; padding: 6px 10px 6px 0; vertical-align: bottom; }
+    .az-cmp td { border-bottom: 1px solid #EFECE6; padding: 8px 10px 8px 0; vertical-align: top; font-variant-numeric: tabular-nums; }
+    .az-cmp tr.az-cmp-yo td { background: rgba(200,169,110,.14); }
+    .az-cmp tr.az-cmp-yo td:first-child { font-weight: 700; box-shadow: inset 3px 0 0 var(--gold); padding-left: 8px; }
+    .az-cmp-pie { font-family: 'Inter', sans-serif; font-size: 11px; color: #8a857c; margin: 4px 0 8px; }
     @media (max-width: 800px) { .az-2q-juego { grid-template-columns: 1fr; } .az-2q-juego > * { grid-column: 1 !important; } }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
@@ -2170,10 +2181,10 @@
       </div>
     </div>
   </footer>
-  <script src="js/solucion-celdas.js?v=3"></script>
+  <script src="js/solucion-celdas.js?v=4"></script>
   <script src="js/solucion.js?v=21"></script>
   <script src="js/solucion-derivacion.js?v=8"></script>
-  <script src="js/solucion-ansatz.js?v=8"></script>
+  <script src="js/solucion-ansatz.js?v=9"></script>
   <script src="js/solucion-cuaderno.js?v=8"></script>
 </body>
 </html>

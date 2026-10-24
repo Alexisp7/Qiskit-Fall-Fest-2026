@@ -50,7 +50,7 @@
     { t: 'Para qué sirve la cascada: el paisaje', l: [
       ['b \\text{ ruta válida}\\;\\Rightarrow\\; H(b \\oplus e_k) - H(b) \\;\\ge\\; A - 2B\\,d_{\\max} > 0', 'Cambiar un solo bit de una ruta válida rompe al menos una regla (cuesta A) y ahorra a lo más dos distancias. Cada ruta válida es un mínimo local: pasar de 1 → 3 → 2 a 1 → 2 → 3 exige cambiar cuatro bits a la vez.'],
       ['\\text{con CZ:}\\quad \\langle z_k z_l\\rangle_\\theta \\ne \\langle z_k\\rangle_\\theta\\langle z_l\\rangle_\\theta', 'La cascada agrega direcciones correlacionadas, por ejemplo «x₂₂ y x₃₃ suben mientras x₃₂ y x₂₃ bajan», que pueden ayudar a salir de esos mínimos.'],
-      ['\\text{triángulo, 300 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{38\\,\\%} \\text{ con CZ}, \\quad 31\\,\\% \\text{ sin CZ}', 'Medido con la misma regla de abajo. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
+      ['\\text{triángulo, 2000 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{35\\,\\%} \\text{ con CZ}, \\quad 32\\,\\% \\text{ sin CZ}', 'Medido con la misma regla de abajo. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
     ] },
     { t: 'De θ al azar a la ruta: cada ángulo es un seno', l: [
       ['E(\\theta_j) = \\alpha_j \\cos(\\theta_j - \\beta_j) + \\gamma_j', 'Cada θ_j aparece en una sola R_Y, así que la energía, como función de ese ángulo, es una sinusoide.'],
@@ -172,9 +172,27 @@
       ['', terminosN(n), 'Los signos menos salen de los pares vecinos en 1 entre los primeros n − 1 qubits; el último qubit lleva +θ o −θ según su vecino.']
     ];
   }
-  function circuitoN(n) {
-    var dy = 38, y0 = 34, xcz = 196, xf = xcz + (n - 1) * 26 + 34, W = xf + 150;
-    var o = '<svg class="az-circ az-2q-circ" viewBox="0 0 ' + W + ' ' + (y0 + (n - 1) * dy + 26) + '" role="img" aria-label="Circuito del ansatz con ' + n + ' qubits">';
+  // el mismo ejemplo sin la cascada: un solo producto
+  function pasosSin(n) {
+    if (n === 2) return [
+      ['Se parte de |00⟩', String.raw`|\psi_0\rangle = |0\rangle\otimes|0\rangle = |00\rangle`, null],
+      ['Primera capa: igual que con la cascada', String.raw`|\psi_1\rangle = ` + giro0(th(1)) + String.raw`\otimes` + giro0(th(2)), 'Hasta aquí no cambia nada.'],
+      ['Sin CZ, cada qubit sigue por su cuenta', String.raw`|\psi\rangle = R_Y(\varphi_1)` + giro0(th(1)) + String.raw`\;\otimes\; R_Y(\varphi_2)` + giro0(th(2)), 'Ningún paso mezcla los qubits: el estado sigue siendo un producto.'],
+      ['Dos giros seguidos se suman', String.raw`\begin{aligned} R_Y(\varphi)\big(\cos\tfrac{\theta}{2}|0\rangle + \sin\tfrac{\theta}{2}|1\rangle\big) &= \cos\tfrac{\theta}{2}\big(\cos\tfrac{\varphi}{2}|0\rangle + \sin\tfrac{\varphi}{2}|1\rangle\big) + \sin\tfrac{\theta}{2}\big(-\sin\tfrac{\varphi}{2}|0\rangle + \cos\tfrac{\varphi}{2}|1\rangle\big) \\ &= \big(\cos\tfrac{\varphi}{2}\cos\tfrac{\theta}{2} - \sin\tfrac{\varphi}{2}\sin\tfrac{\theta}{2}\big)|0\rangle + \big(\sin\tfrac{\varphi}{2}\cos\tfrac{\theta}{2} + \cos\tfrac{\varphi}{2}\sin\tfrac{\theta}{2}\big)|1\rangle \\ &= \cos\tfrac{\varphi + \theta}{2}\,|0\rangle + \sin\tfrac{\varphi + \theta}{2}\,|1\rangle \;=\; R_Y(\varphi + \theta)\,|0\rangle \end{aligned}`, 'Es la misma cuenta del paso 5 con cascada, pero siempre con +θ: sin la Z de la CZ nunca aparece −θ.'],
+      ['Resultado', String.raw`\boxed{|\psi\rangle = \underbrace{\big(\cos\tfrac{\theta_1+\varphi_1}{2}|0\rangle + \sin\tfrac{\theta_1+\varphi_1}{2}|1\rangle\big)}_{\text{qubit 1}} \otimes \underbrace{\big(\cos\tfrac{\theta_2+\varphi_2}{2}|0\rangle + \sin\tfrac{\theta_2+\varphi_2}{2}|1\rangle\big)}_{\text{qubit 2}}}`, 'Un solo término, frente a los dos de la cascada. Los cuatro ángulos actúan como dos: solo importan las sumas γₖ = θₖ + φₖ.'],
+      ['Las amplitudes se factorizan', String.raw`\gamma_k = \theta_k + \varphi_k: \qquad \psi(b_1 b_2) = u_1(b_1)\,u_2(b_2), \quad u_k(0) = \cos\tfrac{\gamma_k}{2},\ u_k(1) = \sin\tfrac{\gamma_k}{2} \qquad P(b_1 b_2) = P_1(b_1)\,P_2(b_2)`, 'Lo que se mida en un qubit no depende del otro.'],
+      ['Por qué |01⟩ + |10⟩ es imposible', String.raw`\psi(00)\,\psi(11) = u_1(0)\,u_2(0)\,u_1(1)\,u_2(1) = \psi(01)\,\psi(10) \;\Rightarrow\; C = 2\,\big|\psi(00)\,\psi(11) - \psi(01)\,\psi(10)\big| = 0`, '|01⟩ + |10⟩ pide ψ(00) = ψ(11) = 0 con ψ(01) y ψ(10) distintos de 0, y eso rompe la igualdad. Pruébalo: no hay ángulos que lo logren.']
+    ];
+    return [
+      ['Primera capa', String.raw`\bigotimes_{k=1}^{${n}}\big(\cos\tfrac{\theta_k}{2}|0\rangle + \sin\tfrac{\theta_k}{2}|1\rangle\big)`, 'Igual que con la cascada.'],
+      ['Sin cascada, cada qubit por su cuenta', String.raw`|\psi\rangle = \bigotimes_{k=1}^{${n}} R_Y(\varphi_k)\,R_Y(\theta_k)|0\rangle = \bigotimes_{k=1}^{${n}}\big(\cos\tfrac{\gamma_k}{2}|0\rangle + \sin\tfrac{\gamma_k}{2}|1\rangle\big), \qquad \gamma_k = \theta_k + \varphi_k`, 'Un solo producto, sin suma de términos: ' + (2 * n) + ' ángulos que funcionan como ' + n + '.'],
+      ['Amplitudes y probabilidades', String.raw`\psi(b) = \prod_{k=1}^{${n}} u_k(b_k), \qquad P(b) = \prod_{k=1}^{${n}} P_k(b_k)`, 'Con la cascada había 2ⁿ⁻¹ términos con signos; aquí, uno.'],
+      ['La energía del campo medio', String.raw`E = \text{cte} + \sum_{k} h_k \cos\gamma_k + \sum_{k<l} J_{kl}\cos\gamma_k\cos\gamma_l`, 'Es la ecuación de la sección 7: multilineal, con el mínimo en una cadena de bits. Llega a la ruta, pero cada ruta válida es un mínimo local.']
+    ];
+  }
+  function circuitoN(n, sinCZ) {
+    var dy = 38, y0 = 34, xcz = 196, xf = xcz + (n - 1) * 26 + 34, W = xf + 150, H = y0 + (n - 1) * dy + (sinCZ ? 40 : 26);
+    var o = '<svg class="az-circ az-2q-circ" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Circuito del ansatz con ' + n + ' qubits' + (sinCZ ? ', sin la cascada de CZ' : '') + '">';
     for (var k = 0; k < n; k++) {
       var y = y0 + k * dy;
       o += '<text class="azc-q" x="4" y="' + (y + 5) + '">q<tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan></text><text class="azc-ket" x="34" y="' + (y + 5) + '">|0⟩</text>';
@@ -183,37 +201,45 @@
       o += '<rect class="azc-ry" x="' + xf + '" y="' + (y - 12) + '" width="70" height="24"/><text class="azc-g" x="' + (xf + 35) + '" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ</tspan><tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3">)</tspan></text>';
       o += '<rect class="azc-ry" x="' + (xf + 92) + '" y="' + (y - 12) + '" width="28" height="24"/><path class="azc-aguja" d="M' + (xf + 97) + ' ' + (y + 6) + ' A9 9 0 0 1 ' + (xf + 115) + ' ' + (y + 6) + ' M' + (xf + 106) + ' ' + (y + 6) + ' L' + (xf + 113) + ' ' + (y - 6) + '"/>';
     }
-    for (var c = 0; c < n - 1; c++) {
+    if (sinCZ) o += '<rect class="azc-hueco" x="' + (xcz - 16) + '" y="' + (y0 - 18) + '" width="' + ((n - 2) * 26 + 32) + '" height="' + ((n - 1) * dy + 36) + '"/><text class="azc-col" x="' + (xcz + (n - 2) * 13) + '" y="' + (H - 4) + '">sin CZ</text>';
+    else for (var c = 0; c < n - 1; c++) {
       var x = xcz + c * 26, ya = y0 + c * dy, yb = ya + dy;
       o += '<line class="azc-cz" x1="' + x + '" y1="' + ya + '" x2="' + x + '" y2="' + yb + '"/><circle class="azc-p" cx="' + x + '" cy="' + ya + '" r="4.5"/><circle class="azc-p" cx="' + x + '" cy="' + yb + '" r="4.5"/>';
     }
     return o + '</svg>';
   }
   // estado exacto de n qubits; el qubit k es el bit k del índice
-  function estadoN(n, t, f) {
+  function estadoN(n, t, f, sinCZ) {
     var dim = 1 << n, psi = new Float64Array(dim); psi[0] = 1;
     function ry(q, ang) { var c = Math.cos(ang / 2), s = Math.sin(ang / 2), m = 1 << q; for (var i = 0; i < dim; i++) if (!(i & m)) { var a = psi[i], b = psi[i | m]; psi[i] = c * a - s * b; psi[i | m] = s * a + c * b; } }
     for (var q = 0; q < n; q++) ry(q, t[q]);
-    for (var k = 0; k < n - 1; k++) { var mm = (1 << k) | (1 << (k + 1)); for (var i = 0; i < dim; i++) if ((i & mm) === mm) psi[i] = -psi[i]; }
+    if (!sinCZ) for (var k = 0; k < n - 1; k++) { var mm = (1 << k) | (1 << (k + 1)); for (var i = 0; i < dim; i++) if ((i & mm) === mm) psi[i] = -psi[i]; }
     for (var q2 = 0; q2 < n; q2++) ry(q2, f[q2]);
     return psi;
   }
-  var dos = { abierto: false, n: 2, t: [90, 90], f: [0, 90] };
+  // un estado por desplegable: con la cascada y sin ella
+  var EST = { con: { abierto: false, n: 2, t: [90, 90], f: [0, 90] }, sin: { abierto: false, n: 2, t: [90, 90], f: [0, 90] } };
+  var TXT = {
+    con: { kicker: 'Ejemplo resuelto · para mirar y jugar', tit: function (n) { return n === 2 ? 'El ansatz con 2 qubits, paso a paso' : 'De 2 a ' + n + ' qubits: la misma cuenta'; }, ayuda: 'Con 2 está todo el álgebra; con 3 o 4, cómo se generaliza.' },
+    sin: { kicker: 'Supuesto · sin la cascada', tit: function (n) { return n === 2 ? 'El mismo ejemplo de 2 qubits, sin CZ' : 'Sin CZ con ' + n + ' qubits: un solo producto'; }, ayuda: 'Los mismos ángulos que el ejemplo con cascada; la marca dorada en cada barra es lo que daría con ella.' }
+  };
   function montarDos(slot) {
     if (!slot) return;
+    var modo = slot.getAttribute('data-modo') || 'con', sin = modo === 'sin', dos = EST[modo], tx = TXT[modo];
     var R = Math.PI / 180;
     function f3(v) { var r = Math.round(v * 1000) / 1000; return (Math.abs(r) < 5e-4 ? 0 : r).toFixed(3).replace('.', ','); }
-    slot.innerHTML = '<details class="az-2q"' + (dos.abierto ? ' open' : '') + '><summary><span class="az-2q-kicker">Ejemplo resuelto · para mirar y jugar</span><span class="az-2q-tit">El ansatz con 2 qubits, paso a paso</span><span class="az-2q-mas" aria-hidden="true"></span></summary>' +
-      '<div class="az-2q-cuerpo"><div class="az-2q-cab"><span class="az-2q-lbl">Qubits</span>' + [2, 3, 4].map(function (k) { return '<button type="button" class="az-2q-nb" data-n="' + k + '">' + k + '</button>'; }).join('') + '<span class="az-2q-ayuda">Con 2 está todo el álgebra; con 3 o 4, cómo se generaliza.</span></div>' +
+    slot.innerHTML = '<details class="az-2q' + (sin ? ' sin' : '') + '"' + (dos.abierto ? ' open' : '') + '><summary><span class="az-2q-kicker">' + tx.kicker + '</span><span class="az-2q-tit"></span><span class="az-2q-mas" aria-hidden="true"></span></summary>' +
+      '<div class="az-2q-cuerpo"><div class="az-2q-cab"><span class="az-2q-lbl">Qubits</span>' + [2, 3, 4].map(function (k) { return '<button type="button" class="az-2q-nb" data-n="' + k + '">' + k + '</button>'; }).join('') + '<span class="az-2q-ayuda">' + tx.ayuda + '</span></div>' +
       '<div data-dos="circ"></div><div class="az-2q-grid"><div class="az-2q-alg" data-dos="alg"></div><div class="az-2q-juego">' +
-      '<div class="cp-mult-tit">Probabilidades de los ' + '<span data-dos="nq"></span> qubits</div><div class="az-2q-pre" data-dos="pre"></div><div class="az-2q-sl" data-dos="sl"></div><div data-dos="barras"></div><div class="az-2q-num" data-dos="num"></div></div></div></div></details>';
+      '<div class="cp-mult-tit">Probabilidades de los <span data-dos="nq"></span> qubits' + (sin ? ', sin CZ' : '') + '</div><div class="az-2q-pre" data-dos="pre"></div><div class="az-2q-sl" data-dos="sl"></div><div data-dos="barras"></div><div class="az-2q-num" data-dos="num"></div></div></div></div></details>';
     var det = slot.querySelector('details');
     det.addEventListener('toggle', function () { dos.abierto = det.open; });
     function $(k) { return slot.querySelector('[data-dos="' + k + '"]'); }
     function presets() {
       var p = [['todo en 0', function () { dos.t = dos.t.map(function () { return 0; }); dos.f = dos.f.map(function () { return 0; }); }],
                ['al azar', function () { dos.t = dos.t.map(function () { return Math.round(Math.random() * 72) * 5; }); dos.f = dos.f.map(function () { return Math.round(Math.random() * 72) * 5; }); }]];
-      if (dos.n === 2) p.unshift(['entrelazado: |01⟩ + |10⟩', function () { dos.t = [90, 90]; dos.f = [0, 90]; }], ['sin entrelazar: θ₁ = 0', function () { dos.t = [0, 60]; dos.f = [40, 30]; }]);
+      if (dos.n === 2 && !sin) p.unshift(['entrelazado: |01⟩ + |10⟩', function () { dos.t = [90, 90]; dos.f = [0, 90]; }], ['sin entrelazar: θ₁ = 0', function () { dos.t = [0, 60]; dos.f = [40, 30]; }]);
+      if (dos.n === 2 && sin) p.unshift(['los ángulos de |01⟩ + |10⟩', function () { dos.t = [90, 90]; dos.f = [0, 90]; }]);
       $('pre').innerHTML = ''; p.forEach(function (x) { var b = document.createElement('button'); b.type = 'button'; b.className = 'dv-btn'; b.textContent = x[0]; b.addEventListener('click', function () { x[1](); deslizadores(); calcular(); }); $('pre').appendChild(b); });
     }
     function deslizadores() {
@@ -227,21 +253,30 @@
       });
     }
     function calcular() {
-      var n = dos.n, psi = estadoN(n, dos.t.map(function (v) { return v * R; }), dos.f.map(function (v) { return v * R; })), filas = '', suma = 0;
+      var n = dos.n, tr = dos.t.map(function (v) { return v * R; }), fr = dos.f.map(function (v) { return v * R; });
+      var psi = estadoN(n, tr, fr, sin), otro = sin ? estadoN(n, tr, fr, false) : null, filas = '', suma = 0;
       for (var m = 0; m < 1 << n; m++) {
         var s = 0, et = ''; for (var k = 0; k < n; k++) { var b = (m >> (n - 1 - k)) & 1; s |= b << k; et += b; }
         var p = psi[s] * psi[s]; suma += p;
-        filas += '<div class="az-2q-fila"><span class="az-2q-ket">|' + et + '⟩</span><span class="az-barra"><span style="width:' + (p * 100).toFixed(1) + '%"></span></span><span class="az-2q-p">' + (p * 100).toFixed(1).replace('.', ',') + ' %</span><span class="az-2q-amp">ψ = ' + f3(psi[s]) + '</span></div>';
+        var marca = otro ? '<i class="az-2q-marca" style="left:' + (otro[s] * otro[s] * 100).toFixed(1) + '%" title="con la cascada: ' + (otro[s] * otro[s] * 100).toFixed(1).replace('.', ',') + ' %"></i>' : '';
+        filas += '<div class="az-2q-fila"><span class="az-2q-ket">|' + et + '⟩</span><span class="az-barra az-2q-barra"><span style="width:' + (p * 100).toFixed(1) + '%"></span>' + marca + '</span><span class="az-2q-p">' + (p * 100).toFixed(1).replace('.', ',') + ' %</span><span class="az-2q-amp">ψ = ' + f3(psi[s]) + '</span></div>';
       }
-      $('barras').innerHTML = filas + '<p class="az-ley">Suma: ' + (suma * 100).toFixed(1).replace('.', ',') + ' % · orden: qubit de arriba a la izquierda · el signo de ψ no se mide, pero decide la interferencia.</p>';
+      $('barras').innerHTML = filas + '<p class="az-ley">Suma: ' + (suma * 100).toFixed(1).replace('.', ',') + ' % · orden: qubit de arriba a la izquierda · ' + (sin ? 'marca dorada: con la cascada, mismos ángulos.' : 'el signo de ψ no se mide, pero decide la interferencia.') + '</p>';
       if (n !== 2) { $('num').innerHTML = ''; return; }
-      var c1 = Math.cos(dos.t[0] * R / 2), s1 = Math.sin(dos.t[0] * R / 2), C1 = Math.cos(dos.f[0] * R / 2), S1 = Math.sin(dos.f[0] * R / 2);
-      var al = (dos.f[1] + dos.t[1]) * R / 2, be = (dos.f[1] - dos.t[1]) * R / 2;
-      var A = [['00', c1 * C1, Math.cos(al), -s1 * S1, Math.cos(be)], ['01', c1 * C1, Math.sin(al), -s1 * S1, Math.sin(be)], ['10', c1 * S1, Math.cos(al), s1 * C1, Math.cos(be)], ['11', c1 * S1, Math.sin(al), s1 * C1, Math.sin(be)]];
-      var amp = {}, h = '<div class="az-2q-num-tit">Con tus ángulos (fórmulas del paso 7)</div>';
-      A.forEach(function (r) { var v = r[1] * r[2] + r[3] * r[4]; amp[r[0]] = v; h += '<div>ψ(' + r[0] + ') = ' + f3(r[1]) + ' · ' + f3(r[2]) + ' ' + (r[3] < 0 ? '−' : '+') + ' ' + f3(Math.abs(r[3])) + ' · ' + f3(r[4]) + ' = <b>' + f3(v) + '</b></div>'; });
+      var h, amp = {};
+      if (sin) {
+        var g1 = (dos.t[0] + dos.f[0]) * R, g2 = (dos.t[1] + dos.f[1]) * R, u1 = [Math.cos(g1 / 2), Math.sin(g1 / 2)], u2 = [Math.cos(g2 / 2), Math.sin(g2 / 2)];
+        h = '<div class="az-2q-num-tit">Con tus ángulos: γ₁ = ' + (dos.t[0] + dos.f[0]) + '°, γ₂ = ' + (dos.t[1] + dos.f[1]) + '°</div>';
+        ['00', '01', '10', '11'].forEach(function (b) { var v = u1[+b[0]] * u2[+b[1]]; amp[b] = v; h += '<div>ψ(' + b + ') = u₁(' + b[0] + ') · u₂(' + b[1] + ') = ' + f3(u1[+b[0]]) + ' · ' + f3(u2[+b[1]]) + ' = <b>' + f3(v) + '</b></div>'; });
+      } else {
+        var c1 = Math.cos(dos.t[0] * R / 2), s1 = Math.sin(dos.t[0] * R / 2), C1 = Math.cos(dos.f[0] * R / 2), S1 = Math.sin(dos.f[0] * R / 2);
+        var al = (dos.f[1] + dos.t[1]) * R / 2, be = (dos.f[1] - dos.t[1]) * R / 2;
+        var A = [['00', c1 * C1, Math.cos(al), -s1 * S1, Math.cos(be)], ['01', c1 * C1, Math.sin(al), -s1 * S1, Math.sin(be)], ['10', c1 * S1, Math.cos(al), s1 * C1, Math.cos(be)], ['11', c1 * S1, Math.sin(al), s1 * C1, Math.sin(be)]];
+        h = '<div class="az-2q-num-tit">Con tus ángulos (fórmulas del paso 7)</div>';
+        A.forEach(function (r) { var v = r[1] * r[2] + r[3] * r[4]; amp[r[0]] = v; h += '<div>ψ(' + r[0] + ') = ' + f3(r[1]) + ' · ' + f3(r[2]) + ' ' + (r[3] < 0 ? '−' : '+') + ' ' + f3(Math.abs(r[3])) + ' · ' + f3(r[4]) + ' = <b>' + f3(v) + '</b></div>'; });
+      }
       var conc = 2 * Math.abs(amp['00'] * amp['11'] - amp['01'] * amp['10']);
-      h += '<div class="az-2q-conc">Entrelazamiento (concurrencia) C = 2|ψ(00)ψ(11) − ψ(01)ψ(10)| = <b>' + f3(conc) + '</b><span>0: producto · 1: máximo</span></div>';
+      h += '<div class="az-2q-conc">Entrelazamiento (concurrencia) C = 2|ψ(00)ψ(11) − ψ(01)ψ(10)| = <b>' + f3(conc) + '</b><span>' + (sin ? 'sin la cascada siempre vale 0' : '0: producto · 1: máximo') + '</span></div>';
       $('num').innerHTML = h;
     }
     function pintarN() {
@@ -249,17 +284,32 @@
       while (dos.t.length < n) { dos.t.push(0); dos.f.push(0); }
       dos.t.length = n; dos.f.length = n;
       Array.prototype.forEach.call(slot.querySelectorAll('.az-2q-nb'), function (b) { b.classList.toggle('activo', +b.getAttribute('data-n') === n); });
-      slot.querySelector('.az-2q-tit').textContent = n === 2 ? 'El ansatz con 2 qubits, paso a paso' : 'De 2 a ' + n + ' qubits: la misma cuenta';
+      slot.querySelector('.az-2q-tit').textContent = tx.tit(n);
       $('nq').textContent = n;
-      $('circ').innerHTML = circuitoN(n);
+      $('circ').innerHTML = circuitoN(n, sin);
       var paso = 0;
-      $('alg').innerHTML = (n === 2 ? pasosDos() : pasosN(n)).map(function (p) {
+      $('alg').innerHTML = (sin ? pasosSin(n) : n === 2 ? pasosDos() : pasosN(n)).map(function (p) {
         return (p[0] ? '<div class="az-2q-paso"><span>' + (++paso) + '</span>' + p[0] + '</div>' : '') + '<div class="dv-linea">' + tex(p[1], true) + (p[2] ? '<p class="dv-nota">' + p[2] + '</p>' : '') + '</div>';
       }).join('');
       presets(); deslizadores(); calcular();
     }
     Array.prototype.forEach.call(slot.querySelectorAll('.az-2q-nb'), function (b) { b.addEventListener('click', function () { dos.n = +b.getAttribute('data-n'); pintarN(); }); });
     pintarN();
+  }
+  // comparación de variantes del ansatz en el triángulo (2000 arranques al azar, regla de la sinusoide)
+  function comparacion() {
+    var F = [
+      ['Solo R<sub>Y</sub> (campo medio)', '9', '0', 'sí', 'no', '32 %', '76', ''],
+      ['R<sub>Y</sub> + CZ, sin capa final', '9', '8', 'sí', 'no: la CZ antes de medir no cambia ninguna probabilidad', '32 %', '76', ''],
+      ['R<sub>Y</sub> + CZ + R<sub>Y</sub> (el propuesto)', '18', '8', 'sí', 'sí', '35 %', '1 337', ' class="az-cmp-yo"'],
+      ['Dos capas: R<sub>Y</sub> CZ R<sub>Y</sub> CZ R<sub>Y</sub>', '27', '16', 'sí', 'sí', '33 %', '2 815', '']
+    ];
+    return '<section class="dv-seccion az-cmp"><div class="dv-paso-tit">Comparación: por qué dos capas de R<sub>Y</sub> con la cascada</div>' +
+      '<div class="az-cmp-caja"><table><thead><tr><th>Ansatz</th><th>Parámetros</th><th>CZ</th><th>¿Contiene la ruta óptima?</th><th>¿Entrelaza?</th><th>Llega al óptimo*</th><th>Evaluaciones*</th></tr></thead><tbody>' +
+      F.map(function (f) { return '<tr' + f[7] + '><td>' + f[0] + '</td><td>' + f[1] + '</td><td>' + f[2] + '</td><td>' + f[3] + '</td><td>' + f[4] + '</td><td><b>' + f[5] + '</b></td><td>' + f[6] + '</td></tr>'; }).join('') +
+      '</tbody></table></div>' +
+      '<p class="az-cmp-pie">* Triángulo, 9 qubits: 2000 arranques al azar con la regla de la sinusoide de la sección 10 (± 1 punto). «Llega al óptimo» = termina en E = 12; «evaluaciones» = promedio de energías calculadas por arranque.</p>' +
+      '<p class="dv-nota">Es la versión más chica que entrelaza de verdad. Sin la capa final, la CZ no hace nada medible y el circuito equivale al campo medio. Sin la CZ, el estado es un producto y el optimizador se queda antes en otra ruta válida (32 % contra 35 %). Una segunda capa duplica parámetros y compuertas CZ y no mejora en el triángulo (33 %); en un chip real suma ruido y riesgo de <i>barren plateaus</i>. Además usa solo R<sub>Y</sub>, que da amplitudes reales (todo lo que necesita un Hamiltoniano diagonal; R<sub>Z</sub> sobre |0⟩ no cambia probabilidades), y CZ solo entre vecinos. La ventaja es modesta y no garantiza el óptimo: por eso el VQE usa varios arranques.</p></section>';
   }
 
   window.montarAnsatzMat = function (caja) {
@@ -270,7 +320,9 @@
         '<div class="dv-pizarra">' + circuitoTexto() + S.map(function (p, i) {
           return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' +
             p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + '</section>' +
-            (i === 1 ? '<div class="az-2q-slot"></div>' : '');   // tras R_Y: el ejemplo de 2 qubits
+            (i === 4 ? '<div class="az-2q-slot" data-modo="con"></div>' : '') +   // tras la capa final: el ejemplo de 2 qubits
+            (i === 6 ? '<div class="az-2q-slot" data-modo="sin"></div>' : '') +   // tras el campo medio: el mismo sin CZ
+            (i === 8 ? comparacion() : '');
         }).join('') + '</div>';
     }
     caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>' +
@@ -330,7 +382,8 @@
     caja.querySelector('[data-az="opt"]').addEventListener('click', correr);
     caja.querySelector('[data-az="construido"]').addEventListener('click', function () { clearTimeout(tim); corriendo = false; construido(); pintar(); });
     sortear(); pintar();
-    montarDos(caja.querySelector('.az-2q-slot'));
-    (function listo() { if (window.katex) { caja.querySelector('.az-texto').innerHTML = pintarTexto(); montarDos(caja.querySelector('.az-2q-slot')); } else setTimeout(listo, 300); })();
+    function montarSlots() { Array.prototype.forEach.call(caja.querySelectorAll('.az-2q-slot'), montarDos); }
+    montarSlots();
+    (function listo() { if (window.katex) { caja.querySelector('.az-texto').innerHTML = pintarTexto(); montarSlots(); } else setTimeout(listo, 300); })();
   };
 })();
