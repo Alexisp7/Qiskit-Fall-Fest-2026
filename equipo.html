@@ -1458,6 +1458,15 @@
       .ficha-bio { -webkit-line-clamp: 1; }
       .eq-titulo { font-size: 40px; }
     }
+    /* fotos rectangulares, como una presentación normal del equipo */
+    .foto { width: 88px; height: 116px; flex: none; }
+    .ficha { grid-template-columns: 88px 1fr; }
+    .foto-marco { inset: 0; border-radius: 3px; border: 1px solid rgba(200,169,110,.45); background: linear-gradient(160deg, #1d1d1d, #111); }
+    .foto-marco img { filter: none; object-position: center 30%; }
+    .foto-marco i { font-size: 46px; }
+    .foto .bloch { display: none; }
+    .medido-0 .foto-marco { box-shadow: 0 0 0 2px #3B82F6; }
+    .medido-1 .foto-marco { box-shadow: 0 0 0 2px #EF4444; }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('eq-intro');</script>
 </head>
@@ -1495,7 +1504,7 @@
         <div class="ficha">
           <div class="foto">
             <!-- foto: reemplazar la inicial por <img src="img/equipo/alexis.jpg" alt="Alexis"> -->
-            <div class="foto-marco"><i>A</i></div>
+            <div class="foto-marco"><img src="img/equipo/alexis.webp" alt="Alexis" width="480" height="640"></div>
             <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
               <circle class="esfera" cx="66" cy="66" r="62"/>
               <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
