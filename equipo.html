@@ -1467,8 +1467,29 @@
     .foto .bloch { display: none; }
     .medido-0 .foto-marco { box-shadow: 0 0 0 2px #3B82F6; }
     .medido-1 .foto-marco { box-shadow: 0 0 0 2px #EF4444; }
+    /* ── equipo: presentación sobria, cuatro tarjetas ── */
+    html, body { background: var(--white, #fff); }
+    .tm-equipo { background: #fff; padding: 72px 24px 64px; }
+    .tm-equipo-in { max-width: 1160px; margin: 0 auto; }
+    .tm-equipo-cab { margin-bottom: 34px; border-bottom: 1px solid #E5E2DC; padding-bottom: 18px; }
+    .tm-kicker { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #8C6D33; }
+    .tm-equipo-tit { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 46px; line-height: 1.05; color: #111; margin: 8px 0 0; }
+    .tm-grilla { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+    .tm-persona { border: 1px solid #E5E2DC; background: #fff; display: flex; flex-direction: column; transition: border-color .25s; }
+    .tm-persona:hover { border-color: #1B2A4A; }
+    .tm-foto { aspect-ratio: 3 / 4; background: #F4F2EE; overflow: hidden; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #E5E2DC; }
+    .tm-foto img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+    .tm-sin-foto { font-family: 'Cormorant Garamond', serif; font-size: 48px; color: #C9C4BB; letter-spacing: .04em; }
+    .tm-nombre { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 22px; line-height: 1.2; color: #111; margin: 16px 18px 0; }
+    .tm-rol { font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: #9a958c; margin: 6px 18px 10px; }
+    .tm-bio { font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.6; color: #444; margin: 0 18px 14px; flex: 1; }
+    .tm-bio.pendiente { color: #A9A49B; font-style: italic; }
+    .tm-links { display: flex; gap: 16px; margin: 0 18px 18px; min-height: 16px; }
+    .tm-links a { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: #1B2A4A; text-decoration: none; border-bottom: 1px solid #C8A96E; padding-bottom: 2px; }
+    .tm-links a:hover { color: #8C6D33; }
+    @media (max-width: 1000px) { .tm-grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .tm-grilla { grid-template-columns: 1fr; } .tm-equipo-tit { font-size: 36px; } }
 </style>
-  <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('eq-intro');</script>
 </head>
 <body>
 
@@ -1488,114 +1509,42 @@
     </div>
   </header>
 
-  <section class="equipo-wrap">
-    <div class="eq-cabecera">
-      <div class="eq-kicker">Registro de 4 qubits</div>
-      <h1 class="eq-titulo">El <em>equipo</em></h1>
-      <div class="eq-estado">|equipo⟩ = <span class="frac"><span>1</span><span>√2</span></span> ( |0000⟩ + |1111⟩ )</div>
-      <p class="eq-nota">Cuatro integrantes, un solo estado. Una compuerta H y tres CNOT nos dejan entrelazados: al medir, siempre coincidimos.</p>
-    </div>
-
-    <div class="circuito">
-      <canvas aria-hidden="true"></canvas>
-      <article class="qubit">
-        <div class="ket"><b>q₀</b><span>|Alexis⟩</span></div>
-        <div class="tramo"></div>
-        <div class="ficha">
-          <div class="foto">
-            <!-- foto: reemplazar la inicial por <img src="img/equipo/alexis.jpg" alt="Alexis"> -->
-            <div class="foto-marco"><img src="img/equipo/alexis.webp" alt="Alexis" width="480" height="640"></div>
-            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
-              <circle class="esfera" cx="66" cy="66" r="62"/>
-              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
-              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
-              <g class="flecha" style="animation-delay:-0.0s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
-              <text class="ket-medido" x="100" y="18">|0⟩</text>
-            </svg>
-          </div>
-          <div>
-            <div class="ficha-nombre">Alexis</div>
-            <div class="ficha-rol">q₀ · Integrante</div>
-            <p class="ficha-bio">Estudiante de física en la UNMSM. Mecánica cuántica, computación y sistemas complejos.</p>
-            <div class="ficha-links"><a href="https://www.linkedin.com/in/ronaldo-alexis-salvatierra-balde%C3%B3n-b99411212/" target="_blank" rel="noopener">LinkedIn</a><a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Portafolio</a></div>
-          </div>
-        </div>
+  <section class="tm-equipo">
+    <div class="tm-equipo-in">
+      <header class="tm-equipo-cab">
+        <div class="tm-kicker">Qiskit Fall Fest 2026 · Track 2</div>
+        <h1 class="tm-equipo-tit">Equipo</h1>
+      </header>
+      <div class="tm-grilla">
+      <article class="tm-persona">
+        <div class="tm-foto"><img src="img/equipo/alexis.webp" alt="Ronaldo Alexis Salvatierra Baldeón" width="480" height="640" loading="lazy"></div>
+        <h2 class="tm-nombre">Ronaldo Alexis Salvatierra Baldeón</h2>
+        <div class="tm-rol">Integrante</div>
+        <p class="tm-bio">Estudiante de física en la UNMSM. Mecánica cuántica, computación y sistemas complejos.</p>
+        <div class="tm-links"><a href="https://www.linkedin.com/in/ronaldo-alexis-salvatierra-balde%C3%B3n-b99411212/" target="_blank" rel="noopener">LinkedIn</a><a href="https://alexisfisteo-ij75.vercel.app/index.html" target="_blank" rel="noopener">Portafolio</a></div>
       </article>
-      <article class="qubit">
-        <div class="ket"><b>q₁</b><span>|Cristh⟩</span></div>
-        <div class="tramo"></div>
-        <div class="ficha">
-          <div class="foto">
-            <!-- foto: reemplazar la inicial por <img src="img/equipo/cristh.jpg" alt="Cristh"> -->
-            <div class="foto-marco"><i>C</i></div>
-            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
-              <circle class="esfera" cx="66" cy="66" r="62"/>
-              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
-              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
-              <g class="flecha" style="animation-delay:-3.4s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
-              <text class="ket-medido" x="100" y="18">|0⟩</text>
-            </svg>
-          </div>
-          <div>
-            <div class="ficha-nombre">Cristh</div>
-            <div class="ficha-rol">q₁ · Integrante</div>
-            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
-            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
-          </div>
-        </div>
+      <article class="tm-persona">
+        <div class="tm-foto"><span class="tm-sin-foto">C</span></div>
+        <h2 class="tm-nombre">Cristh</h2>
+        <div class="tm-rol">Integrante</div>
+        <p class="tm-bio pendiente">Breve presentación próximamente.</p>
+        <div class="tm-links"></div>
       </article>
-      <article class="qubit">
-        <div class="ket"><b>q₂</b><span>|Paul⟩</span></div>
-        <div class="tramo"></div>
-        <div class="ficha">
-          <div class="foto">
-            <!-- foto: reemplazar la inicial por <img src="img/equipo/paul.jpg" alt="Paul"> -->
-            <div class="foto-marco"><i>P</i></div>
-            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
-              <circle class="esfera" cx="66" cy="66" r="62"/>
-              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
-              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
-              <g class="flecha" style="animation-delay:-6.8s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
-              <text class="ket-medido" x="100" y="18">|0⟩</text>
-            </svg>
-          </div>
-          <div>
-            <div class="ficha-nombre">Paul</div>
-            <div class="ficha-rol">q₂ · Integrante</div>
-            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
-            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
-          </div>
-        </div>
+      <article class="tm-persona">
+        <div class="tm-foto"><span class="tm-sin-foto">P</span></div>
+        <h2 class="tm-nombre">Paul</h2>
+        <div class="tm-rol">Integrante</div>
+        <p class="tm-bio pendiente">Breve presentación próximamente.</p>
+        <div class="tm-links"></div>
       </article>
-      <article class="qubit">
-        <div class="ket"><b>q₃</b><span>|Francis⟩</span></div>
-        <div class="tramo"></div>
-        <div class="ficha">
-          <div class="foto">
-            <!-- foto: reemplazar la inicial por <img src="img/equipo/francis.jpg" alt="Francis"> -->
-            <div class="foto-marco"><i>F</i></div>
-            <svg class="bloch" viewBox="0 0 132 132" aria-hidden="true">
-              <circle class="esfera" cx="66" cy="66" r="62"/>
-              <path class="ecuador atras" d="M4 66 A62 18 0 0 1 128 66"/>
-              <path class="ecuador" d="M4 66 A62 18 0 0 0 128 66"/>
-              <g class="flecha" style="animation-delay:-10.2s"><line x1="66" y1="66" x2="66" y2="16"/><path d="M66 8 L61 17 L71 17 Z"/></g>
-              <text class="ket-medido" x="100" y="18">|0⟩</text>
-            </svg>
-          </div>
-          <div>
-            <div class="ficha-nombre">Francis</div>
-            <div class="ficha-rol">q₃ · Integrante</div>
-            <p class="ficha-bio pendiente">Breve presentación próximamente.</p>
-            <div class="ficha-links"><!-- <a href="URL" target="_blank" rel="noopener">LinkedIn</a> --></div>
-          </div>
-        </div>
+      <article class="tm-persona">
+        <div class="tm-foto"><span class="tm-sin-foto">F</span></div>
+        <h2 class="tm-nombre">Francis</h2>
+        <div class="tm-rol">Integrante</div>
+        <p class="tm-bio pendiente">Breve presentación próximamente.</p>
+        <div class="tm-links"></div>
       </article>
-    </div>
-
-    <div class="eq-medir">
-      <button class="boton-medir" type="button">Medir el equipo</button>
-      <div class="eq-resultado" aria-live="polite"></div>
-      <div class="eq-conteo"></div>
+      </div>
     </div>
   </section>
 
@@ -1608,6 +1557,5 @@
       </div>
     </div>
   </footer>
-  <script src="js/equipo.js?v=2"></script>
 </body>
 </html>
