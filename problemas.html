@@ -2322,6 +2322,36 @@
     .picto-punto { fill: #1B2A4A; }
     .ctx-grafo .caso-nodo.foco .picto-fondo { fill: var(--gold); }
     @media (max-width: 900px) { .caso-e1 { grid-template-columns: 1fr; } }
+    /* ── ruta: grafo más grande y el camión ── */
+    .caso-e3 { grid-template-columns: 250px minmax(0, 1fr); gap: 18px; }
+    .caso-e[data-e="3"] .caso-grafo { max-width: none !important; max-height: none; width: 100%; }
+    .caso-res .caso-grafo { max-height: calc(100vh - 430px); }
+    .camion { pointer-events: none; transition: opacity .3s; }
+    .camion-caja { fill: var(--gold); stroke: #8C6D33; stroke-width: 1.2; }
+    .camion-cabina { fill: #1B2A4A; }
+    .camion-rueda { fill: #fff; stroke: #1B2A4A; stroke-width: 1.6; }
+    .camion-ala { fill: #fff; stroke: #B5472E; stroke-width: 1.2; opacity: 0; transform-box: fill-box; transform-origin: center bottom; }
+    .camion.vuela .camion-ala { opacity: 1; animation: camionAla .22s ease-in-out infinite alternate; }
+    @keyframes camionAla { from { transform: scaleY(1); } to { transform: scaleY(.45); } }
+    .camion.mal .camion-caja, .camion.mal .camion-cabina { animation: camionRojo .35s steps(2) infinite; }
+    @keyframes camionRojo { 0% { fill: #B5472E; } 100% { fill: #F2B8AA; } }
+    /* distancias: todos los términos; los d = 0 por definición en gris translúcido */
+    .caso-filas { grid-template-columns: auto; grid-auto-flow: row; font-size: 15px; }
+    .caso-filas .tm-t-pista { grid-row: auto; }
+    .caso-fila .tm-term.def0 { background: rgba(160,154,145,.16); border-radius: 3px; padding: 0 3px; color: #9a958c; }
+    .caso-fila .tm-term.def0 .tm-d { color: #9a958c; }
+    .caso-def0-ej { background: rgba(160,154,145,.22); padding: 0 4px; border-radius: 3px; color: #6b665e; }
+    .caso-fila .tm-term.def0.hecho { position: relative; }
+    .caso-fila .tm-term.def0.hecho::after { content: ''; position: absolute; left: 0; right: 0; top: 58%; height: 1px; background: rgba(110,104,96,.75); animation: tachaD .3s ease-out both; transform-origin: left center; }
+    @keyframes tachaD { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .caso-escena:not(.animando) .caso-fila .tm-term.def0 { position: relative; }
+    .caso-escena:not(.animando) .caso-fila .tm-term.def0::after { content: ''; position: absolute; left: 0; right: 0; top: 58%; height: 1px; background: rgba(110,104,96,.75); }
+    @media (prefers-reduced-motion: reduce) { .camion-ala, .camion-caja, .camion-cabina { animation: none !important; } }
+    .caso-filas { font-size: 14px; line-height: 1.05; }
+    .caso-fila { padding: 0; }
+    .caso-fila .tm-x-val { font-size: 8px; margin-bottom: 0; }
+    .caso-e[data-e="4"] .caso-q { font-size: 23px; margin: 0 0 2px; }
+    .caso-e[data-e="4"] .caso-e-rot { margin-bottom: 0; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2646,6 +2676,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=9"></script>
+  <script src="js/caso-minero.js?v=11"></script>
 </body>
 </html>

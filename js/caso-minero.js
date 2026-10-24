@@ -128,6 +128,7 @@
   // ── modo manual ──
   var avisoT = 0;
   function tocar(k) {
+    viaje.t0 = 0;
     var ult = ruta[ruta.length - 1];
     if (ruta.length === T) ruta = [k];
     else if (k === ult) { ruta.pop(); nuevo = null; pintar(); return; }
@@ -178,6 +179,7 @@
       el('text', { 'class': 'caso-dist', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 + 4 }, svg).textContent = km(c[2]);
     });
     var aqui = r.length && r.length < T ? r[r.length - 1] : null;
+    var conCamion = modo === 3 || modo === 6;
     var meta = modo === 3 && r.length === T - 1 ? f : null;
     L.forEach(function (k) {
       var p = POS[k], pts = [];
@@ -196,6 +198,7 @@
       g.addEventListener('click', function () { tocar(k); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
     });
+    if (conCamion && !quieto) camion(svg);
   }
 
   // dibujos de trazos geométricos para cada instalación (solo en el grafo del contexto)
@@ -215,6 +218,43 @@
     el('path', { 'class': 'picto-trazo', d: D[k] }, h);
     if (k === 'x7') [[-6, 4], [-1, 0], [5, 5]].forEach(function (c) { el('circle', { 'class': 'picto-punto', cx: c[0], cy: c[1], r: 1.6 }, h); });
   }
+
+  // ── un camión recorre la ruta; en un salto sin camino vuela (con alas) y parpadea en rojo ──
+  function camion(svg) {
+    var h = el('g', { 'class': 'camion' }, svg);
+    var cuerpo = el('g', { 'class': 'camion-cuerpo' }, h);
+    el('path', { 'class': 'camion-ala', d: 'M-4 -14 C -14 -30, -30 -26, -36 -14 C -26 -18, -14 -16, -4 -12 Z' }, cuerpo);
+    el('path', { 'class': 'camion-ala', d: 'M4 -14 C 10 -30, 26 -30, 30 -18 C 20 -20, 12 -17, 6 -12 Z' }, cuerpo);
+    el('rect', { 'class': 'camion-caja', x: -16, y: -16, width: 20, height: 12, rx: 1.5 }, cuerpo);
+    el('path', { 'class': 'camion-cabina', d: 'M4 -12 H11 L15 -7 V-4 H4 Z' }, cuerpo);
+    el('circle', { 'class': 'camion-rueda', cx: -11, cy: -2.5, r: 3 }, cuerpo);
+    el('circle', { 'class': 'camion-rueda', cx: 9, cy: -2.5, r: 3 }, cuerpo);
+    return h;
+  }
+  var viaje = { t0: 0, raf: 0 };
+  function andar(ahora) {
+    viaje.raf = requestAnimationFrame(andar);
+    var svg = raiz.querySelector(paso === 6 ? '[data-grafo="6"]' : '[data-grafo="3"]');
+    if (!svg || (paso !== 3 && paso !== 6)) return;
+    var c = svg.querySelector('.camion'); if (!c) return;
+    var r = ruta.length > 1 ? ruta : null;
+    if (!r) { c.setAttribute('opacity', '0'); return; }
+    var TRAMO = 900, PAUSA = 220, ciclo = (r.length - 1) * (TRAMO + PAUSA) + 900;
+    if (!viaje.t0) viaje.t0 = ahora;
+    var e = (ahora - viaje.t0) % ciclo, n = Math.min(r.length - 2, Math.floor(e / (TRAMO + PAUSA)));
+    var u = Math.min(1, (e - n * (TRAMO + PAUSA)) / TRAMO); if (e >= (r.length - 1) * (TRAMO + PAUSA)) { n = r.length - 2; u = 1; }
+    u = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    var a = POS[r[n]], b = POS[r[n + 1]], vuela = !camino(r[n], r[n + 1]);
+    var x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u - (vuela ? Math.sin(Math.PI * u) * 46 : 0);
+    var mal = vuela || (n === 0 && u < .2 && r[0] !== s) || (n === r.length - 2 && u > .8 && r.length === T && r[T - 1] !== f);
+    c.setAttribute('opacity', '1');
+    c.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + (y - R + 4).toFixed(1) + ')');
+    var cuerpo = c.firstChild;
+    cuerpo.setAttribute('transform', b[0] < a[0] ? 'scale(-1 1)' : '');
+    c.classList.toggle('vuela', vuela);
+    c.classList.toggle('mal', mal);
+  }
+  if (!quieto) viaje.raf = requestAnimationFrame(andar);
 
   // ── matriz x_{i,t}: 8 filas × T columnas ──
   function matriz(caja) {
@@ -298,20 +338,14 @@
       '<span class="tm-q-res"> = <span class="tm-circulo">' + km(D) + '</span> &nbsp;→&nbsp; B·D = ' + usd(B()) + ' · ' + kmCorto(D) + ' = <b>' + usd(B() * D) + '</b></span>';
     for (var t = 1; t < T; t++) {
       var i0 = IDX[ruta[t - 1]], destino = ruta[t];
-      // solo los vecinos de i (para los demás d_ij no existe: eso lo cubre la regla de saltos)
-      var js = VECINOS[ruta[t - 1]].slice();
-      if (js.indexOf(destino) < 0) js.push(destino);
-      js.sort(function (p, q) { return IDX[p] - IDX[q]; });
-      var terms = js.map(function (k) {
-        var j = IDX[k], on = destino === k, dd = d(ruta[t - 1], k);
-        return '<span class="tm-term' + (on ? ' on' : '') + (dd == null ? ' salto' : '') + '" data-v="' + (dd || 0) + '"><span class="tm-d' + (on ? ' on' : '') + '">d' + sub('' + i0 + j) + '</span>(' + xv(i0, t) + xv(j, t + 1) + ')</span>';
+      // los N términos de la fila i: sin camino (o i = j) d_ij = 0 por definición
+      var terms = L.map(function (k) {
+        var j = IDX[k], on = destino === k, dd = d(ruta[t - 1], k), cero = dd == null;
+        return '<span class="tm-term' + (on ? ' on' : '') + (cero ? (on ? ' salto' : ' def0') : '') + '" data-v="' + (dd || 0) + '"><span class="tm-d' + (on ? ' on' : '') + '">d' + sub('' + i0 + j) + '</span>(' + xv(i0, t) + xv(j, t + 1) + ')</span>';
       });
       html += '<div class="tm-par caso-fila"><span class="tm-t-rot">t = ' + t + '</span>' + terms.join('<span class="tm-mas">+</span>') + '</div>';
     }
-    // dos columnas que se leen de arriba abajo: t = 1 … a la izquierda y sigue a la derecha
-    var mitad = Math.ceil((T - 1) / 2);
-    $('filas').style.gridTemplateRows = 'auto repeat(' + mitad + ', auto)';
-    $('filas').innerHTML = '<p class="tm-t-pista">En cada t solo sobrevive la fila <i>i</i> con x' + sub('i,t') + ' = 1 y, de ella, los caminos que salen de <i>i</i>.</p>' + html;
+    $('filas').innerHTML = '<p class="tm-t-pista">En cada t solo sobrevive la fila <i>i</i> con x' + sub('i,t') + ' = 1. <span class="caso-def0-ej">En gris</span>: d' + sub('ij') + ' = 0 por definición (no hay camino, o i = j).</p>' + html;
   }
   var animT = 0, escena = $('escena');
   function animar() {
@@ -333,7 +367,7 @@
       var hs = par.querySelectorAll('.tm-term');
       if (hs[hs.length - 1] === tm) par.classList.add('hecho');
       n++;
-      animT = setTimeout(siguiente, quieto ? 0 : vivo ? 380 : 110);
+      animT = setTimeout(siguiente, quieto ? 0 : vivo ? 380 : tm.classList.contains('def0') ? 45 : 110);   // los ceros por definición pasan rápido
     }
     suma(false);
     animT = setTimeout(siguiente, quieto ? 0 : 500);

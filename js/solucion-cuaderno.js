@@ -398,10 +398,16 @@
     var lado = document.createElement('aside'); lado.className = 'nb-lado';
     lado.innerHTML = '<div class="nb-ej-cab"><span class="nb-ej-rot">Red minera · ' + (etapa === 'inicializar' ? 'acción del bloque' : 'en este bloque') + '</span><span class="nb-ej-paso"></span></div>' +
       '<svg class="nb-ej" viewBox="0 0 460 400" role="img" aria-label="La red minera en este bloque del código"></svg><div class="nb-exp"></div>';
-    nb.appendChild(col); nb.appendChild(lado);
+    // celdas y ejemplo en su propia grilla: así el ejemplo fijo no se monta sobre las matrices
+    var grilla = document.createElement('div'); grilla.className = 'nb-grilla';
+    grilla.appendChild(col); grilla.appendChild(lado); nb.appendChild(grilla);
     if (etapa === 'inicializar' && window.montarMatrices) {
       var mat = document.createElement('section'); mat.className = 'nb-matrices'; mat.id = 'celda-matrices';
       nb.appendChild(mat); window.montarMatrices(mat);
+    }
+    if (etapa === 'inicializar' && window.montarDerivacion) {
+      var dv = document.createElement('section'); dv.className = 'nb-deriva'; dv.id = 'celda-derivacion';
+      nb.appendChild(dv); window.montarDerivacion(dv);
     }
     var svg = lado.querySelector('.nb-ej'), exp = lado.querySelector('.nb-exp'), paso = lado.querySelector('.nb-ej-paso');
     var previas = [], actual = null, fijo = 0;
@@ -419,6 +425,10 @@
         b2.type = 'button'; b2.textContent = 'Matrices explícitas J y h'; b2.className = 'clave';
         b2.addEventListener('click', function () { document.getElementById('celda-matrices').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' }); });
         li2.appendChild(b2); indice.appendChild(li2);
+        var li3 = document.createElement('li'), b3 = document.createElement('button');
+        b3.type = 'button'; b3.textContent = 'Del QUBO al Ising, paso a paso'; b3.className = 'clave';
+        b3.addEventListener('click', function () { document.getElementById('celda-derivacion').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' }); });
+        li3.appendChild(b3); indice.appendChild(li3);
       }
     }
     function activar(id, ir) {
