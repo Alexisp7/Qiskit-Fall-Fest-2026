@@ -1973,6 +1973,22 @@
     .az-h { color: #8C6D33; }
     .az-ley { font-family: 'Inter', sans-serif; font-size: 11px; color: #9a958c; margin: 6px 0 0; }
     @media (max-width: 900px) { .az-cuerpo { grid-template-columns: 1fr; } }
+    /* el circuito del ansatz para el triángulo */
+    .az-circ { display: block; width: 100%; max-width: 900px; height: auto; margin: 6px auto 4px; }
+    .azc-col { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .12em; fill: #6b665e; text-anchor: middle; }
+    .azc-q { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; fill: #1a1a1a; }
+    .azc-ket { font-family: 'Cormorant Garamond', serif; font-size: 16px; fill: #1a1a1a; }
+    .azc-sub { font-size: 10px; font-style: normal; }
+    .azc-cable { stroke: #1a1a1a; stroke-width: 1.1; }
+    .azc-ry { fill: #fff; stroke: #1a1a1a; stroke-width: 1.2; }
+    .azc-g { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; fill: #1a1a1a; text-anchor: middle; }
+    .azc-aguja { fill: none; stroke: #1a1a1a; stroke-width: 1.2; }
+    .azc-t { stroke: #C9C4BB; stroke-width: 1; stroke-dasharray: 3 4; }
+    .azc-cz { stroke: #1a1a1a; stroke-width: 1.4; }
+    .azc-p { fill: #1a1a1a; }
+    .azc-cz.cruza { stroke: #8C6D33; stroke-width: 2; }
+    .azc-p.cruza { fill: #8C6D33; }
+    .azc-cruza { font-family: 'Space Mono', monospace; font-size: 9.5px; fill: #8C6D33; }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -2111,7 +2127,7 @@
   <script src="js/solucion-celdas.js?v=2"></script>
   <script src="js/solucion.js?v=21"></script>
   <script src="js/solucion-derivacion.js?v=7"></script>
-  <script src="js/solucion-ansatz.js?v=1"></script>
+  <script src="js/solucion-ansatz.js?v=4"></script>
   <script src="js/solucion-cuaderno.js?v=7"></script>
 </body>
 </html>

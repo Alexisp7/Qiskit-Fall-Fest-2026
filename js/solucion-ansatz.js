@@ -17,7 +17,7 @@
     { t: 'Punto de partida', l: [
       ['|\\psi_0\\rangle = |0\\rangle^{\\otimes n} = |00\\cdots 0\\rangle, \\qquad n = N\\cdot T = 9', 'Todos los qubits empiezan en |0⟩: en x, ningún lugar visitado.']
     ] },
-    { t: 'Una rotación R_Y', l: [
+    { t: 'Una rotación R<sub>Y</sub>', l: [
       ['R_Y(\\theta) = \\begin{pmatrix} \\cos\\frac{\\theta}{2} & -\\sin\\frac{\\theta}{2} \\\\ \\sin\\frac{\\theta}{2} & \\cos\\frac{\\theta}{2} \\end{pmatrix}, \\qquad R_Y(\\theta)\\,|0\\rangle = \\cos\\tfrac{\\theta}{2}\\,|0\\rangle + \\sin\\tfrac{\\theta}{2}\\,|1\\rangle'],
       ['P(1) = \\sin^{2}\\tfrac{\\theta}{2}, \\qquad \\langle Z\\rangle = \\cos^{2}\\tfrac{\\theta}{2} - \\sin^{2}\\tfrac{\\theta}{2} = \\cos\\theta', 'El ángulo decide cuánto se inclina cada qubit hacia 1; las amplitudes son reales.']
     ] },
@@ -84,12 +84,49 @@
     return x;
   }
 
+  // el circuito del ansatz para el triángulo: 9 qubits, una capa (como ansatz(9, capas=1) del cuaderno)
+  function circuitoSVG() {
+    var N = 3, n = 9, dy = 34, y0 = 44, x = [];
+    var o = '<svg class="az-circ" viewBox="0 0 900 ' + (y0 + (n - 1) * dy + 40) + '" role="img" aria-label="Circuito del ansatz para el triángulo">';
+    o += '<text class="azc-col" x="168" y="18">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text>';
+    o += '<text class="azc-col" x="420" y="18">cascada de CZ</text>';
+    o += '<text class="azc-col" x="668" y="18">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text>';
+    o += '<text class="azc-col" x="790" y="18">medir</text>';
+    for (var k = 0; k < n; k++) {
+      var y = y0 + k * dy, i = k % N + 1, t = Math.floor(k / N) + 1;
+      o += '<text class="azc-q" x="8" y="' + (y + 5) + '">q<tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3"> · x</tspan><tspan class="azc-sub" dy="3">' + i + t + '</tspan></text>';
+      o += '<text class="azc-ket" x="92" y="' + (y + 5) + '">|0⟩</text>';
+      o += '<line class="azc-cable" x1="118" y1="' + y + '" x2="812" y2="' + y + '"/>';
+      o += '<rect class="azc-ry" x="138" y="' + (y - 12) + '" width="62" height="24"/><text class="azc-g" x="169" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ</tspan><tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3">)</tspan></text>';
+      o += '<rect class="azc-ry" x="638" y="' + (y - 12) + '" width="62" height="24"/><text class="azc-g" x="669" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ</tspan><tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3">)</tspan></text>';
+      o += '<rect class="azc-ry" x="776" y="' + (y - 12) + '" width="28" height="24"/><path class="azc-aguja" d="M781 ' + (y + 6) + ' A9 9 0 0 1 799 ' + (y + 6) + ' M790 ' + (y + 6) + ' L797 ' + (y - 6) + '"/>';
+    }
+    // separación entre tiempos
+    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="118" y1="' + yy + '" x2="812" y2="' + yy + '"/>'; });
+    for (var c = 0; c < n - 1; c++) {
+      var xc = 250 + c * 44, ya = y0 + c * dy, yb = ya + dy, cruza = (c + 1) % N === 0;
+      o += '<line class="azc-cz' + (cruza ? ' cruza' : '') + '" x1="' + xc + '" y1="' + ya + '" x2="' + xc + '" y2="' + yb + '"/>';
+      o += '<circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + ya + '" r="4.5"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + yb + '" r="4.5"/>';
+      if (cruza) o += '<text class="azc-cruza" x="' + (xc + 9) + '" y="' + (ya + dy / 2 + 4) + '">t' + ((c + 1) / N) + ' → t' + ((c + 1) / N + 1) + '</text>';
+    }
+    return o + '</svg>';
+  }
+  function circuitoTexto() {
+    return '<section class="dv-seccion az-circuito"><div class="dv-paso-tit">El circuito del ansatz para el triángulo</div>' +
+      '<p class="dv-nota">Es el ansatz del cuaderno con n = 9 qubits y una capa: ansatz(9, capas=1). Cada qubit es una variable x<sub>i,t</sub> en el orden k = (t − 1)N + i, así que la cascada recorre los tres lugares de un tiempo y salta al siguiente tiempo (en dorado).</p>' +
+      circuitoSVG() +
+      tex(String.raw`|\psi(\boldsymbol\theta,\boldsymbol\varphi)\rangle = \Big[\bigotimes_{k=1}^{9} R_Y(\varphi_k)\Big]\;\Big[\prod_{k=1}^{8}\mathrm{CZ}_{k,k+1}\Big]\;\Big[\bigotimes_{k=1}^{9} R_Y(\theta_k)\Big]\;|0\rangle^{\otimes 9}`) +
+      tex(String.raw`(q_1,\dots,q_9) = (x_{11},\,x_{21},\,x_{31},\,x_{12},\,x_{22},\,x_{32},\,x_{13},\,x_{23},\,x_{33}), \qquad q_k \leftrightarrow x_{i,t},\ k = (t-1)N + i`) +
+      tex(String.raw`\boldsymbol\theta = (\theta_1,\dots,\theta_9),\ \boldsymbol\varphi = (\varphi_1,\dots,\varphi_9):\ 18 \text{ parámetros}, \quad 8 \text{ compuertas CZ}, \quad \mathrm{CZ}_{3,4}:\ x_{31}\!-\!x_{12}, \quad \mathrm{CZ}_{6,7}:\ x_{32}\!-\!x_{13}`) +
+      '</section>';
+  }
+
   window.montarAnsatzMat = function (caja) {
     function pintarTexto() {
       numero = 0;
       return '<div class="dv-cab"><div class="mx-kicker">El ansatz en matemáticas</div><h3 class="dv-tit">De un θ al azar a la ruta, a través de la cascada</h3>' +
         '<p class="dv-resumen"><b>Resumen.</b> Se sigue el estado del circuito desde |0⟩<sup>⊗n</sup>: la primera capa de R<sub>Y</sub>(θ) con ángulos al azar reparte amplitud entre todas las rutas, la cascada de CZ las marca con signos que dependen de pares vecinos y la capa final hace interferir esos signos. Se muestra que la energía es un promedio de las rutas, que la ruta óptima está dentro de la familia del ansatz y cómo se llega a ella ajustando un ángulo a la vez.</p></div>' +
-        '<div class="dv-pizarra">' + S.map(function (p, i) {
+        '<div class="dv-pizarra">' + circuitoTexto() + S.map(function (p, i) {
           return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' +
             p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + '</section>';
         }).join('') + '</div>';
