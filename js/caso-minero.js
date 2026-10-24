@@ -35,7 +35,9 @@
   var R = 20;
 
   // ── estado ──
-  var T = 13, s = 'x1', f = 'x1', antesOn = false, aA = 'x6', bB = 'x3';
+  var T = 13, s = 'x1', f = 'x1';
+  // dos reglas "visitar a antes que b", cada una se enciende por separado
+  var ANTES = [{ on: false, a: 'x6', b: 'x3' }, { on: false, a: 'x7', b: 'x4' }];
   var ruta = [], paso = 1, nuevo = null;
   function B() { return Math.max(0, Number($('b').value) || 0); }
   function A() { return Math.max(0, Number($('a').value) || 0); }
@@ -49,7 +51,8 @@
     for (var i = 1; i < r.length; i++) if (!camino(r[i - 1], r[i])) p.salto++;
     p.inicio = r[0] === s ? 0 : 1;
     p.fin = r[T - 1] === f ? 0 : 1;
-    if (antesOn) { var nb = 0; r.forEach(function (k) { if (k === aA) p.antes += nb; if (k === bB) nb++; }); }
+    p.antesR = ANTES.map(function (q) { var v = 0, nb = 0; if (q.on) r.forEach(function (k) { if (k === q.a) v += nb; if (k === q.b) nb++; }); return v; });
+    p.antes = p.antesR[0] + p.antesR[1];
     p.total = p.tiempo + p.visita + p.salto + p.inicio + p.fin + p.antes;
     return p;
   }
@@ -59,15 +62,19 @@
   // Es exacta para el modelo: considera también saltos prohibidos y partir fuera de s,
   // cada uno con su castigo A.
   function optima(forzarSegundo) {
-    var b = B(), a = A(), NB = antesOn ? T + 1 : 1, M = 1 << N, tam = N * M * NB;
-    var capas = [], previo = [];
+    // por cada regla encendida se cuenta cuántas veces ya se pasó por b (hasta 3)
+    var b = B(), a = A(), C1 = ANTES[0].on ? 4 : 1, C2 = ANTES[1].on ? 4 : 1, NB = C1 * C2, M = 1 << N, tam = N * M * NB;
+    var previo = [];
     var cap = new Float64Array(tam).fill(Infinity), prv = new Int32Array(tam).fill(-1);
     function id(i, m, nb) { return (i * M + m) * NB + nb; }
-    L.forEach(function (k, i) {
-      var nb = antesOn && k === bB ? 1 : 0;
-      cap[id(i, 1 << i, nb)] = k === s ? 0 : a;
-    });
-    capas.push(cap); previo.push(prv);
+    function llega(nb, k) {   // castigo al llegar a k y conteos nuevos
+      var n1 = Math.floor(nb / C2), n2 = nb % C2, pen = 0;
+      if (ANTES[0].on) { if (k === ANTES[0].a) pen += n1; if (k === ANTES[0].b) n1 = Math.min(n1 + 1, C1 - 1); }
+      if (ANTES[1].on) { if (k === ANTES[1].a) pen += n2; if (k === ANTES[1].b) n2 = Math.min(n2 + 1, C2 - 1); }
+      return [pen, n1 * C2 + n2];
+    }
+    L.forEach(function (k, i) { var z = llega(0, k); cap[id(i, 1 << i, z[1])] = k === s ? 0 : a; });
+    previo.push(prv);
     for (var t = 1; t < T; t++) {
       var sig = new Float64Array(tam).fill(Infinity), ps = new Int32Array(tam).fill(-1);
       for (var i = 0; i < N; i++) for (var m = 0; m < M; m++) {
@@ -77,15 +84,13 @@
           if (v === Infinity) continue;
           for (var j = 0; j < N; j++) {
             if (t === 1 && forzarSegundo && L[j] !== forzarSegundo) continue;
-            var dd = d(L[i], L[j]), c = v + (dd != null && i !== j ? b * dd : a);
-            if (antesOn && L[j] === aA) c += a * nb;
-            var nb2 = antesOn && L[j] === bB ? Math.min(nb + 1, NB - 1) : nb;
-            var k2 = id(j, m | (1 << j), nb2);
+            var dd = d(L[i], L[j]), z = llega(nb, L[j]), c = v + (dd != null && i !== j ? b * dd : a) + a * z[0];
+            var k2 = id(j, m | (1 << j), z[1]);
             if (c < sig[k2]) { sig[k2] = c; ps[k2] = id(i, m, nb); }
           }
         }
       }
-      cap = sig; capas.push(sig); previo.push(ps);
+      cap = sig; previo.push(ps);
     }
     // cierre: castigos de visitar todo y de terminar en f
     var mejor = Infinity, fin = -1;
@@ -143,13 +148,15 @@
   }
   function grafo(svg, modo) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var r = modo === 1 ? [] : ruta, interactivo = modo === 3;
+    var r = modo === 1 || modo === 'ctx' ? [] : ruta, interactivo = modo === 3;
     svg.classList.toggle('quieto', !interactivo);
     var defs = el('defs', {}, svg), mid = 'caso-flecha-' + modo;
     var mk = el('marker', { id: mid, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' }, defs);
     el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'tm-punta' }, mk);
     var mk2 = el('marker', { id: mid + '-x', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' }, defs);
     el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'caso-punta-x' }, mk2);
+    var mk3 = el('marker', { id: mid + '-v', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' }, defs);
+    el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'caso-punta-v' }, mk3);
     var usados = {};
     for (var i = 1; i < r.length; i++) usados[[r[i - 1], r[i]].sort().join('')] = (usados[[r[i - 1], r[i]].sort().join('')] || 0) + 1;
     CAMINOS.forEach(function (c) {
@@ -162,8 +169,8 @@
       var a0 = POS[r[t - 1]], b0 = POS[r[t]];
       if (r[t - 1] === r[t]) continue;
       var ex = b0[0] - a0[0], ey = b0[1] - a0[1], l = Math.hypot(ex, ey), nx = -ey / l * 5, ny = ex / l * 5, R0 = R + 4;
-      var ok = camino(r[t - 1], r[t]);
-      el('line', { 'class': ok ? 'tm-dir' : 'caso-salto', x1: a0[0] + ex / l * R0 + nx, y1: a0[1] + ey / l * R0 + ny, x2: b0[0] - ex / l * (R0 + 2) + nx, y2: b0[1] - ey / l * (R0 + 2) + ny, 'marker-end': 'url(#' + mid + (ok ? '' : '-x') + ')' }, svg);
+      var ok = camino(r[t - 1], r[t]), vuelve = r.slice(0, t).indexOf(r[t]) >= 0;
+      el('line', { 'class': ok ? (vuelve ? 'tm-dir caso-vuelve' : 'tm-dir') : 'caso-salto', x1: a0[0] + ex / l * R0 + nx, y1: a0[1] + ey / l * R0 + ny, x2: b0[0] - ex / l * (R0 + 2) + nx, y2: b0[1] - ey / l * (R0 + 2) + ny, 'marker-end': 'url(#' + mid + (ok ? (vuelve ? '-v' : '') : '-x') + ')' }, svg);
     }
     // distancias sobre cada camino, con halo blanco para que no se pisen con las líneas
     CAMINOS.forEach(function (c) {
@@ -178,6 +185,7 @@
       var g = el('g', { 'class': 'tm-nodo-g caso-nodo' + (pts.length ? ' visitado' : '') + (modo !== 1 && (k === s) ? ' es-s' : ''), tabindex: interactivo ? '0' : '-1', role: interactivo ? 'button' : 'img', 'aria-label': k + ' — ' + NOMBRE_LARGO[k] }, svg);
       if (k === aqui) el('circle', { 'class': 'tm-aqui', cx: p[0], cy: p[1], r: R }, g);
       if (k === meta) el('circle', { 'class': 'tm-meta', cx: p[0], cy: p[1], r: R + 5 }, g);
+      if (modo === 'ctx') { picto(g, k, p[0], p[1]); var e0 = ETIQ[k]; el('text', { 'class': 'caso-nombre', x: p[0] + e0[0], y: p[1] + e0[1], 'text-anchor': e0[2] }, g).textContent = NOMBRE[k]; return; }
       el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: R }, g);
       var tx = el('text', { 'class': 'caso-letra', x: p[0], y: p[1] + 5 }, g);
       tx.appendChild(document.createTextNode('x'));
@@ -190,6 +198,24 @@
     });
   }
 
+  // dibujos de trazos geométricos para cada instalación (solo en el grafo del contexto)
+  function picto(g, k, x, y) {
+    var h = el('g', { 'class': 'picto', transform: 'translate(' + x + ' ' + y + ')' }, g);
+    el('circle', { 'class': 'picto-fondo', cx: 0, cy: 0, r: 23 }, h);
+    var D = {
+      x1: 'M-14 10 V-4 L-7 -9 V-4 L0 -9 V-4 L7 -9 V10 Z M9 10 V-14 H13 V10 M-10 3 h4 M-2 3 h4',           // planta: naves y chimenea
+      x2: 'M0 -12 L12 0 L0 12 L-12 0 Z M-5 0 H5 M0 -5 V5',                                                // junta J1
+      x3: 'M-16 -6 Q0 -14 16 -6 Q0 2 -16 -6 M-11 -1 Q0 -7 11 -1 Q0 5 -11 -1 M-6 4 Q0 0 6 4 Q0 8 -6 4',   // tajo: bancos
+      x4: 'M-16 10 L-4 -10 L4 -2 L16 10 Z M-9 4 h6 M-2 6 h6',                                             // botadero: pila
+      x5: 'M0 -12 L12 0 L0 12 L-12 0 Z M-5 0 H5 M0 -5 V5',                                                // junta J2
+      x6: 'M-16 -4 H16 L12 10 H-12 Z M-10 2 q3 -3 6 0 t6 0 t6 0',                                          // lixiviación: poza
+      x7: 'M-15 10 Q-6 -12 3 2 Q9 -6 15 10 Z',                                                             // baja ley: acopio
+      x8: 'M-16 -6 H16 L10 10 H-10 Z M-11 0 q3 -3 6 0 t6 0 t6 0 M-8 5 q3 -2 5 0 t5 0 t5 0'               // relaves: embalse
+    };
+    el('path', { 'class': 'picto-trazo', d: D[k] }, h);
+    if (k === 'x7') [[-6, 4], [-1, 0], [5, 5]].forEach(function (c) { el('circle', { 'class': 'picto-punto', cx: c[0], cy: c[1], r: 1.6 }, h); });
+  }
+
   // ── matriz x_{i,t}: 8 filas × T columnas ──
   function matriz(caja) {
     var cols = []; for (var t = 1; t <= T; t++) cols.push(t);
@@ -197,7 +223,13 @@
     L.forEach(function (k, n) {
       h += '<tr><th><span class="caso-tabla-x">x' + sub(n + 1) + '</span> ' + NOMBRE[k] + '</th>' + cols.map(function (t) {
         var v = ruta[t - 1] === k ? 1 : 0, vacio = t > ruta.length, es = nuevo && nuevo[0] === n + 1 && nuevo[1] === t;
-        return '<td class="' + (v ? 'uno' : '') + (vacio ? ' vacio' : '') + (es ? ' nuevo' : '') + '" title="x' + (n + 1) + ',' + t + '">' + (vacio ? '·' : v) + '</td>';
+        // vuelta a un lugar ya visitado: azul · salto sin camino, partida o llegada fuera de regla: rojo
+        var tono = '';
+        if (v) {
+          var mal = (t > 1 && !camino(ruta[t - 2], k)) || (t === 1 && k !== s) || (t === T && k !== f);
+          tono = mal ? ' infraccion' : ruta.slice(0, t - 1).indexOf(k) >= 0 ? ' revisita' : '';
+        }
+        return '<td class="' + (v ? 'uno' : '') + tono + (vacio ? ' vacio' : '') + (es ? ' nuevo' : '') + '" title="x' + (n + 1) + ',' + t + '">' + (vacio ? '·' : v) + '</td>';
       }).join('') + '</tr>';
     });
     caja.innerHTML = h + '</table>';
@@ -276,6 +308,9 @@
       });
       html += '<div class="tm-par caso-fila"><span class="tm-t-rot">t = ' + t + '</span>' + terms.join('<span class="tm-mas">+</span>') + '</div>';
     }
+    // dos columnas que se leen de arriba abajo: t = 1 … a la izquierda y sigue a la derecha
+    var mitad = Math.ceil((T - 1) / 2);
+    $('filas').style.gridTemplateRows = 'auto repeat(' + mitad + ', auto)';
     $('filas').innerHTML = '<p class="tm-t-pista">En cada t solo sobrevive la fila <i>i</i> con x' + sub('i,t') + ' = 1 y, de ella, los caminos que salen de <i>i</i>.</p>' + html;
   }
   var animT = 0, escena = $('escena');
@@ -313,8 +348,7 @@
     var p = castigos(ruta), a = A();
     var faltan = L.filter(function (k) { return ruta.indexOf(k) < 0; });
     var saltos = []; for (var i = 1; i < ruta.length; i++) if (!camino(ruta[i - 1], ruta[i])) saltos.push('x' + sub(IDX[ruta[i - 1]] + ',' + i) + 'x' + sub(IDX[ruta[i]] + ',' + (i + 1)));
-    var pares = [];
-    if (antesOn) { var tb = []; ruta.forEach(function (k, t) { if (k === aA) tb.forEach(function (t0) { pares.push('x' + sub(IDX[bB] + ',' + t0) + 'x' + sub(IDX[aA] + ',' + (t + 1))); }); if (k === bB) tb.push(t + 1); }); }
+    var pares = ANTES.map(function (q) { var out = [], tb = []; if (q.on) ruta.forEach(function (k, t) { if (k === q.a) tb.forEach(function (t0) { out.push('x' + sub(IDX[q.b] + ',' + t0) + 'x' + sub(IDX[q.a] + ',' + (t + 1))); }); if (k === q.b) tb.push(t + 1); }); return out; });
     function suma(terms) { return terms.join(' + ') + (terms.length > 1 ? ' = ' + terms.length : ''); }
     var REGLAS = [
       ['Temporalidad', 'P' + sub('tiempo') + ' = Σ' + sub('t') + ' (1 − Σ' + sub('i') + ' x' + sub('i,t') + ')<sup>2</sup>', p.tiempo, ''],
@@ -324,7 +358,7 @@
       ['Empezar en ' + s, 'P' + sub('inicio') + ' = 1 − x' + sub(IDX[s] + ',1'), p.inicio, '1 − x' + sub(IDX[s] + ',1') + ' = 1 − 0 = 1 <span class="caso-cast-por">parte en ' + ruta[0] + '</span>'],
       ['Terminar en ' + f, 'P' + sub('fin') + ' = 1 − x' + sub(IDX[f] + ',' + T), p.fin, '1 − x' + sub(IDX[f] + ',' + T) + ' = 1 − 0 = 1 <span class="caso-cast-por">termina en ' + ruta[T - 1] + '</span>']
     ];
-    if (antesOn) REGLAS.push(['Visitar ' + aA + ' antes que ' + bB, 'P' + sub('antes') + ' = Σ' + sub('t') + ' Σ' + sub('t′<t') + ' x' + sub(IDX[bB] + ',t′') + ' x' + sub(IDX[aA] + ',t'), p.antes, suma(pares)]);
+    ANTES.forEach(function (q, n) { if (q.on) REGLAS.push(['Visitar ' + q.a + ' antes que ' + q.b, 'P' + sub('antes,' + (n + 1)) + ' = Σ' + sub('t') + ' Σ' + sub('t′<t') + ' x' + sub(IDX[q.b] + ',t′') + ' x' + sub(IDX[q.a] + ',t'), p.antesR[n], suma(pares[n])]); });
     $('castigos').innerHTML = REGLAS.map(function (c, n) {
       return '<div class="caso-cast pendiente" data-n="' + n + '"><span class="caso-cast-n">' + c[0] + '</span><span class="caso-f">' + c[1] + '</span>' +
         '<span class="caso-cast-v">= ' + c[2] + '</span>' + (c[2] ? '<div class="caso-cast-cuenta">= ' + c[3] + '</div>' : '') + '</div>';
@@ -352,10 +386,10 @@
     $('q-total').innerHTML = 'Q = B·D + A·P = ' + usd(B()) + ' · ' + kmCorto(D) + ' + ' + usd(A()) + ' · ' + p.total + ' = <span class="tm-circulo">' + usd(q) + '</span>' +
       (n === 0 ? ' <span class="tm-r-min">óptima</span>' : '');
     $('res-der').innerHTML =
-      '<div class="caso-res-bloque"><div class="caso-col-rot">Ruta</div><div class="caso-res-ruta">' + ruta.map(function (k) { return 'x' + sub(IDX[k]); }).join(' → ') + '</div></div>' +
+      '<div class="caso-res-bloque"><div class="caso-col-rot">Ruta</div><div class="caso-res-ruta">' + ruta.map(function (k) { return '<span class="caso-res-paso">' + NOMBRE[k] + ' <i>(x' + sub(IDX[k]) + ')</i></span>'; }).join(' → ') + '</div></div>' +
       '<div class="caso-res-bloque"><div class="caso-col-rot">Distancia</div><div class="caso-res-num">' + km(D) + ' <span>· ' + usd(B() * D) + '</span></div></div>' +
       '<div class="caso-res-bloque"><div class="caso-col-rot">Castigos</div><div class="caso-res-chips">' +
-      [['tiempo', p.tiempo], ['visita', p.visita], ['salto', p.salto], ['inicio', p.inicio], ['fin', p.fin]].concat(antesOn ? [['antes', p.antes]] : []).map(function (c) {
+      [['tiempo', p.tiempo], ['visita', p.visita], ['salto', p.salto], ['inicio', p.inicio], ['fin', p.fin]].concat(ANTES[0].on ? [['antes,1', p.antesR[0]]] : []).concat(ANTES[1].on ? [['antes,2', p.antesR[1]]] : []).map(function (c) {
         return '<span class="' + (c[1] ? 'roto' : '') + '">P' + sub(c[0]) + ' = ' + c[1] + '</span>';
       }).join('') + '</div></div>';
   }
@@ -394,18 +428,22 @@
   $('reiniciar').addEventListener('click', function () { ruta = []; nuevo = null; pintar(); });
 
   // ── pesos y restricciones elegibles ──
-  ['s', 'f', 'antes-a', 'antes-b'].forEach(function (n) {
+  ['s', 'f', 'antes-a', 'antes-b', 'antes2-a', 'antes2-b'].forEach(function (n) {
     $(n).innerHTML = L.map(function (k) { return '<option value="' + k + '">' + k + ' · ' + NOMBRE[k] + '</option>'; }).join('');
   });
-  $('s').value = s; $('f').value = f; $('antes-a').value = aA; $('antes-b').value = bB;
+  $('s').value = s; $('f').value = f;
+  $('antes-a').value = ANTES[0].a; $('antes-b').value = ANTES[0].b; $('antes2-a').value = ANTES[1].a; $('antes2-b').value = ANTES[1].b;
   function leerReglas() {
-    s = $('s').value; f = $('f').value; aA = $('antes-a').value; bB = $('antes-b').value; antesOn = $('antes-on').checked;
-    $('antes-a').disabled = $('antes-b').disabled = !antesOn;
+    s = $('s').value; f = $('f').value;
+    ANTES[0] = { on: $('antes-on').checked, a: $('antes-a').value, b: $('antes-b').value };
+    ANTES[1] = { on: $('antes2-on').checked, a: $('antes2-a').value, b: $('antes2-b').value };
+    $('antes-a').disabled = $('antes-b').disabled = !ANTES[0].on;
+    $('antes2-a').disabled = $('antes2-b').disabled = !ANTES[1].on;
     generar(); pintar();
   }
-  ['s', 'f', 'antes-a', 'antes-b', 'antes-on'].forEach(function (n) { $(n).addEventListener('change', leerReglas); });
+  ['s', 'f', 'antes-a', 'antes-b', 'antes-on', 'antes2-a', 'antes2-b', 'antes2-on'].forEach(function (n) { $(n).addEventListener('change', leerReglas); });
   ['b', 'a'].forEach(function (n) { $(n).addEventListener('input', function () { generar(); pintar(); }); });
-  $('antes-a').disabled = $('antes-b').disabled = true;
+  $('antes-a').disabled = $('antes-b').disabled = $('antes2-a').disabled = $('antes2-b').disabled = true;
 
   generar();
   irA(1);
@@ -415,8 +453,8 @@
   var anims = document.querySelectorAll('.ctx-anim');
   var marco = document.querySelector('[data-ctx-marco]');
   var PIES = {
-    sat: 'Foto satelital de la mina Orcopampa con sus posibles caminos. Los planos son reales.',
-    cam: 'Los posibles caminos entre las instalaciones A, T, B, C, D y E.',
+    sat: 'Vista satelital: llegada a la mina Orcopampa.',
+    cam: 'Foto satelital con sus posibles caminos. Los planos son reales.',
     graf: 'Solo las distancias se reducen al grafo que tenemos: cada instalación es un nodo xᵢ.'
   };
   var grafoCtx = document.querySelector('[data-grafo="ctx"]');
@@ -429,8 +467,10 @@
     });
     Array.prototype.forEach.call(marco.querySelectorAll('.ctx-vista'), function (f) { f.classList.toggle('activa', f.getAttribute('data-v') === v); });
     marco.querySelector('[data-ctx-pie]').textContent = PIES[v];
+    var video = marco.querySelector('video');
+    if (video) { if (v === 'sat') { try { video.currentTime = 0; video.playbackRate = 1; var pr = video.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} } else video.pause(); }
     if (v === 'graf') {
-      grafo(grafoCtx, 1);
+      grafo(grafoCtx, 'ctx');
       grafoCtx.classList.remove('dibuja'); void grafoCtx.getBoundingClientRect(); grafoCtx.classList.add('dibuja');
     }
   }
@@ -439,14 +479,17 @@
     Array.prototype.forEach.call(marco.querySelectorAll('[data-vista]'), function (b) {
       b.addEventListener('click', function () { clearTimeout(ciclo); ciclando = false; vista(b.getAttribute('data-vista'), false); });
     });
-    grafo(grafoCtx, 1);
+    grafo(grafoCtx, 'ctx');
   }
   // recorrido automático, una sola vez: satélite → caminos → grafo
   function recorrer() {
     if (ciclando) return;
     ciclando = true;
-    vista('sat', true);
-    ciclo = setTimeout(function () { vista('cam', true); ciclo = setTimeout(function () { vista('graf', false); ciclando = false; }, 3200); }, 3200);
+    vista('sat', false);
+    // el video manda: al terminar pasa a los caminos y luego al grafo
+    var video = marco.querySelector('video'), seguir = function () { vista('cam', true); ciclo = setTimeout(function () { vista('graf', false); ciclando = false; }, 3600); };
+    if (video && !quieto) video.addEventListener('ended', function fin() { video.removeEventListener('ended', fin); if (ciclando) seguir(); });
+    else ciclo = setTimeout(seguir, 3200);
   }
   function contar(elm) {
     var hasta = Number(elm.getAttribute('data-hasta')), miles = elm.hasAttribute('data-miles'), t0 = null, dur = 1400;

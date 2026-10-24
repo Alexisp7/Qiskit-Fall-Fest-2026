@@ -2285,6 +2285,43 @@
       .ctx-anim { opacity: 1; transform: none; transition: none; }
       .ctx-vista[data-v="sat"].activa img, .ctx-grafo.dibuja *, .ctx-tabs button.cargando::after { animation: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; }
     }
+    /* ── caso real, más grande y siempre en una pantalla ── */
+    .caso-escena, .caso-escena[data-paso="3"] { max-width: 1240px; }
+    .caso-e-rot { font-size: 26px; }
+    .caso-titulo { font-size: 46px; }
+    .caso:not([data-en="1"]) .caso-titulo { font-size: 34px; }
+    .caso-e1 { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 26px; align-items: center; }
+    .caso-e1 .caso-grafo { max-width: 940px !important; max-height: calc(100vh - 300px); }
+    .caso-e1 .caso-pesos { flex-direction: column; align-items: stretch; gap: 22px; text-align: center; }
+    .caso-e3 { grid-template-columns: 300px minmax(0, 1fr); }
+    .caso-e[data-e="3"] .caso-grafo { max-width: 860px !important; max-height: calc(100vh - 470px); }
+    .caso-res .caso-grafo { max-width: 700px !important; max-height: calc(100vh - 505px); }
+    .caso-tabla { font-size: 13px; }
+    .caso-tabla th { font-size: 16px; }
+    .caso-tabla td { min-width: 34px; }
+    .caso-dist { font-size: 12px; }
+    .caso-nombre { font-size: 12px; }
+    /* revisitas en azul, infracciones en rojo */
+    .caso-tabla td.revisita { background: rgba(62,111,176,.22); box-shadow: inset 0 0 0 1px rgba(62,111,176,.55); color: #1F4E8C; }
+    .caso-tabla td.infraccion { background: rgba(181,71,46,.2); box-shadow: inset 0 0 0 1px rgba(181,71,46,.6); color: #8E2F1B; }
+    .caso-grafo .caso-vuelve { stroke: #3E6FB0; }
+    .caso-punta-v { fill: #3E6FB0; }
+    .caso-leyenda-ruta { display: flex; gap: 14px; font-family: 'Inter', sans-serif; font-size: 11px; color: #6b665e; flex-wrap: wrap; }
+    .caso-leyenda-ruta i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+    /* distancias: una sola secuencia de t = 1 a T − 1 */
+    .caso-filas { grid-template-columns: repeat(2, auto); grid-auto-flow: column; column-gap: 54px; row-gap: 0; }
+    .caso-filas .tm-t-pista { grid-row: 1; }
+    .caso-fila { padding: 1px 0; }
+    /* resumen: nombre y su x */
+    .caso-res-paso { white-space: nowrap; }
+    .caso-res-paso i { font-size: .85em; color: #8C6D33; }
+    /* el grafo del contexto con dibujos de trazos geométricos */
+    .ctx-vista video { width: 100%; height: 100%; object-fit: cover; display: block; background: #0d0f14; }
+    .picto-fondo { fill: #fff; stroke: #1B2A4A; stroke-width: 1.6; }
+    .picto-trazo { fill: none; stroke: #1B2A4A; stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
+    .picto-punto { fill: #1B2A4A; }
+    .ctx-grafo .caso-nodo.foco .picto-fondo { fill: var(--gold); }
+    @media (max-width: 900px) { .caso-e1 { grid-template-columns: 1fr; } }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2445,13 +2482,13 @@
       <!-- de la foto satelital al grafo: solo las distancias pasan al modelo -->
       <div class="ctx-marco ctx-anim" data-ctx-marco>
         <div class="ctx-tabs" role="tablist">
-          <button type="button" role="tab" data-vista="sat" aria-selected="true">Foto satelital</button>
+          <button type="button" role="tab" data-vista="sat" aria-selected="true">Vista satelital</button>
           <button type="button" role="tab" data-vista="cam" aria-selected="false">Posibles caminos</button>
           <button type="button" role="tab" data-vista="graf" aria-selected="false">El grafo</button>
         </div>
         <div class="ctx-vistas">
-          <figure class="ctx-vista activa" data-v="sat"><img src="img/orcopampa/satelital.webp" alt="Foto satelital de la mina Orcopampa con sus posibles caminos y las instalaciones A, T, B, C, D y E" loading="lazy" width="1600" height="732"></figure>
-          <figure class="ctx-vista" data-v="cam"><img src="img/orcopampa/boceto.webp" alt="Boceto de los posibles caminos entre las instalaciones A, T, B, C, D y E" loading="lazy" width="914" height="404"></figure>
+          <figure class="ctx-vista activa" data-v="sat"><video src="img/orcopampa/vuelo.mp4" poster="img/orcopampa/vuelo-poster.jpg" muted playsinline preload="metadata" aria-label="Vista satelital: llegada a la mina Orcopampa"></video></figure>
+          <figure class="ctx-vista" data-v="cam"><img src="img/orcopampa/satelital.webp" alt="Foto satelital de la mina Orcopampa con sus posibles caminos y las instalaciones A, T, B, C, D y E" loading="lazy" width="1600" height="732"></figure>
           <figure class="ctx-vista" data-v="graf"><svg class="caso-grafo ctx-grafo" data-grafo="ctx" viewBox="0 0 660 300" aria-label="El grafo: las mismas instalaciones como nodos x1 a x8 y las distancias reales de cada camino"></svg></figure>
         </div>
         <p class="ctx-pie" data-ctx-pie>Los planos son reales y salen de la mina Orcopampa.</p>
@@ -2487,11 +2524,13 @@
       <!-- 1 · la red: distancias reales (fijas) y los dos pesos del costo -->
       <section class="caso-e" data-e="1">
         <div class="caso-e-rot">La red: ocho instalaciones y nueve caminos</div>
+        <div class="caso-e1">
         <svg class="caso-grafo" data-grafo="1" viewBox="0 0 660 300" aria-label="Red minera de ocho nodos con nueve caminos"></svg>
         <div class="caso-pesos">
           <label class="caso-peso"><span class="caso-peso-l">B = $</span><input type="number" min="0" step="1" value="10" data-c="b" aria-label="Costo por kilómetro, en dólares"><span class="caso-peso-n">costo por km recorrido</span></label>
-          <label class="caso-peso"><span class="caso-peso-l">A = $</span><input type="number" min="0" step="5" value="50" data-c="a" aria-label="Castigo por restricción rota, en dólares"><span class="caso-peso-n">castigo por cada regla rota</span></label>
+          <label class="caso-peso"><span class="caso-peso-l">A = $</span><input type="number" min="0" step="10" value="200" data-c="a" aria-label="Castigo por restricción rota, en dólares"><span class="caso-peso-n">castigo por cada regla rota</span></label>
           <p class="caso-nota">Las distancias son reales y únicas: no se editan.</p>
+        </div>
         </div>
       </section>
 
@@ -2527,9 +2566,13 @@
             </div>
             <div class="caso-regla interactiva">
               <div class="caso-regla-cab"><label class="caso-check"><input type="checkbox" data-c="antes-on"> <b>Visitar</b></label> <select data-c="antes-a" aria-label="Lugar que va primero"></select> <b>antes que</b> <select data-c="antes-b" aria-label="Lugar que va después"></select></div>
-              <div class="caso-f">P<sub>antes</sub> = Σ<sub>t</sub> Σ<sub>t′&lt;t</sub> x<sub>b,t′</sub> x<sub>a,t</sub></div>
+              <div class="caso-f">P<sub>antes,1</sub> = Σ<sub>t</sub> Σ<sub>t′&lt;t</sub> x<sub>b,t′</sub> x<sub>a,t</sub></div>
             </div>
-            <p class="caso-nota">Cada regla rota suma A al costo: Q = B·D + A·(P<sub>tiempo</sub> + P<sub>visita</sub> + P<sub>salto</sub> + P<sub>inicio</sub> + P<sub>fin</sub> + P<sub>antes</sub>).</p>
+            <div class="caso-regla interactiva">
+              <div class="caso-regla-cab"><label class="caso-check"><input type="checkbox" data-c="antes2-on"> <b>Visitar</b></label> <select data-c="antes2-a" aria-label="Lugar que va primero"></select> <b>antes que</b> <select data-c="antes2-b" aria-label="Lugar que va después"></select></div>
+              <div class="caso-f">P<sub>antes,2</sub> = Σ<sub>t</sub> Σ<sub>t′&lt;t</sub> x<sub>b′,t′</sub> x<sub>a′,t</sub></div>
+            </div>
+            <p class="caso-nota">Cada regla rota suma A al costo: Q = B·D + A·(P<sub>tiempo</sub> + P<sub>visita</sub> + P<sub>salto</sub> + P<sub>inicio</sub> + P<sub>fin</sub> + P<sub>antes,1</sub> + P<sub>antes,2</sub>).</p>
           </div>
         </div>
       </section>
@@ -2548,6 +2591,7 @@
               <ol class="tm-rutas" data-c="rutas" role="listbox"></ol>
             </div>
             <button type="button" class="tm-reiniciar" data-c="reiniciar">Reiniciar</button>
+            <div class="caso-leyenda-ruta"><span><i style="background:rgba(62,111,176,.35)"></i>vuelve a un lugar ya visitado</span><span><i style="background:rgba(181,71,46,.35)"></i>salto o regla rota</span></div>
           </div>
           <div class="caso-e3-der">
             <svg class="caso-grafo" data-grafo="3" viewBox="0 0 660 300" aria-label="Red minera: toca los nodos en orden para armar la ruta"></svg>
@@ -2602,6 +2646,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=7"></script>
+  <script src="js/caso-minero.js?v=9"></script>
 </body>
 </html>
