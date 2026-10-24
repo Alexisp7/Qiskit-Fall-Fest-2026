@@ -1417,6 +1417,66 @@
     /* el grafo se ajusta al alto disponible para que todo entre en una vista */
     .reto-red#grafo { max-height: max(250px, calc(100vh - 430px)); width: 100%; }
     .reto-figura { padding-top: 18px; padding-bottom: 16px; }
+    /* ── rework: reto + ejemplo de 5 puntos + distancias ── */
+    .reto-intro { max-width: 1280px; margin: 0 auto 18px; padding: 0 48px; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    .reto-intro .reto-titulo { font-size: 30px; }
+    .reto-intro .reto-pregunta { margin-top: 0; }
+    .ejemplo { max-width: 1280px; margin: 0 auto; padding: 0 48px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+    .plano { width: 100%; height: auto; display: block; }
+    .plano .rejilla { stroke: rgba(242,238,230,.07); }
+    .plano .eje { stroke: rgba(242,238,230,.35); }
+    .plano .marca { font-family: 'Space Mono', monospace; font-size: 9px; fill: #6f6a61; text-anchor: middle; }
+    .plano .eje-nombre { text-anchor: end; fill: #8a8478; }
+    .plano .posible { stroke: rgba(242,238,230,.16); stroke-dasharray: 3 4; }
+    .plano .tramo { stroke: var(--gold); stroke-width: 3; stroke-linecap: round; }
+    .plano .tramo-n { fill: #0f1626; stroke: var(--gold); stroke-width: 1.2; }
+    .plano .tramo-n-txt { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; fill: #E0C48C; text-anchor: middle; }
+    .plano .punto-g { cursor: pointer; outline: none; }
+    .plano .punto { fill: #0f1626; stroke: #F2EEE6; stroke-width: 1.6; transition: fill .2s; }
+    .plano .punto-g:hover .punto, .plano .punto-g:focus-visible .punto { stroke: var(--gold); stroke-width: 2.6; }
+    .plano .punto.visitado { fill: var(--gold); }
+    .plano .punto.almacen { stroke: var(--gold); stroke-width: 2.6; }
+    .plano .punto-etq { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 14px; fill: #F2EEE6; text-anchor: middle; pointer-events: none; }
+    .plano .punto.visitado + .punto-etq { fill: #111; }
+    .plano .punto-coord { font-family: 'Space Mono', monospace; font-size: 9px; fill: #A8A39A; text-anchor: middle; pointer-events: none; }
+    .ejemplo-texto { background: #FAF8F4; border: 1px solid #EEE9E0; border-left: none; padding: 24px 32px; }
+    .ejemplo-enunciado { font-size: 14.5px; line-height: 1.65; color: var(--gray); margin: 8px 0 14px; }
+    .ejemplo-enunciado b { color: var(--black); }
+    .fcoste { background: #fff; border: 1px solid #E5E2DC; border-top: 3px solid var(--gold); padding: 14px 18px 12px; margin-bottom: 14px; }
+    .fcoste-rot { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #7A7A7A; margin-bottom: 6px; }
+    .fcoste-formula { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; line-height: 1.25; color: var(--black); }
+    .fcoste-formula .sumatoria { font-style: normal; font-size: 36px; display: inline-flex; flex-direction: column; vertical-align: middle; align-items: center; line-height: .8; margin: 0 2px; }
+    .fcoste-formula .sumatoria sub, .fcoste-formula .sumatoria sup { font-size: 12px; font-style: italic; line-height: 1; vertical-align: baseline; }
+    .fcoste-def { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: #1B2A4A; margin-top: 4px; }
+    .fcoste-qubo { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: #5A6478; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E2DC; line-height: 1.4; }
+    .fcoste-qubo span { font-family: 'Space Mono', monospace; font-style: normal; font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8a8478; margin-right: 6px; }
+    .exp-suma, .exp-num { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; color: var(--black); line-height: 1.35; }
+    .exp-num { color: #1B2A4A; }
+    .exp-total { font-style: normal; font-weight: 700; font-size: 32px; color: #8C6D33; font-variant-numeric: lining-nums; }
+    .exp-unidad { font-family: 'Space Mono', monospace; font-style: normal; font-size: 11px; color: #7A7A7A; }
+    .coste-estado { font-size: 13px; line-height: 1.55; color: var(--gray); margin: 8px 0 10px; min-height: 20px; }
+    .coste-estado.bien { color: #2F7A4F; font-weight: 600; }
+    .ejemplo-texto .calc-botones button { border-color: #1B2A4A; color: #1B2A4A; }
+    .ejemplo-texto .calc-botones button:hover { background: #1B2A4A; color: #fff; }
+    .distancias-wrap { max-width: 1280px; margin: 26px auto 10px; padding: 0 48px; box-sizing: border-box; }
+    .dist-cab { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+    .dist-cab .reto-desc { margin: 0; font-size: 13px; }
+    .distancias { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .dij { border: 1px solid #E5E2DC; background: #fff; padding: 12px 14px; font-family: 'Cormorant Garamond', serif; font-style: italic; color: #1B2A4A; transition: border-color .25s, background .25s; }
+    .dij.usada { border-color: var(--gold); background: #FBF7EE; box-shadow: inset 0 3px 0 var(--gold); }
+    .dij-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .dij-nombre { font-size: 22px; font-weight: 600; color: var(--black); }
+    .dij-orden { font-family: 'Space Mono', monospace; font-style: normal; font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8C6D33; }
+    .dij-linea { font-size: 14px; line-height: 1.45; white-space: nowrap; }
+    .dij-valor { font-style: normal; font-weight: 700; font-size: 20px; color: #8C6D33; margin-top: 4px; font-variant-numeric: lining-nums; }
+    @media (max-width: 1100px) { .distancias { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px) {
+      .reto-intro, .ejemplo { grid-template-columns: 1fr; padding: 0 16px; gap: 10px; }
+      .ejemplo-texto { border-left: 1px solid #EEE9E0; }
+      .distancias-wrap { padding: 0 16px; }
+      .distancias { grid-template-columns: repeat(2, 1fr); }
+      .dij-linea { white-space: normal; }
+    }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1449,28 +1509,53 @@
       <p class="problemas-intro entra" style="--i:2">El reto del hackathon Qiskit Fall Fest 2026 que desarrollamos en este espacio.</p>
     </div>
 
-    <div class="reto entra" style="--i:3">
-      <div class="reto-figura">
-        <svg class="reto-red" id="grafo" viewBox="0 0 480 360" role="group" aria-label="Grafo: toca puntos conectados para armar una ruta"></svg>
-        <div class="calc" aria-live="polite">
-          <div class="calc-fila">
-            <div class="calc-ruta-caja"><span class="calc-rot">Ruta</span><span class="calc-ruta" id="calc-ruta">—</span></div>
-            <div class="calc-total-caja"><span class="calc-rot">Gasto total</span><span class="calc-suma" id="calc-suma"></span><span class="calc-total" id="calc-total">0</span></div>
-          </div>
-          <div class="calc-fila calc-fila-2">
-            <p class="calc-estado" id="calc-estado"></p>
-            <div class="calc-botones"><button type="button" id="calc-optima">Ver ruta óptima</button><button type="button" id="calc-reiniciar">Reiniciar</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="reto-texto">
+    <!-- el reto -->
+    <div class="reto-intro entra" style="--i:3">
+      <div>
         <div class="reto-kicker">Track 01</div>
         <h3 class="reto-titulo">Optimización de rutas y conexiones mediante algoritmos cuánticos</h3>
         <p class="reto-desc">Muchos problemas requieren encontrar la mejor manera de conectar puntos, distribuir recursos o seleccionar combinaciones de elementos, minimizando costos y respetando determinadas restricciones.</p>
+      </div>
+      <div>
         <p class="reto-pregunta">¿Cómo pueden los algoritmos de optimización cuántica contribuir a encontrar soluciones de buena calidad para estos problemas?</p>
         <div class="reto-sub">Qué construir</div>
         <p class="reto-desc">Un entorno que permita representar un problema de optimización, definir sus variables y costos, y explorar distintas soluciones mediante enfoques clásicos y cuánticos o híbridos. La aplicación deberá permitir visualizar y comparar los resultados obtenidos.</p>
       </div>
+    </div>
+
+    <!-- ejemplo de 5 puntos: la ruta del repartidor -->
+    <div class="ejemplo entra" style="--i:4">
+      <div class="reto-figura">
+        <svg class="plano" id="plano" viewBox="0 0 480 400" role="group" aria-label="Plano con los 5 puntos: toca los puntos en orden para armar la ruta"></svg>
+      </div>
+      <div class="ejemplo-texto">
+        <div class="reto-kicker">Ejemplo · 5 puntos</div>
+        <p class="ejemplo-enunciado">Un repartidor sale del almacén <b>A</b>, visita una vez a los clientes <b>B, C, D</b> y <b>E</b>, y vuelve a <b>A</b>. ¿En qué orden debe hacerlo para recorrer la menor distancia?</p>
+
+        <div class="fcoste">
+          <div class="fcoste-rot">Función de coste</div>
+          <div class="fcoste-formula">C(π) = <span class="sumatoria"><sup>5</sup>Σ<sub>k=1</sub></span> d<sub>π<sub>k</sub>π<sub>k+1</sub></sub> ,&nbsp;&nbsp; π<sub>6</sub> = π<sub>1</sub> = A</div>
+          <div class="fcoste-def">d<sub>ij</sub> = √((x<sub>i</sub> − x<sub>j</sub>)² + (y<sub>i</sub> − y<sub>j</sub>)²)</div>
+          <div class="fcoste-qubo"><span>Para el enfoque cuántico (QUBO):</span> H = A Σ<sub>i</sub>(1 − Σ<sub>t</sub> x<sub>i,t</sub>)² + A Σ<sub>t</sub>(1 − Σ<sub>i</sub> x<sub>i,t</sub>)² + Σ<sub>i≠j</sub> d<sub>ij</sub> Σ<sub>t</sub> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
+        </div>
+
+        <div class="expandida" aria-live="polite">
+          <div class="fcoste-rot">Tu ruta, expandida</div>
+          <div class="exp-suma" id="coste-suma"></div>
+          <div class="exp-num"><span id="coste-num"></span> <span class="exp-igual">=</span> <span class="exp-total" id="coste-total">0</span> <span class="exp-unidad">km</span></div>
+          <p class="coste-estado" id="coste-estado"></p>
+          <div class="calc-botones"><button type="button" id="coste-optima">Ver la vuelta más corta</button><button type="button" id="coste-reiniciar">Reiniciar</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- cada distancia, calculada a mano -->
+    <div class="distancias-wrap entra" style="--i:5">
+      <div class="dist-cab">
+        <div class="reto-sub">Las 10 distancias d<sub>ij</sub>, una por una</div>
+        <p class="reto-desc">Con 5 puntos hay 5 × 4 / 2 = 10 pares. Las que usa tu ruta se marcan con su número de tramo.</p>
+      </div>
+      <ol class="distancias" id="distancias"></ol>
     </div>
   </section>
 
@@ -1483,6 +1568,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js"></script>
+  <script src="js/problemas.js?v=3"></script>
 </body>
 </html>
