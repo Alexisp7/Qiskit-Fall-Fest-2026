@@ -2019,6 +2019,186 @@
     .tm-xit-fuera { font-size: 19px; fill: #8C6D33; }
     .tm-xit-t { font-style: italic; }
     .tm-nodo-g:not(.visitado) .tm-xit-fuera { fill: #9a958c; font-weight: 600; }
+    /* ── caso real: red minera ── */
+    .caso { background: var(--white); padding: 56px 24px 40px; border-top: 1px solid rgba(200,169,110,.45); text-align: center; }
+    .caso-cab { max-width: 760px; margin: 0 auto 18px; }
+    .caso-kicker { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: #8C6D33; display: inline-flex; align-items: center; gap: 14px; }
+    .caso-kicker::before, .caso-kicker::after { content: ''; width: 34px; height: 1px; background: var(--gold); }
+    .caso-titulo { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 44px; line-height: 1.1; color: var(--black); margin: 8px 0 10px; }
+    .caso-titulo em { color: var(--gold); }
+    .caso-reto { font-family: 'Cormorant Garamond', serif; font-size: 22px; line-height: 1.4; color: #1B2A4A; margin: 0; }
+    .caso-reto b { color: #8C6D33; }
+    .caso-pasos { justify-content: center; margin: 0 auto 14px; }
+    .caso-escena { max-width: 1100px; margin: 0 auto; min-height: 420px; }
+    .caso-e { display: none; }
+    .caso-escena[data-paso="1"] .caso-e[data-e="1"], .caso-escena[data-paso="2"] .caso-e[data-e="2"], .caso-escena[data-paso="3"] .caso-e[data-e="3"],
+    .caso-escena[data-paso="4"] .caso-e[data-e="4"], .caso-escena[data-paso="5"] .caso-e[data-e="5"], .caso-escena[data-paso="6"] .caso-e[data-e="6"] { display: block; }
+    .caso-e > * { animation: tmEscena .5s cubic-bezier(.16,1,.3,1) both; }
+    .caso-e > :nth-child(2) { animation-delay: .07s; } .caso-e > :nth-child(3) { animation-delay: .14s; } .caso-e > :nth-child(4) { animation-delay: .21s; }
+    .caso-e-rot { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 25px; color: #1B2A4A; margin-bottom: 6px; }
+    .caso-nota { font-family: 'Inter', sans-serif; font-size: 12px; color: #8C6D33; margin: 6px 0 0; }
+    /* grafo horizontal grande */
+    .caso-grafo { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; }
+    .caso-grafo .tm-arista { stroke: #1B2A4A; stroke-width: 1.5; }
+    .caso-grafo .tm-resalte { stroke-width: 9; }
+    .caso-dist { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; text-anchor: middle; fill: #1B2A4A; paint-order: stroke; stroke: #fff; stroke-width: 5px; stroke-linejoin: round; }
+    .caso-letra { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 700; font-size: 18px; text-anchor: middle; fill: #1B2A4A; pointer-events: none; }
+    .caso-letra-sub { font-size: 11px; font-style: normal; }
+    .caso-nombre { font-family: 'Inter', sans-serif; font-size: 11px; fill: #6b665e; pointer-events: none; }
+    .caso-tiempos { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; fill: #8C6D33; pointer-events: none; }
+    .caso-nodo.visitado .tm-nodo { fill: #FBF7EE; }
+    .caso-salto { stroke: #B5472E; stroke-width: 1.8; stroke-dasharray: 5 4; }
+    .caso-punta-x { fill: #B5472E; }
+    .caso-grafo.quieto .tm-nodo-g { cursor: default; }
+    .caso-grafo.quieto .tm-nodo-g:hover .tm-nodo { stroke: #1B2A4A; stroke-width: 2; }
+    /* pesos B y A */
+    .caso-pesos { display: flex; align-items: flex-end; justify-content: center; gap: 46px; flex-wrap: wrap; margin-top: 4px; }
+    .caso-pesos .caso-nota { flex-basis: 100%; }
+    .caso-peso { display: grid; grid-template-columns: auto auto; align-items: baseline; column-gap: 4px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; color: #1B2A4A; }
+    .caso-peso input { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; width: 70px; border: none; border-bottom: 1px solid #C9C4BB; background: transparent; text-align: center; -moz-appearance: textfield; color: var(--black); }
+    .caso-peso input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .caso-peso input:focus { outline: none; border-bottom-color: var(--gold); background: rgba(200,169,110,.12); }
+    .caso-peso-n { grid-column: 1 / -1; font-family: 'Inter', sans-serif; font-style: normal; font-size: 11px; color: #9a958c; text-align: center; }
+    /* restricciones */
+    .caso-reglas { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; text-align: left; margin-top: 8px; }
+    .caso-col-rot { font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #9a958c; margin-bottom: 8px; }
+    .caso-regla { border: 1px solid #E5E2DC; padding: 10px 14px; margin-bottom: 8px; background: #fff; }
+    .caso-regla.interactiva { border-color: rgba(200,169,110,.6); background: #FBF7EE; }
+    .caso-regla-cab { font-family: 'Inter', sans-serif; font-size: 13px; color: #555; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .caso-regla-cab b { color: #1B2A4A; }
+    .caso-regla select { font-family: 'Inter', sans-serif; font-size: 12.5px; padding: 3px 6px; border: 1px solid #C9C4BB; background: #fff; color: var(--black); }
+    .caso-regla select:disabled { opacity: .45; }
+    .caso-check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .caso-check input { accent-color: #8C6D33; }
+    .caso-f { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; color: var(--black); margin-top: 4px; }
+    .caso-regla-n { font-family: 'Inter', sans-serif; font-size: 11.5px; line-height: 1.45; color: #8C6D33; margin: 4px 0 0; }
+    /* paso 3: T, desplegable, contador, grafo y matriz */
+    .caso-barra { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; margin-bottom: 6px; }
+    .caso-t { display: flex; align-items: center; gap: 10px; }
+    .caso-t-rot { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px; color: #1B2A4A; }
+    .caso-t-ops { display: flex; gap: 3px; }
+    .caso-t-ops button { min-width: 28px; height: 28px; border: 1px solid #D9D3C7; background: #fff; font-family: 'Space Mono', monospace; font-size: 11px; color: #1B2A4A; cursor: pointer; }
+    .caso-t-ops button:hover { border-color: #1B2A4A; }
+    .caso-t-ops button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 700; }
+    .caso-select { flex: 0 1 380px; max-width: 380px; text-align: left; }
+    .caso-select .tm-rutas { max-height: 280px; overflow-y: auto; }
+    .caso-camino { font-family: 'Space Mono', monospace; font-size: 12px !important; letter-spacing: .02em; }
+    .caso-contador-fila { display: flex; align-items: center; justify-content: center; gap: 18px; }
+    .caso-e[data-e="3"] .caso-grafo { max-width: 700px; }
+    .caso-mat { overflow-x: auto; margin: 4px auto 0; max-width: 100%; }
+    .caso-tabla { border-collapse: collapse; margin: 0 auto; font-family: 'Space Mono', monospace; font-size: 12px; }
+    .caso-tabla th { font-weight: 400; color: #1B2A4A; padding: 2px 6px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; }
+    .caso-tabla tr:first-child th { border-bottom: 1px solid #1B2A4A; }
+    .caso-tabla tr th:first-child { text-align: left; border-right: 1px solid #1B2A4A; font-family: 'Inter', sans-serif; font-style: normal; font-size: 11px; color: #6b665e; white-space: nowrap; padding-right: 10px; }
+    .caso-tabla-x { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; color: #1B2A4A; }
+    .caso-tabla td { text-align: center; min-width: 30px; padding: 2px 4px; border-left: 1px solid #EEE9E0; border-bottom: 1px solid #F1EDE5; color: #B0AAA0; }
+    .caso-tabla td.uno { background: rgba(200,169,110,.32); color: var(--black); font-weight: 700; box-shadow: inset 0 0 0 1px rgba(140,109,51,.35); }
+    .caso-tabla td.vacio { color: #DDD7CB; }
+    .caso-tabla td.nuevo { animation: tmAnota .9s cubic-bezier(.16,1,.3,1); }
+    .caso-tabla th.ahora { color: #8C6D33; font-weight: 700; }
+    /* paso 4: distancia */
+    .caso-q { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; color: var(--black); margin: 4px 0 10px; }
+    .caso-filas { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 6px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 18px; text-align: left; }
+    .caso-fila .tm-term:not(.on) { color: var(--black); }
+    .caso-fila .tm-term.salto .tm-d { color: #B5472E; }
+    .caso-escena .tm-par { transition: opacity .45s; }
+    .caso-escena .caso-fila .tm-term.hecho:not(.on) { opacity: .35; }
+    .caso-escena.animando .tm-q-res { visibility: hidden; }
+    .caso-escena.animando .tm-term:not(.hecho) .tm-x-val { visibility: hidden; }
+    .caso-escena.animando .tm-term:not(.hecho) .tm-x.cero .tm-x-glifo::after { content: none; }
+    .caso-escena.animando .tm-term:not(.hecho) { font-weight: 400; opacity: 1; }
+    .caso-escena.animando .tm-term.on:not(.hecho) { border-bottom-color: transparent; }
+    .caso-escena.animando .tm-term:not(.hecho) .tm-d.on { color: var(--black); font-weight: 400; }
+    .caso-escena:not(.animando) .caso-fila .tm-term:not(.on) { opacity: .35; }
+    /* paso 5: castigos */
+    .caso-castigos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; text-align: left; max-width: 1000px; margin: 6px auto 12px; }
+    .caso-cast { border: 1px solid #E5E2DC; padding: 10px 14px; position: relative; animation: tmEscena .45s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--k) * .1s); }
+    .caso-cast.ok { border-left: 3px solid #2F7A4F; }
+    .caso-cast.roto { border-left: 3px solid #B5472E; background: #FCF4F1; }
+    .caso-cast.off { opacity: .5; }
+    .caso-cast-n { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12.5px; color: #1B2A4A; }
+    .caso-cast-d { font-family: 'Inter', sans-serif; font-size: 11.5px; color: #6b665e; margin-top: 2px; }
+    .caso-cast-v { position: absolute; right: 12px; top: 8px; font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; color: #2F7A4F; }
+    .caso-cast.roto .caso-cast-v { color: #B5472E; }
+    /* paso 6: resumen */
+    .caso-q-total { font-size: 28px; }
+    .caso-res { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 28px; align-items: start; text-align: left; }
+    .caso-res-der { border-left: 1px solid #E5E2DC; padding-left: 26px; }
+    .caso-res-bloque { margin-bottom: 16px; }
+    .caso-res-ruta { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; line-height: 1.5; color: var(--black); }
+    .caso-res-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: #8C6D33; }
+    .caso-res-num span { font-size: 18px; color: #1B2A4A; font-weight: 500; }
+    .caso-res-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .caso-res-chips span { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; padding: 2px 10px; border: 1px solid rgba(47,122,79,.4); color: #2F7A4F; }
+    .caso-res-chips span.roto { border-color: rgba(181,71,46,.5); color: #B5472E; background: #FCF4F1; }
+    .caso-res .caso-grafo { max-width: 620px; }
+    .caso-nav { margin-top: 14px; }
+    .caso-adelante:not(:disabled) { border-color: var(--gold); background: var(--gold); color: #fff; animation: tmLlama 1.6s ease-in-out infinite; }
+    .caso-escena[data-paso="6"] ~ .caso-nav .caso-adelante { display: none; }
+    @media (max-width: 900px) {
+      .caso { padding: 40px 16px 30px; }
+      .caso-titulo { font-size: 32px; }
+      .caso-reglas, .caso-res { grid-template-columns: 1fr; }
+      .caso-castigos { grid-template-columns: 1fr; }
+      .caso-res-der { border-left: none; padding-left: 0; border-top: 1px solid #E5E2DC; padding-top: 14px; }
+      .caso-pasos li { font-size: 0; gap: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { .caso-e > *, .caso-cast, .caso-adelante { animation: none !important; } }
+    /* caso: que cada paso quepa en una pantalla */
+    .caso { padding-top: 64px; }
+    .caso-cab { margin-bottom: 10px; }
+    .caso-titulo { font-size: 38px; margin: 4px 0 6px; }
+    .caso-reto { font-size: 19px; }
+    .caso-pasos { margin-bottom: 8px; }
+    .caso-e-rot { font-size: 22px; margin-bottom: 2px; }
+    .caso-e[data-e="1"] .caso-grafo { max-width: 680px; }
+    .caso-pesos { gap: 40px; }
+    .caso-pesos .caso-nota { margin-top: 0; }
+    .caso-nav { margin-top: 8px; }
+    .caso-f, .caso-tabla, .caso-q, .caso-filas, .caso-res-num, .caso-cast-v { font-variant-numeric: lining-nums; }
+    /* después del paso 1 la cabecera se achica para dejar sitio al trabajo */
+    .caso-cab .caso-reto, .caso-titulo { transition: font-size .3s; }
+    .caso:not([data-en="1"]) .caso-reto { display: none; }
+    .caso:not([data-en="1"]) .caso-titulo { font-size: 30px; margin-bottom: 2px; }
+    .caso-e[data-e="3"] .caso-grafo { max-width: 600px; }
+    .caso-tabla td { padding: 0 4px; line-height: 19px; }
+    .caso-tabla th { line-height: 19px; padding-top: 0; padding-bottom: 0; }
+    .caso-barra { margin-bottom: 2px; }
+    /* paso 3: controles a un costado, grafo grande y la matriz debajo */
+    .caso-e3 { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: center; text-align: left; }
+    .caso-panel { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+    .caso-panel .caso-t { align-items: flex-start; }
+    .caso-panel .caso-t-ops { flex-wrap: wrap; max-width: 230px; }
+    .caso-contador { flex-wrap: wrap; row-gap: 4px; }
+    .caso-contador .tm-c-txt { flex-basis: 100%; }
+    .caso-panel .caso-select { flex: none; width: 100%; max-width: none; }
+    .caso-e[data-e="3"] .caso-grafo { max-width: 720px; }
+    @media (max-width: 900px) { .caso-e3 { grid-template-columns: 1fr; } }
+    .caso-select .tm-sel-btn { flex-wrap: wrap; align-items: center; row-gap: 2px; padding: 7px 12px; }
+    .caso-select .tm-sel-btn .tm-r-camino { flex: 1 1 100%; order: 2; }
+    .caso-select .tm-sel-btn .tm-sel-chev { margin-left: auto; }
+    .caso-select .tm-ruta button { flex-wrap: wrap; }
+    /* paso 4: las filas por tiempo en dos columnas */
+    .caso-filas { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; column-gap: 44px; row-gap: 0; font-size: 17px; line-height: 1.15; }
+    .caso-filas .tm-t-pista { grid-column: 1 / -1; font-family: 'Inter', sans-serif; font-style: normal; font-size: 12px; color: #8C6D33; margin: 0 0 4px; text-align: center; }
+    .caso-fila { display: flex; align-items: flex-end; white-space: nowrap; padding: 2px 0; }
+    .caso-fila .tm-t-rot { font-family: 'Space Mono', monospace; font-style: normal; font-size: 10px; color: #9a958c; min-width: 46px; margin-right: 6px; align-self: center; }
+    .caso-fila .tm-term { display: inline-flex; align-items: flex-end; }
+    .caso-fila .tm-mas { margin: 0 4px; }
+    .caso-fila .tm-x-val { font-size: 9px; }
+    .caso-e[data-e="4"] .caso-q { margin-bottom: 4px; }
+    .caso-e[data-e="4"] .tm-acum { margin-top: 6px; font-size: 22px; }
+    .caso-res-chips span, .caso .tm-acum { font-variant-numeric: lining-nums; }
+    .caso .tm-acum { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+    .caso-e[data-e="1"] .caso-grafo { max-width: 720px; }
+    @media (min-width: 1000px) and (max-height: 760px) {
+      .caso { padding-top: 58px; }
+      .caso-e[data-e="1"] .caso-grafo { max-width: 610px; }
+      .caso-e[data-e="3"] .caso-grafo { max-width: 620px; }
+      .caso-res .caso-grafo { max-width: 520px; }
+      .caso-tabla td, .caso-tabla th { line-height: 17px; }
+      .caso-q-total { font-size: 24px; margin-bottom: 4px; }
+    }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2151,6 +2331,129 @@
     </div>
   </section>
 
+  <!-- caso real: cobertura de la red minera (8 instalaciones, distancias reales) -->
+  <section class="caso" data-caso aria-labelledby="caso-titulo">
+    <div class="caso-cab">
+      <div class="caso-kicker">Caso real</div>
+      <h2 class="caso-titulo" id="caso-titulo">Cobertura de la red <em>minera</em></h2>
+      <p class="caso-reto">¿Cuál es la ruta <b>mínima</b> para pasar por <b>todos</b> los lugares en <i>T</i> tiempos, saliendo de x<sub>1</sub> y volviendo a x<sub>1</sub>?</p>
+    </div>
+
+    <ol class="tm-pasos caso-pasos" data-c="pasos">
+      <li><span>1</span>Red</li>
+      <li><span>2</span>Restricciones</li>
+      <li><span>3</span>Ruta</li>
+      <li><span>4</span>Distancia</li>
+      <li><span>5</span>Castigos</li>
+      <li><span>6</span>Resumen</li>
+    </ol>
+
+    <div class="caso-escena" data-c="escena" data-paso="1">
+      <!-- 1 · la red: distancias reales (fijas) y los dos pesos del costo -->
+      <section class="caso-e" data-e="1">
+        <div class="caso-e-rot">La red: ocho instalaciones y nueve caminos</div>
+        <svg class="caso-grafo" data-grafo="1" viewBox="0 0 660 300" aria-label="Red minera de ocho nodos con nueve caminos"></svg>
+        <div class="caso-pesos">
+          <label class="caso-peso"><span class="caso-peso-l">B = $</span><input type="number" min="0" step="1" value="10" data-c="b" aria-label="Costo por kilómetro, en dólares"><span class="caso-peso-n">costo por km recorrido</span></label>
+          <label class="caso-peso"><span class="caso-peso-l">A = $</span><input type="number" min="0" step="5" value="50" data-c="a" aria-label="Castigo por restricción rota, en dólares"><span class="caso-peso-n">castigo por cada regla rota</span></label>
+          <p class="caso-nota">Las distancias son reales y únicas: no se editan.</p>
+        </div>
+      </section>
+
+      <!-- 2 · restricciones: tres siempre activas y tres que eliges -->
+      <section class="caso-e" data-e="2">
+        <div class="caso-e-rot">Las reglas que debe respetar la ruta</div>
+        <div class="caso-reglas">
+          <div class="caso-col">
+            <div class="caso-col-rot">Siempre activas</div>
+            <div class="caso-regla">
+              <div class="caso-regla-cab"><b>Temporalidad</b> · un lugar por tiempo</div>
+              <div class="caso-f">P<sub>tiempo</sub> = Σ<sub>t</sub> (1 − Σ<sub>i</sub> x<sub>i,t</sub>)<sup>2</sup></div>
+            </div>
+            <div class="caso-regla">
+              <div class="caso-regla-cab"><b>Espacialidad</b> · cada lugar se visita</div>
+              <div class="caso-f">P<sub>visita</sub> = Σ<sub>i</sub> (1 − y<sub>i</sub>)<sup>2</sup>, &nbsp;y<sub>i</sub> = 1 si Σ<sub>t</sub> x<sub>i,t</sub> ≥ 1</div>
+              <p class="caso-regla-n">El camión puede retroceder por un nodo si así gasta menos: repetir no se castiga, dejar un lugar sin visitar sí.</p>
+            </div>
+            <div class="caso-regla">
+              <div class="caso-regla-cab"><b>Saltos prohibidos</b> · solo por caminos</div>
+              <div class="caso-f">P<sub>salto</sub> = Σ<sub>t</sub> Σ<sub>(i,j)∉E</sub> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
+            </div>
+          </div>
+          <div class="caso-col">
+            <div class="caso-col-rot">Las eliges tú</div>
+            <div class="caso-regla interactiva">
+              <div class="caso-regla-cab"><b>Empezar en</b> <select data-c="s" aria-label="Lugar de partida"></select></div>
+              <div class="caso-f">P<sub>inicio</sub> = 1 − x<sub>s,1</sub></div>
+            </div>
+            <div class="caso-regla interactiva">
+              <div class="caso-regla-cab"><b>Terminar en</b> <select data-c="f" aria-label="Lugar de llegada"></select></div>
+              <div class="caso-f">P<sub>fin</sub> = 1 − x<sub>f,T</sub></div>
+            </div>
+            <div class="caso-regla interactiva">
+              <div class="caso-regla-cab"><label class="caso-check"><input type="checkbox" data-c="antes-on"> <b>Visitar</b></label> <select data-c="antes-a" aria-label="Lugar que va primero"></select> <b>antes que</b> <select data-c="antes-b" aria-label="Lugar que va después"></select></div>
+              <div class="caso-f">P<sub>antes</sub> = Σ<sub>t</sub> Σ<sub>t′&lt;t</sub> x<sub>b,t′</sub> x<sub>a,t</sub></div>
+            </div>
+            <p class="caso-nota">Cada regla rota suma A al costo: Q = B·D + A·(P<sub>tiempo</sub> + P<sub>visita</sub> + P<sub>salto</sub> + P<sub>inicio</sub> + P<sub>fin</sub> + P<sub>antes</sub>).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 · la ruta: T elegible, grafo grande en horizontal y la matriz debajo -->
+      <section class="caso-e" data-e="3">
+        <div class="caso-e3">
+          <div class="caso-panel">
+            <div class="caso-t">
+              <span class="caso-t-rot">T =</span>
+              <div class="caso-t-ops" data-c="t-ops" role="group" aria-label="Número de tiempos"></div>
+            </div>
+            <div class="tm-contador caso-contador" data-c="contador" aria-live="polite"></div>
+            <div class="tm-select caso-select" data-c="select">
+              <button type="button" class="tm-sel-btn" data-c="sel-btn" aria-haspopup="listbox" aria-expanded="false"></button>
+              <ol class="tm-rutas" data-c="rutas" role="listbox"></ol>
+            </div>
+            <button type="button" class="tm-reiniciar" data-c="reiniciar">Reiniciar</button>
+          </div>
+          <svg class="caso-grafo" data-grafo="3" viewBox="0 0 660 300" aria-label="Red minera: toca los nodos en orden para armar la ruta"></svg>
+        </div>
+        <div class="caso-mat" data-mat="3"></div>
+      </section>
+
+      <!-- 4 · distancia: B Σ d_ij Σ x_{i,t} x_{j,t+1}, término a término -->
+      <section class="caso-e" data-e="4">
+        <div class="caso-e-rot">La distancia recorrida, tiempo por tiempo</div>
+        <div class="caso-q" data-c="q-dist"></div>
+        <div class="caso-filas" data-c="filas"></div>
+        <div class="tm-acum" data-c="acum"></div>
+        <button type="button" class="tm-reiniciar tm-repetir" data-c="repetir">↻ Repetir</button>
+      </section>
+
+      <!-- 5 · castigos: cada regla evaluada con la ruta elegida -->
+      <section class="caso-e" data-e="5">
+        <div class="caso-e-rot">Los castigos: ¿qué reglas rompe la ruta?</div>
+        <div class="caso-castigos" data-c="castigos"></div>
+        <div class="caso-q caso-q-castigo" data-c="q-castigo"></div>
+      </section>
+
+      <!-- 6 · resumen -->
+      <section class="caso-e" data-e="6">
+        <div class="caso-q caso-q-total" data-c="q-total"></div>
+        <div class="caso-res">
+          <div class="caso-res-izq">
+            <svg class="caso-grafo" data-grafo="6" viewBox="0 0 660 300" aria-label="Red minera con la ruta elegida"></svg>
+            <div class="caso-mat" data-mat="6"></div>
+          </div>
+          <div class="caso-res-der" data-c="res-der"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="tm-nav-abajo caso-nav">
+      <button type="button" class="tm-nav-btn" data-c="atras" aria-label="Paso anterior">‹</button>
+      <button type="button" class="tm-nav-btn caso-adelante" data-c="adelante" aria-label="Paso siguiente">›</button>
+    </div>
+  </section>
+
     <!-- el reto, al final: banda de cierre -->
     <section class="reto-cierre entra" style="--i:6" aria-labelledby="reto-cierre-titulo">
       <div class="rc-interior">
@@ -2183,5 +2486,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
+  <script src="js/caso-minero.js?v=6"></script>
 </body>
 </html>
