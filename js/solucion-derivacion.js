@@ -130,6 +130,7 @@
     { t: 'De pares a una matriz', l: [
       ['H = \\text{cte} + \\sum_{i=1}^{N}\\sum_{t=1}^{T} h_{i,t}\\,z_{i,t} + \\sum_{\\text{pares únicos}} J_{(i,t)(j,t\')}\\,z_{i,t}\\,z_{j,t\'}'],
       ['M = N\\times T, \\qquad k = (i-1)\\,T + t \\in \\{1,\\dots,M\\}', 'Para cada i, los T tiempos ocupan k = (i − 1)T + 1, …, iT: bloques que no se pisan, así que cada (i, t) tiene un k propio.'],
+      ['k_{\\text{cuaderno}} = (t-1)\\,N + i, \\qquad z_{12}:\\ k = 2 \\text{ por lugar},\\quad k = 4 \\text{ por tiempo}', 'Aquí se numera por lugar, como en la foto. El cuaderno y el circuito numeran por tiempo: es la misma H con los índices permutados (J ↦ PJPᵀ, h ↦ Ph). El argumento de la cascada de CZ del ansatz solo vale con el orden por tiempo.'],
       ['H_{\\text{matriz}} = \\sum_{k=1}^{M} h_k z_k + \\sum_{k=1}^{M}\\sum_{l=k+1}^{M} J_{kl}\\,z_k z_l \\;(+\\,\\text{cte}) \\;=\\; z^{\\mathsf T} J_{\\text{sup}}\\, z + h^{\\mathsf T} z', 'Con J simétrica, J_sim = J_sup + J_supᵀ y zᵀ J_sup z = ½ zᵀ J_sim z.']
     ] },
     { t: 'El Hamiltoniano como operador y lo que busca el VQE', l: [

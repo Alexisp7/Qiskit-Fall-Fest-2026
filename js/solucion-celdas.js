@@ -1,11 +1,12 @@
 // Bloques de código del cuaderno TRACK1_rutas_QUBO.ipynb. Solo la celda de
-// datos cambia: lleva la red minera real de 8 lugares.
+// datos cambia: lleva la red minera real de 8 lugares. Con T = 13 > N hay
+// revisitas: visitar_al_menos_una_vez (con holguras) reemplaza a visitar_una_vez.
 window.CELDAS = {
  "inicializar": [
   {
    "id": "datos",
    "titulo": "Datos de entrada · red minera",
-   "codigo": "# ---------- Grafo: red minera de Orcopampa (distancias en km) ----------\naristas = [\n    (1, 2, 1.6),     # Planta - J1\n    (2, 3, 0.072),   # J1 - Tajo\n    (2, 4, 0.035),   # J1 - Botadero\n    (2, 8, 1.4),     # J1 - Relaves\n    (2, 5, 1.4),     # J1 - J2\n    (1, 5, 1.7),     # Planta - J2\n    (8, 5, 1.0),     # Relaves - J2\n    (5, 6, 0.2),     # J2 - Lixiviacion\n    (5, 7, 0.5),     # J2 - Baja ley\n]\n\n# Posiciones para dibujar (opcional, None para automatico)\nposiciones = {1: (0, 2), 2: (2, 3), 3: (1, 4), 4: (3, 4),\n              5: (3, 1), 6: (2, 0), 7: (4, 0), 8: (5, 2)}\n\n# ---------- Pasos de tiempo ----------\nT = 13              # sale de x1 y vuelve a x1 pasando por los 8 lugares\n\n# ---------- Penalizacion de las restricciones ----------\nA = 100             # A >> B·d_max\n\n# ---------- Piezas activas del Hamiltoniano ----------\n# Cada linea es (nombre_de_pieza, argumentos_extra)\npiezas_activas = [\n    (\"coste_distancia\", ()),\n    (\"un_lugar_por_tiempo\", ()),\n    (\"visitar_una_vez\", ()),\n    (\"saltos_prohibidos\", ()),\n    (\"empezar_en\", (1,)),\n    (\"terminar_en\", (1,)),\n]\n\n# ---------- Resolvedores ----------\nUSAR_EXACTO = False  # 8 x 13 = 104 qubits: 2^104 estados no se pueden enumerar\nUSAR_VQE = False     # ni simular con Statevector en un computador normal\n",
+   "codigo": "# ---------- Grafo: red minera de Orcopampa (distancias en km) ----------\naristas = [\n    (1, 2, 1.6),     # Planta - J1\n    (2, 3, 0.072),   # J1 - Tajo\n    (2, 4, 0.035),   # J1 - Botadero\n    (2, 8, 1.4),     # J1 - Relaves\n    (2, 5, 1.4),     # J1 - J2\n    (1, 5, 1.7),     # Planta - J2\n    (8, 5, 1.0),     # Relaves - J2\n    (5, 6, 0.2),     # J2 - Lixiviacion\n    (5, 7, 0.5),     # J2 - Baja ley\n]\n\n# Posiciones para dibujar (opcional, None para automatico)\nposiciones = {1: (0, 2), 2: (2, 3), 3: (1, 4), 4: (3, 4),\n              5: (3, 1), 6: (2, 0), 7: (4, 0), 8: (5, 2)}\n\n# ---------- Pasos de tiempo ----------\nT = 13              # sale de x1 y vuelve a x1 pasando por los 8 lugares\n# 3, 4, 6 y 7 son hojas: la ruta debe volver a pasar por J1 (2) y J2 (5).\n# Ruta valida de 13 pasos: 1-2-3-2-4-2-8-5-6-5-7-5-1\n\n# ---------- Penalizacion de las restricciones ----------\nA = None            # None: usa sugerir_penalizacion(prob) = (T-1)·d_max + 1 ≈ 21.4\n\n# ---------- Piezas activas del Hamiltoniano ----------\n# Cada linea es (nombre_de_pieza, argumentos_extra)\npiezas_activas = [\n    (\"coste_distancia\", ()),\n    (\"un_lugar_por_tiempo\", ()),\n    (\"visitar_al_menos_una_vez\", ()),   # no \"visitar_una_vez\": 13 tiempos > 8 lugares\n    (\"saltos_prohibidos\", ()),          # incluye quedarse quieto (i -> i)\n    (\"empezar_en\", (1,)),\n    (\"terminar_en\", (1,)),\n]\n\n# ---------- Resolvedores ----------\nUSAR_EXACTO = False  # 8 x 13 + 24 holguras = 128 qubits: 2^128 estados no se pueden enumerar\nUSAR_VQE = False     # ni simular con Statevector en un computador normal\n",
    "clave": false,
    "tipo": "code"
   },
@@ -20,6 +21,13 @@ window.CELDAS = {
    "id": "problema",
    "titulo": "Problema: cada (lugar, tiempo) es un qubit",
    "codigo": "class Problema:\n    \"\"\"Guarda el grafo, los tiempos y el mapa (nodo, tiempo) -> qubit.\"\"\"\n\n    def __init__(self, grafo, T=None):\n        self.grafo = grafo\n        self.nodos = sorted(grafo.nodes)\n        self.N = len(self.nodos)\n        self.T = T if T is not None else self.N\n        self.tiempos = list(range(1, self.T + 1))\n        self.n_qubits = self.N * self.T\n        # qubit k = (t-1)*N + posicion del nodo\n        self._pos = {nodo: p for p, nodo in enumerate(self.nodos)}\n\n    def q(self, nodo, t):\n        \"\"\"Indice del qubit que representa x(nodo, t).\"\"\"\n        return (t - 1) * self.N + self._pos[nodo]\n\n    def var(self, k):\n        \"\"\"Inverso de q: qubit k -> (nodo, t).\"\"\"\n        return self.nodos[k % self.N], k // self.N + 1\n\n    def distancia(self, i, j):\n        \"\"\"Peso de la arista i-j, o None si no existe.\"\"\"\n        if self.grafo.has_edge(i, j):\n            return self.grafo[i][j].get(\"weight\", 1)\n        return None\n",
+   "clave": false,
+   "tipo": "code"
+  },
+  {
+   "id": "instancia",
+   "titulo": "La instancia: grafo y problema",
+   "codigo": "grafo = nx.Graph()\ngrafo.add_weighted_edges_from(aristas)      # (i, j, distancia en km)\nprob = Problema(grafo, T)\nprint(f\"{prob.N} lugares x {prob.T} tiempos = {prob.n_qubits} qubits de ruta\")\n",
    "clave": false,
    "tipo": "code"
   },
@@ -40,7 +48,14 @@ window.CELDAS = {
   {
    "id": "basicas",
    "titulo": "Restricciones que siempre van",
-   "codigo": "def exactamente_uno(Q, qubits, peso=1.0):\n    \"\"\"Ayuda generica: suma peso * (1 - sum x)^2 sobre esos qubits.\"\"\"\n    return Q.agregar_cuadrado({k: -1.0 for k in qubits}, c0=1.0, peso=peso)\n\n\ndef un_lugar_por_tiempo(prob):\n    \"\"\"Q_A = sum_t (1 - sum_i x(i,t))^2.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for t in prob.tiempos:\n        exactamente_uno(Q, [prob.q(i, t) for i in prob.nodos])\n    return Q\n\n\ndef visitar_una_vez(prob):\n    \"\"\"Q_B = sum_i (1 - sum_t x(i,t))^2.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for i in prob.nodos:\n        exactamente_uno(Q, [prob.q(i, t) for t in prob.tiempos])\n    return Q\n\n\ndef saltos_prohibidos(prob):\n    \"\"\"Castiga ir de i a j en pasos seguidos si no hay arista i-j.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for t in prob.tiempos[:-1]:\n        for i in prob.nodos:\n            for j in prob.nodos:\n                if i != j and prob.distancia(i, j) is None:\n                    Q.agregar_cuadratico(prob.q(i, t), prob.q(j, t + 1), 1.0)\n    return Q\n",
+   "codigo": "def exactamente_uno(Q, qubits, peso=1.0):\n    \"\"\"Ayuda generica: suma peso * (1 - sum x)^2 sobre esos qubits.\"\"\"\n    return Q.agregar_cuadrado({k: -1.0 for k in qubits}, c0=1.0, peso=peso)\n\n\ndef un_lugar_por_tiempo(prob):\n    \"\"\"Q_A = sum_t (1 - sum_i x(i,t))^2.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for t in prob.tiempos:\n        exactamente_uno(Q, [prob.q(i, t) for i in prob.nodos])\n    return Q\n\n\ndef visitar_una_vez(prob):\n    \"\"\"Q_B = sum_i (1 - sum_t x(i,t))^2.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for i in prob.nodos:\n        exactamente_uno(Q, [prob.q(i, t) for t in prob.tiempos])\n    return Q\n\n\ndef saltos_prohibidos(prob):\n    \"\"\"Castiga ir de i a j en pasos seguidos si no hay arista i-j,\n    y tambien quedarse en el mismo lugar (i -> i): con revisitas permitidas,\n    esperar en un nodo costaria cero y el optimizador lo aprovecharia.\"\"\"\n    Q = QUBO(prob.n_qubits)\n    for t in prob.tiempos[:-1]:\n        for i in prob.nodos:\n            for j in prob.nodos:\n                if i == j or prob.distancia(i, j) is None:\n                    Q.agregar_cuadratico(prob.q(i, t), prob.q(j, t + 1), 1.0)\n    return Q\n",
+   "clave": true,
+   "tipo": "code"
+  },
+  {
+   "id": "revisitas",
+   "titulo": "Visitar al menos una vez (holguras)",
+   "codigo": "def bits_holgura(prob):\n    \"\"\"Bits por lugar para contar las visitas extra: s_i va de 0 a 2^m - 1 >= T - N.\"\"\"\n    return max(1, (prob.T - prob.N).bit_length())\n\n\ndef holgura(prob, nodo, b):\n    \"\"\"Qubit de holgura y(nodo, b), despues de los N*T qubits de la ruta.\"\"\"\n    return prob.n_qubits + prob._pos[nodo] * bits_holgura(prob) + b\n\n\ndef visitar_al_menos_una_vez(prob):\n    \"\"\"Q_B' = sum_i (sum_t x(i,t) - 1 - s_i)^2,  s_i = sum_b 2^b y(i,b) >= 0.\n\n    Con T > N \"exactamente una vez\" choca con \"un lugar por tiempo\"\n    (T unos contra N unos). La holgura s_i cuenta las visitas extra: la\n    pieza vale 0 si el lugar aparece 1 + s_i veces, y s_i no puede ser\n    negativo, asi que no visitarlo nunca siempre se castiga.\n    \"\"\"\n    m = bits_holgura(prob)\n    Q = QUBO(prob.n_qubits + prob.N * m)\n    for i in prob.nodos:\n        coefs = {prob.q(i, t): 1.0 for t in prob.tiempos}\n        for b in range(m):\n            coefs[holgura(prob, i, b)] = -float(2 ** b)\n        Q.agregar_cuadrado(coefs, c0=-1.0)\n    return Q\n",
    "clave": true,
    "tipo": "code"
   },
@@ -54,7 +69,7 @@ window.CELDAS = {
   {
    "id": "armar",
    "titulo": "Armar el Hamiltoniano",
-   "codigo": "def armar_hamiltoniano(piezas):\n    \"\"\"piezas = {nombre: (peso, QUBO)}. Devuelve el QUBO total.\"\"\"\n    return sum(peso * Q for peso, Q in piezas.values())\n\n\ncatalogo = {\n    \"coste_distancia\": coste_distancia,\n    \"un_lugar_por_tiempo\": un_lugar_por_tiempo,\n    \"visitar_una_vez\": visitar_una_vez,\n    \"saltos_prohibidos\": saltos_prohibidos,\n    \"empezar_en\": empezar_en,\n    \"terminar_en\": terminar_en,\n    \"cerrar_camino\": cerrar_camino,\n    \"visitar_antes\": visitar_antes,\n}\npiezas = {}\nfor nombre, args in piezas_activas:\n    peso = 1.0 if nombre == \"coste_distancia\" else A\n    clave = nombre + \"\".join(f\"_{a}\" for a in args)\n    piezas[clave] = (peso, catalogo[nombre](prob, *args))\n\nqubo = armar_hamiltoniano(piezas)\nH, offset = qubo.a_ising()\n",
+   "codigo": "def armar_hamiltoniano(piezas):\n    \"\"\"piezas = {nombre: (peso, QUBO)}. Devuelve el QUBO total.\"\"\"\n    return sum(peso * Q for peso, Q in piezas.values())\n\n\ncatalogo = {\n    \"coste_distancia\": coste_distancia,\n    \"un_lugar_por_tiempo\": un_lugar_por_tiempo,\n    \"visitar_una_vez\": visitar_una_vez,\n    \"visitar_al_menos_una_vez\": visitar_al_menos_una_vez,\n    \"saltos_prohibidos\": saltos_prohibidos,\n    \"empezar_en\": empezar_en,\n    \"terminar_en\": terminar_en,\n    \"cerrar_camino\": cerrar_camino,\n    \"visitar_antes\": visitar_antes,\n}\nif A is None:\n    A = sugerir_penalizacion(prob)      # red minera: 12 · 1.7 + 1 = 21.4\npiezas = {}\nfor nombre, args in piezas_activas:\n    peso = 1.0 if nombre == \"coste_distancia\" else A\n    clave = nombre + \"\".join(f\"_{a}\" for a in args)\n    piezas[clave] = (peso, catalogo[nombre](prob, *args))\n\nqubo = armar_hamiltoniano(piezas)\nH, offset = qubo.a_ising()\n",
    "clave": false,
    "tipo": "code"
   },
@@ -91,14 +106,14 @@ window.CELDAS = {
   {
    "id": "por3",
    "titulo": "¿Por qué entrelazar?",
-   "codigo": "Sin compuertas de dos qubits el estado es un producto: cada qubit se ajusta por su cuenta. Pero el problema acopla qubits: la regla de un lugar por tiempo une los N qubits de un mismo t, la de visitar una vez une los T de un mismo lugar y la distancia une el tiempo t con t + 1. El entrelazamiento deja que el circuito correlacione esas variables mientras se optimiza.",
+   "codigo": "Sin compuertas de dos qubits el estado es un producto y la energía queda multilineal en cos θ<sub>k</sub>: su mínimo está en una esquina, cos θ<sub>k</sub> = ±1, es decir, en una cadena de bits. Así que el campo medio también puede representar la ruta óptima; el entrelazamiento no hace falta para <i>alcanzarla</i>. Lo que cambia es el camino del optimizador: cada ruta válida es un mínimo local para movimientos de un qubit a la vez (pasar a otra ruta exige cambiar varios bits juntos y cada cambio suelto rompe una regla, que cuesta A). La cascada de CZ agrega direcciones correlacionadas que pueden ayudar a salir de esos mínimos. En el triángulo, desde 300 arranques al azar, llegan al óptimo 38 % con CZ y 31 % sin CZ: ayuda, pero no lo garantiza.",
    "clave": true,
    "tipo": "md"
   },
   {
    "id": "por4",
    "titulo": "¿Por qué una cascada de CZ?",
-   "codigo": "Los qubits están ordenados por k = (t − 1)N + i. Con ese orden, unir cada qubit con el siguiente conecta los lugares de un mismo tiempo y, al pasar de x<sub>N,t</sub> a x<sub>1,t+1</sub>, un tiempo con el siguiente: la cadena recorre la misma estructura del Hamiltoniano. Es además la conexión más barata: n − 1 compuertas de dos qubits por capa, solo entre vecinos, que es lo que permite un chip con conectividad limitada.",
+   "codigo": "Los qubits del cuaderno están ordenados por tiempo: k = (t − 1)N + i. Con ese orden, unir cada qubit con el siguiente conecta los lugares de un mismo tiempo y, al pasar de x<sub>N,t</sub> a x<sub>1,t+1</sub>, un tiempo con el siguiente: la cadena sigue la estructura del Hamiltoniano. Ese argumento solo vale con el orden por tiempo; las matrices de Inicializar se muestran por lugar, k = (i − 1)T + t, que es la misma H con los índices permutados. Las holguras van al final de la cadena. Es además la conexión más barata: n − 1 compuertas de dos qubits por capa, solo entre vecinos.",
    "clave": true,
    "tipo": "md"
   },
@@ -112,8 +127,15 @@ window.CELDAS = {
   {
    "id": "por6",
    "titulo": "El tamaño del ansatz",
-   "codigo": "Con n = N·T qubits y una capa hay n parámetros en la primera fila de R<sub>Y</sub>, n en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13: 104 qubits, 208 parámetros θ y 103 CZ.",
+   "codigo": "Con n qubits y una capa hay n parámetros en la primera fila de R<sub>Y</sub>, n en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13 dan 104 qubits de ruta más 8 × 3 = 24 de holgura: 128 qubits, 256 parámetros θ y 127 CZ.",
    "clave": true,
+   "tipo": "md"
+  },
+  {
+   "id": "por7",
+   "titulo": "Escala y límites",
+   "codigo": "Con A ≈ 21,4 y distancias entre 0,035 y 1,7 km, las penalizaciones dominan el paisaje: distinguir dos rutas válidas depende de diferencias de décimas frente a saltos de 21. Por eso A no debe ser mayor que lo necesario (sugerir_penalizacion), y el Hamiltoniano se normaliza antes de optimizar. Aun así, 128 qubits con un ansatz <i>hardware-efficient</i> y 256 parámetros arriesgan <i>barren plateaus</i> (gradientes que se anulan) y COBYLA se vuelve lento. El triángulo (9 qubits) es donde el VQE se puede simular y validar; para la red, la referencia es clásica.",
+   "clave": false,
    "tipo": "md"
   }
  ],
@@ -172,8 +194,15 @@ window.CELDAS = {
   {
    "id": "desglose",
    "titulo": "Desglose por pieza",
-   "codigo": "def desglose(piezas, bits):\n    \"\"\"Valor de cada pieza para una solucion, con y sin su peso.\"\"\"\n    print(f\"{'pieza':<22}{'peso':>10}{'valor':>10}{'aporte':>12}\")\n    total = 0.0\n    for nombre, (peso, Q) in piezas.items():\n        v = Q.energia(bits)\n        total += peso * v\n        print(f\"{nombre:<22}{peso:>10.1f}{v:>10.1f}{peso * v:>12.1f}\")\n    print(f\"{'TOTAL':<22}{'':>10}{'':>10}{total:>12.1f}\")\n",
+   "codigo": "def desglose(piezas, bits):\n    \"\"\"Valor de cada pieza para una solucion, con y sin su peso.\"\"\"\n    print(f\"{'pieza':<26}{'peso':>10}{'valor':>10}{'aporte':>12}\")\n    total = 0.0\n    for nombre, (peso, Q) in piezas.items():\n        v = Q.energia(bits)\n        total += peso * v\n        print(f\"{nombre:<26}{peso:>10.1f}{v:>10.1f}{peso * v:>12.1f}\")\n    print(f\"{'TOTAL':<26}{'':>10}{'':>10}{total:>12.1f}\")\n",
    "clave": false,
+   "tipo": "code"
+  },
+  {
+   "id": "referencia",
+   "titulo": "Referencia clásica: 7,314 km",
+   "codigo": "def ruta_a_bits(prob, ruta):\n    \"\"\"Bits de una ruta (lugar en cada tiempo), con sus holguras s_i = visitas - 1.\"\"\"\n    m = bits_holgura(prob)\n    bits = [0] * (prob.n_qubits + prob.N * m)\n    for t, i in enumerate(ruta, start=1):\n        bits[prob.q(i, t)] = 1\n    for i in prob.nodos:\n        s = ruta.count(i) - 1\n        for b in range(m):\n            bits[holgura(prob, i, b)] = (s >> b) & 1\n    return bits\n\n\n# La red es un arbol con un ciclo central 1-2-8-5-1:\n#   ciclo 1.6 + 1.4 + 1.0 + 1.7 = 5.7 km\n#   hojas ida y vuelta 2 · (0.072 + 0.035 + 0.2 + 0.5) = 1.614 km\nruta_ref = [1, 2, 3, 2, 4, 2, 8, 5, 6, 5, 7, 5, 1]      # 13 pasos = T\nd_ref = sum(prob.distancia(a, b) for a, b in zip(ruta_ref, ruta_ref[1:]))\nprint(f\"Distancia de referencia: {d_ref:.3f} km\")       # 7.314\ndesglose(piezas, ruta_a_bits(prob, ruta_ref))          # todas las restricciones en 0\n",
+   "clave": true,
    "tipo": "code"
   },
   {

@@ -18,30 +18,36 @@
   var T = 13, N = 8;
   // el camino cualquiera con el que se trabaja (tiene un salto sin camino, x4 queda fuera y termina en x2)
   var P = [1, 5, 7, 5, 6, 5, 8, 1, 2, 3, 2, 8, 2];
+  // la ruta óptima de referencia (7,314 km)
+  var RREF = [1, 2, 3, 2, 4, 2, 8, 5, 6, 5, 7, 5, 1];
 
   var EXPLICA = {
-    datos: { t: 'La red minera: 8 lugares unidos por 9 caminos con sus distancias en km, T = 13 tiempos y A = 100. Las piezas activas incluyen partir y terminar en x<sub>1</sub>, la planta.' },
+    datos: { t: 'La red minera: 8 lugares unidos por 9 caminos con sus distancias en km y T = 13 tiempos. Como 3, 4, 6 y 7 son hojas, la ruta tiene que volver a pasar por J1 y J2; por eso se activa visitar_al_menos_una_vez y no visitar_una_vez. A queda en None para usar la sugerida, 21,4. Las piezas activas incluyen partir y terminar en x<sub>1</sub>, la planta.', f: ['1 → 2 → 3 → 2 → 4 → 2 → 8 → 5 → 6 → 5 → 7 → 5 → 1 &nbsp;(13 pasos)'] },
+    instancia: { t: 'Crea el grafo de NetworkX con las 9 aristas y sus distancias, y el Problema con T = 13: 8 × 13 = 104 qubits de ruta.' },
     libs: { t: 'NumPy y NetworkX para los datos, SciPy para el optimizador COBYLA y Qiskit para el circuito, el Hamiltoniano (SparsePauliOp) y el estado (Statevector).' },
-    problema: { t: 'x<sub>i,t</sub> = 1 si el camión está en el lugar i en el tiempo t: 8 × 13 = 104 variables, una por qubit. A la derecha, un camino cualquiera escrito como esas variables.', f: ['x<sub>i,t</sub> ↦ q<sub>k</sub>, &nbsp;k = (t − 1)N + i'] },
+    problema: { t: 'x<sub>i,t</sub> = 1 si el camión está en el lugar i en el tiempo t: 8 × 13 = 104 variables de ruta, una por qubit (las holguras se agregan después). A la derecha, un camino cualquiera escrito como esas variables.', f: ['x<sub>i,t</sub> ↦ q<sub>k</sub>, &nbsp;k = (t − 1)N + i'] },
     qubo: { t: 'Un polinomio en variables binarias que se suma y se escala por piezas. Su herramienta clave, agregar_cuadrado, expande (c<sub>0</sub> + Σ a<sub>k</sub>x<sub>k</sub>)²: sobre una columna de la matriz aparece un término por cada par de sus qubits.', f: ['(1 − Σ x<sub>k</sub>)² = 1 − Σ x<sub>k</sub> + 2 Σ<sub>k&lt;l</sub> x<sub>k</sub>x<sub>l</sub>'] },
     coste: { t: 'La función de coste: por cada par de tiempos seguidos suma d<sub>ij</sub> si el camión va de i a j por un camino. Sobre el camino cualquiera, cada tramo aporta su distancia; el salto sin camino no aporta nada aquí: lo castiga otra pieza.', f: ['Q<sub>C</sub> = Σ<sub>t=1</sub><sup>T−1</sup> Σ<sub>i≠j</sub> d<sub>ij</sub> x<sub>i,t</sub> x<sub>j,t+1</sub>'] },
-    basicas: { t: 'Cada pieza vale 0 si la regla se cumple. Sobre el camino: cada tiempo tiene un lugar (bien), pero los lugares no aparecen exactamente una vez y hay un salto sin camino.', f: ['Σ<sub>t</sub> (1 − Σ<sub>i</sub> x<sub>i,t</sub>)² &nbsp;·&nbsp; Σ<sub>i</sub> (1 − Σ<sub>t</sub> x<sub>i,t</sub>)²', 'Σ<sub>t</sub> Σ<sub>(i,j)∉E</sub> x<sub>i,t</sub> x<sub>j,t+1</sub>'] },
-    elegibles: { t: 'Piezas que se agregan según el caso. Aquí: partir en x<sub>1</sub> (el camino lo cumple) y terminar en x<sub>1</sub> (el camino termina en x<sub>2</sub>).', f: ['1 − x<sub>s,1</sub> &nbsp;·&nbsp; 1 − x<sub>f,T</sub>', 'A = (T − 1) · máx d + 1 &nbsp;(sugerida)'] },
-    armar: { t: 'El Hamiltoniano es la suma ponderada de las piezas: la distancia con peso 1 y cada restricción con peso A. Para el camino, cada regla rota pesa mucho más que toda la distancia.', f: ['Q = Q<sub>C</sub> + A·Q<sub>tiempo</sub> + A·Q<sub>visita</sub> + …'] },
+    basicas: { t: 'Cada pieza vale 0 si la regla se cumple. Sobre el camino: cada tiempo tiene un lugar (bien), los lugares no aparecen exactamente una vez y hay un salto sin camino. saltos_prohibidos también castiga quedarse quieto (i → i): con revisitas, esperar no costaría nada. visitar_una_vez solo sirve si T = N, como en el triángulo.', f: ['Σ<sub>t</sub> (1 − Σ<sub>i</sub> x<sub>i,t</sub>)² &nbsp;·&nbsp; Σ<sub>i</sub> (1 − Σ<sub>t</sub> x<sub>i,t</sub>)²', 'Σ<sub>t</sub> Σ<sub>(i,j)∉E &nbsp;o&nbsp; i=j</sub> x<sub>i,t</sub> x<sub>j,t+1</sub>'] },
+    revisitas: { t: 'Con T = 13 > N = 8, «exactamente una vez» choca con «un lugar por tiempo»: pide 8 unos y la otra pide 13. La holgura s<sub>i</sub> ≥ 0 cuenta las visitas extra: la pieza vale 0 si el lugar aparece 1 + s<sub>i</sub> veces. Sobre el camino, las revisitas ya no se castigan, pero x<sub>4</sub> nunca aparece y eso sí cuesta.', f: ['Q<sub>B′</sub> = Σ<sub>i</sub> (Σ<sub>t</sub> x<sub>i,t</sub> − 1 − s<sub>i</sub>)²', 's<sub>i</sub> = Σ<sub>b</sub> 2<sup>b</sup> y<sub>i,b</sub>: 3 bits por lugar, 24 qubits más'] },
+    elegibles: { t: 'Piezas que se agregan según el caso. Aquí: partir en x<sub>1</sub> (el camino lo cumple) y terminar en x<sub>1</sub> (el camino termina en x<sub>2</sub>).', f: ['1 − x<sub>s,1</sub> &nbsp;·&nbsp; 1 − x<sub>f,T</sub>', 'A = (T − 1) · máx d + 1 = 12 · 1,7 + 1 = 21,4 &nbsp;(sugerida)'] },
+    armar: { t: 'El Hamiltoniano es la suma ponderada de las piezas: la distancia con peso 1 y cada restricción con peso A. Si A se dejó en None, se usa la sugerida, 21,4. Para el camino, cada regla rota pesa mucho más que toda la distancia.', f: ['Q = Q<sub>C</sub> + A·Q<sub>tiempo</sub> + A·Q<sub>visita′</sub> + …'] },
     ising: { t: 'x<sub>k</sub> = (1 − z<sub>k</sub>)/2 lleva el QUBO a espines: un qubit en 1 es z = −1. Cada término lineal da un h<sub>k</sub>, cada producto un J<sub>kl</sub> y lo constante queda como offset. Las matrices explícitas están al final de esta etapa.', f: ['x<sub>k</sub> = (1 − z<sub>k</sub>)/2', 'H = Σ<sub>k&lt;l</sub> J<sub>kl</sub> z<sub>k</sub>z<sub>l</sub> + Σ<sub>k</sub> h<sub>k</sub> z<sub>k</sub> + c'] },
     ansatzc: { t: 'Capas de R<sub>Y</sub>(θ) en cada qubit, una cascada de CZ entre qubits vecinos y una capa final de R<sub>Y</sub>. Las celdas siguientes explican por qué.', f: ['|ψ(θ)⟩ = R<sub>Y</sub>(θ) · [CZ<sub>cadena</sub> · R<sub>Y</sub>(θ)]<sup>capas</sup> |0⟩<sup>⊗n</sup>'] },
     por1: { c: 'R<sub>Y</sub> lleva |0⟩ hacia |1⟩; R<sub>Z</sub> solo gira la fase.' },
     por2: { c: 'R<sub>Y</sub> y CZ mantienen el estado en el plano real.' },
-    por3: { c: 'Lo que acopla el Hamiltoniano: lugares de un mismo t, un lugar en distintos t, y t con t + 1.' },
-    por4: { c: 'La cascada sigue el orden k: dentro de cada tiempo y de un tiempo al siguiente.' },
+    por3: { c: 'Sin CZ el mínimo ya es una cadena de bits: la cascada ayuda a optimizar, no a alcanzar.' },
+    por4: { c: 'La cascada sigue el orden por tiempo, k = (t − 1)N + i.' },
     por5: { c: 'CZ = diag(1, 1, 1, −1): antes de medir no cambia nada; la última R<sub>Y</sub> sí.' },
-    por6: { c: 'El tamaño del circuito para la red minera.' },
+    por6: { c: 'El tamaño del circuito para la red minera, con holguras.' },
+    por7: { c: 'Penalizaciones contra distancias, y el riesgo de barren plateaus.' },
     vqe1: { t: 'El QUBO se traduce a Ising y se normaliza por su coeficiente más grande, porque eso ayuda al optimizador. Se arma el ansatz y un generador aleatorio con semilla para los puntos de partida.', f: ['Ĥ = H / máx |coef|'] },
     vqe2: { t: 'La energía que se minimiza: se asignan los θ al circuito, se simula el estado y se calcula el valor esperado del Hamiltoniano.', f: ['E(θ) = ⟨ψ(θ)| Ĥ |ψ(θ)⟩'] },
     vqe3: { t: 'COBYLA minimiza E(θ) desde varios θ iniciales al azar. Se guarda el historial de cada intento, en la escala original, y se queda el mejor.', f: ['θ* = argmin<sub>θ</sub> E(θ)'] },
     vqe4: { t: 'Con los mejores θ se calculan las probabilidades de cada estado. Entre los más probables se elige el de menor costo QUBO.' },
     correr: { t: 'Se corre el VQE con el Hamiltoniano armado y se muestran la ruta, la matriz x(i,t), el desglose, la convergencia y si coincide con el exacto.' },
-    exacto: { t: 'Revisa los 2<sup>n</sup> estados y los ordena por energía. Con los 104 qubits de la red no se puede: por eso la celda de datos lo deja apagado.', f: ['x* = argmin<sub>x ∈ {0,1}<sup>n</sup></sub> E(x)'] },
+    exacto: { t: 'Revisa los 2<sup>n</sup> estados y los ordena por energía. Con los 128 qubits de la red no se puede: por eso la celda de datos lo deja apagado.', f: ['x* = argmin<sub>x ∈ {0,1}<sup>n</sup></sub> E(x)'] },
+    referencia: { t: 'La red es un árbol con un ciclo central 1–2–8–5–1: se recorre el ciclo (5,7 km) y se entra y sale de cada hoja (1,614 km). Son 7,314 km con todas las restricciones en 0. Una búsqueda exacta por programación dinámica confirma que es el óptimo con T = 13.', f: ['5,7 + 2·(0,072 + 0,035 + 0,2 + 0,5) = 7,314 km'] },
     lectura: { t: 'Traduce los bits a la ruta: en cada tiempo, el lugar cuyo qubit vale 1. matriz_x ordena los mismos bits como lugares × tiempos.' },
     desglose: { t: 'El aporte de cada pieza para una solución. Con el camino cualquiera: la distancia, más A por cada regla que rompe.' },
     compara: { t: 'Lista las mejores soluciones exactas y su desglose; la celda del VQE termina comparando su energía con la exacta.' }
@@ -70,7 +76,11 @@
     exactamente_uno: 'Ayuda genérica: agrega (1 − Σ x)², que vale 0 solo si exactamente un qubit está en 1.',
     un_lugar_por_tiempo: 'Restricción temporal: en cada tiempo, exactamente un lugar.',
     visitar_una_vez: 'Restricción espacial: cada lugar aparece exactamente una vez.',
-    saltos_prohibidos: 'Castiga ir de i a j en tiempos seguidos cuando no hay camino entre ellos.',
+    saltos_prohibidos: 'Castiga ir de i a j en tiempos seguidos cuando no hay camino entre ellos, y quedarse en el mismo lugar.',
+    visitar_al_menos_una_vez: 'Restricción espacial con revisitas: cada lugar aparece 1 + s_i veces, con una holgura s_i ≥ 0.',
+    bits_holgura: 'Cuántos bits necesita cada holgura para contar hasta T − N visitas extra.',
+    holgura: 'Índice del qubit de holgura y(lugar, b), después de los N·T qubits de la ruta.',
+    ruta_a_bits: 'Convierte una ruta (lugar en cada tiempo) en bits, con sus holguras.',
     empezar_en: 'Castiga no estar en el lugar indicado en el tiempo 1.',
     terminar_en: 'Castiga no estar en el lugar indicado en el último tiempo.',
     cerrar_camino: 'Castiga usar la arista i–j en cualquier sentido.',
@@ -273,6 +283,19 @@
       }
       tx(g, 'ej-nota', GX, GY + N * CH + 24, '✓ un lugar por tiempo · ● visitas por lugar · rojo: salto sin camino');
     },
+    chequeoRevisitas: function (g) {
+      for (var i = 1; i <= N; i++) {
+        var veces = P.filter(function (k) { return k === i; }).length, y = GY + (i - 1) * CH + 11;
+        for (var v = 0; v < veces; v++) el('circle', { 'class': 'ej-vez ent', cx: 18 + v * 9, cy: y, r: 3.2, style: '--d:' + (.2 + i * .05) + 's' }, g);
+        if (!veces) el('circle', { 'class': 'ej-vez-0 ent', cx: 18, cy: y, r: 3.2, style: '--d:' + (.2 + i * .05) + 's' }, g);
+      }
+      tx(g, 'ej-nota', GX, GY + N * CH + 14, '● visitas por lugar: repetir está bien · x4 nunca aparece ✗');
+    },
+    rutaRef: function (g, nuevo) {
+      RREF.forEach(function (i, n) { var r = g.ownerSVGElement.querySelector('[data-c="' + i + ',' + (n + 1) + '"]'); if (r) r.setAttribute('class', 'ej-celda uno' + (nuevo ? ' ent' : '')); });
+      rutaGrafo(g, RREF, 'ej-ruta', nuevo);
+      tx(g, 'ej-nota', 446, GY - 16, 'ruta de referencia · 7,314 km').setAttribute('text-anchor', 'end');
+    },
     chequeoElegibles: function (g) {
       var s = celda(1, 1), f = celda(1, T), u = celda(P[T - 1], T);
       el('rect', { 'class': 'ej-marca bien ent', x: s[0] - 3, y: s[1] - 3, width: CW + 3, height: CH + 3, rx: 4 }, g);
@@ -381,7 +404,7 @@
     },
     tamano: function (g) {
       var h = el('g', { 'class': 'ent' }, g);
-      [['104', 'qubits = 8 × 13'], ['208', 'parámetros θ'], ['103', 'compuertas CZ']].forEach(function (z, n) {
+      [['128', 'qubits = 8 × 13 + 24'], ['256', 'parámetros θ'], ['127', 'compuertas CZ']].forEach(function (z, n) {
         var x = 80 + n * 150; tx(h, 'ej-grande', x, 70, z[0]); tx(h, 'ej-nota', x, 94, z[1]).setAttribute('text-anchor', 'middle');
       });
     },
@@ -414,7 +437,7 @@
     histoSel: function (g) { var r = g.ownerSVGElement.querySelector('[data-b="22"]'); if (r) r.setAttribute('class', 'ej-barra sel'); el('circle', { 'class': 'ej-anillo ent', cx: 40 + 22 * 11.8 + 4.3, cy: 208, r: 9 }, g); },
     bitsFila: function (g) {
       for (var k = 0; k < 52; k++) el('rect', { 'class': 'ej-bit ent' + ([0, 12, 22, 30, 37, 44].indexOf(k) >= 0 ? ' uno' : ''), x: 34 + (k % 26) * 15.6, y: 300 + Math.floor(k / 26) * 16, width: 12, height: 12, style: '--d:' + k * .01 + 's' }, g);
-      tx(g, 'ej-nota', 34, 350, '… los 104 bits del estado elegido');
+      tx(g, 'ej-nota', 34, 350, '… los 128 bits del estado elegido');
     },
     puntos: function (g) {
       semilla = 31; var es = []; for (var p = 0; p < 64; p++) es.push(azar()); es.sort();
@@ -423,7 +446,7 @@
       tx(g, 'ej-nota', 240, 396, 'los 2ⁿ estados, ordenados por energía').setAttribute('text-anchor', 'middle');
     },
     piezas: function (g) {
-      [['coste', 'c', 40], ['un lugar por tiempo', 'ok', 0], ['visitar una vez', 'r', 200], ['saltos prohibidos', 'r', 100], ['empezar en x1', 'ok', 0], ['terminar en x1', 'r', 100]].forEach(function (p, n) {
+      [['coste', 'c', 40], ['un lugar por tiempo', 'ok', 0], ['visitar al menos una vez', 'r', 100], ['saltos prohibidos', 'r', 100], ['empezar en x1', 'ok', 0], ['terminar en x1', 'r', 100]].forEach(function (p, n) {
         var y = 180 + n * 32, h = el('g', entra({}, true, n * .1), g);
         tx(h, 'ej-nota', 150, y + 12, p[0]).setAttribute('text-anchor', 'end');
         if (p[2]) el('rect', { 'class': p[1] === 'c' ? 'ej-seg-c' : 'ej-seg-r', x: 160, y: y, width: p[2], height: 14 }, h);
@@ -445,7 +468,8 @@
 
   // qué se ve en cada bloque (en Inicializar: solo la acción de esa función)
   var CAPAS = {
-    datos: ['grafo'], libs: ['grafo', 'herramientas'], problema: ['grafo', 'malla', 'camino'],
+    datos: ['grafo'], libs: ['grafo', 'herramientas'], problema: ['grafo', 'malla', 'camino'], instancia: ['grafo'],
+    revisitas: ['grafo', 'malla', 'camino', 'chequeoRevisitas'], por7: ['circuito', 'tamano'], referencia: ['grafo', 'malla', 'rutaRef'],
     qubo: ['grafo', 'malla', 'camino', 'expande'], coste: ['grafo', 'malla', 'camino', 'cupCamino'],
     basicas: ['grafo', 'malla', 'camino', 'chequeoBasicas'], elegibles: ['grafo', 'malla', 'camino', 'chequeoElegibles'],
     armar: ['grafo', 'malla', 'camino', 'sumaPiezas'], ising: ['grafo', 'malla', 'spinsCamino'],
@@ -607,18 +631,27 @@
     red: { nombre: 'Red minera · 8 lugares', nodos: [1, 2, 3, 4, 5, 6, 7, 8], aristas: ARISTAS, T: 13, nom: function (i) { return 'x' + i; } },
     tri: { nombre: 'Triángulo · 3 lugares (control)', nodos: [1, 2, 3], aristas: [[1, 2, 5], [2, 3, 7], [3, 1, 9]], T: 3, nom: function (i) { return 'x' + i; } }
   };
+  function bitsHolgura(T2, Nn) { var v = Math.abs(T2 - Nn); return Math.max(1, v ? v.toString(2).length : 0); }
   function construir(cs, T2, A, B, piezas) {
-    var Nn = cs.nodos.length, n = Nn * T2;
+    var Nn = cs.nodos.length, nRuta = Nn * T2, m = piezas.visita1 ? bitsHolgura(T2, Nn) : 0, n = nRuta + Nn * m;
     function q(i, t) { return (t - 1) * Nn + cs.nodos.indexOf(i); }
     function dd(i, j) { var e = cs.aristas.filter(function (e) { return (e[0] === i && e[1] === j) || (e[0] === j && e[1] === i); })[0]; return e ? e[2] : null; }
     var c = 0, lin = new Float64Array(n), quad = {};
     function cuad(k, l, v) { if (k === l) { lin[k] += v; return; } var a = Math.min(k, l), b = Math.max(k, l), key = a * n + b; quad[key] = (quad[key] || 0) + v; }
     function cuadrado(ks, peso) { c += peso; ks.forEach(function (k) { lin[k] += peso * (1 - 2); }); for (var x = 0; x < ks.length; x++) for (var y = x + 1; y < ks.length; y++) cuad(ks[x], ks[y], 2 * peso); }
+    // peso · (c0 + Σ a_k x_k)², como QUBO.agregar_cuadrado
+    function cuadradoGen(ks, as, c0, peso) { c += peso * c0 * c0; ks.forEach(function (k, x) { lin[k] += peso * (as[x] * as[x] + 2 * c0 * as[x]); }); for (var x = 0; x < ks.length; x++) for (var y = x + 1; y < ks.length; y++) cuad(ks[x], ks[y], 2 * peso * as[x] * as[y]); }
     var t, i, j;
     if (piezas.coste) for (t = 1; t < T2; t++) cs.nodos.forEach(function (i) { cs.nodos.forEach(function (j) { var d = dd(i, j); if (i !== j && d != null) cuad(q(i, t), q(j, t + 1), B * d); }); });
     if (piezas.lugar) for (t = 1; t <= T2; t++) cuadrado(cs.nodos.map(function (i) { return q(i, t); }), A);
     if (piezas.visita) cs.nodos.forEach(function (i) { var ks = []; for (var t3 = 1; t3 <= T2; t3++) ks.push(q(i, t3)); cuadrado(ks, A); });
-    if (piezas.saltos) for (t = 1; t < T2; t++) cs.nodos.forEach(function (i) { cs.nodos.forEach(function (j) { if (i !== j && dd(i, j) == null) cuad(q(i, t), q(j, t + 1), A); }); });
+    if (piezas.visita1) cs.nodos.forEach(function (i, p) {
+      var ks = [], as = [];
+      for (var t4 = 1; t4 <= T2; t4++) { ks.push(q(i, t4)); as.push(1); }
+      for (var b4 = 0; b4 < m; b4++) { ks.push(nRuta + p * m + b4); as.push(-Math.pow(2, b4)); }
+      cuadradoGen(ks, as, -1, A);
+    });
+    if (piezas.saltos) for (t = 1; t < T2; t++) cs.nodos.forEach(function (i) { cs.nodos.forEach(function (j) { if (i === j || dd(i, j) == null) cuad(q(i, t), q(j, t + 1), A); }); });
     if (piezas.inicio) { c += A; lin[q(cs.nodos[0], 1)] -= A; }
     if (piezas.fin) { c += A; lin[q(cs.nodos[0], T2)] -= A; }
     // a Ising, igual que QUBO.a_ising()
@@ -628,7 +661,7 @@
       var v = quad[key], a = Math.floor(key / n), b = key % n;
       off += v / 4; h[a] -= v / 4; h[b] -= v / 4; J[a * n + b] += v / 4; J[b * n + a] += v / 4;
     });
-    return { n: n, N: Nn, T: T2, h: h, J: J, off: off, q: q };
+    return { n: n, nRuta: nRuta, m: m, N: Nn, T: T2, h: h, J: J, off: off, q: q };
   }
   function fmt(v) { return (Math.abs(v) < 5e-13 ? 0 : v).toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); }
 
@@ -643,7 +676,7 @@
       '<label>A <input type="number" data-mx="A" value="100" min="0" step="10"></label>' +
       '<label>B <input type="number" data-mx="B" value="1" min="0" step="0.5"></label>' +
       '<label>Orden <select data-mx="orden"><option value="lugar">por lugar: z<sub>i,t</sub> con i fijo</option><option value="tiempo">por tiempo: como el cuaderno</option></select></label>' +
-      '<div class="mx-piezas">' + [['coste', 'coste_distancia'], ['lugar', 'un_lugar_por_tiempo'], ['visita', 'visitar_una_vez'], ['saltos', 'saltos_prohibidos'], ['inicio', 'empezar_en(1)'], ['fin', 'terminar_en(1)']].map(function (p) {
+      '<div class="mx-piezas">' + [['coste', 'coste_distancia'], ['lugar', 'un_lugar_por_tiempo'], ['visita', 'visitar_una_vez'], ['visita1', 'visitar_al_menos_una_vez'], ['saltos', 'saltos_prohibidos'], ['inicio', 'empezar_en(1)'], ['fin', 'terminar_en(1)']].map(function (p) {
         return '<label class="mx-pieza"><input type="checkbox" data-pieza="' + p[0] + '" checked> ' + p[1] + '</label>';
       }).join('') + '</div></div>' +
       '<div class="mx-resumen" data-mx="resumen"></div>' +
@@ -655,8 +688,9 @@
     function $(k) { return caja.querySelector('[data-mx="' + k + '"]'); }
     var selT = $('T'); for (var t = 2; t <= 16; t++) selT.insertAdjacentHTML('beforeend', '<option' + (t === 13 ? ' selected' : '') + '>' + t + '</option>');
     var R = null, perm = [];
-    function etiqueta(k) { var cs = CASOS[$('caso').value], i = cs.nodos[k % R.N], t2 = Math.floor(k / R.N) + 1; return 'z<sub>' + i + ',' + t2 + '</sub>'; }
-    function texto(k) { var cs = CASOS[$('caso').value]; return 'z' + cs.nodos[k % R.N] + ',' + (Math.floor(k / R.N) + 1); }
+    // las holguras y(i,b) van después de los N·T qubits de la ruta
+    function etiqueta(k) { var cs = CASOS[$('caso').value]; if (k >= R.nRuta) return 'y<sub>' + cs.nodos[Math.floor((k - R.nRuta) / R.m)] + ',' + ((k - R.nRuta) % R.m) + '</sub>'; return 'z<sub>' + cs.nodos[k % R.N] + ',' + (Math.floor(k / R.N) + 1) + '</sub>'; }
+    function texto(k) { var cs = CASOS[$('caso').value]; if (k >= R.nRuta) return 'y' + cs.nodos[Math.floor((k - R.nRuta) / R.m)] + ',' + ((k - R.nRuta) % R.m); return 'z' + cs.nodos[k % R.N] + ',' + (Math.floor(k / R.N) + 1); }
     function calcular() {
       var cs = CASOS[$('caso').value];
       if ($('caso').value === 'tri') { selT.value = '3'; selT.disabled = true; }
@@ -665,10 +699,10 @@
       R = construir(cs, Number(selT.value), Number($('A').value) || 0, Number($('B').value) || 0, piezas);
       // orden de las filas: por lugar (z_{i,1..T} juntos, como la foto) o por tiempo (k del cuaderno)
       perm = [];
-      if ($('orden').value === 'lugar') { for (var i = 0; i < R.N; i++) for (var t3 = 0; t3 < R.T; t3++) perm.push(t3 * R.N + i); }
+      if ($('orden').value === 'lugar') { for (var i = 0; i < R.N; i++) for (var t3 = 0; t3 < R.T; t3++) perm.push(t3 * R.N + i); for (var k5 = R.nRuta; k5 < R.n; k5++) perm.push(k5); }
       else for (var k = 0; k < R.n; k++) perm.push(k);
       var nJ = 0, maxJ = 0; for (var a = 0; a < R.n; a++) for (var b = a + 1; b < R.n; b++) { var v = R.J[a * R.n + b]; if (v) { nJ++; maxJ = Math.max(maxJ, v); } }
-      $('resumen').innerHTML = '<span><b>' + R.n + '</b> qubits</span><span><b>' + nJ + '</b> pares con J ≠ 0</span><span>c = <b>' + fmt(R.off) + '</b></span>';
+      $('resumen').innerHTML = '<span><b>' + R.n + '</b> qubits' + (R.m ? ' (' + R.nRuta + ' de ruta + ' + (R.n - R.nRuta) + ' de holgura)' : '') + '</span><span><b>' + nJ + '</b> pares con J ≠ 0</span><span>c = <b>' + fmt(R.off) + '</b></span>';
       pintar();
       $('tabla').hidden = true; $('numeros').textContent = 'ver todos los números de J';
     }
@@ -696,7 +730,7 @@
       }
       var bloque = $('orden').value === 'lugar' ? R.T : R.N;
       ctx.strokeStyle = 'rgba(140,109,51,.45)'; ctx.lineWidth = 1;
-      for (var g = bloque; g < n; g += bloque) { ctx.beginPath(); ctx.moveTo(g * celda + .5, 0); ctx.lineTo(g * celda + .5, lado); ctx.moveTo(0, g * celda + .5); ctx.lineTo(lado, g * celda + .5); ctx.stroke(); }
+      for (var g = bloque; g < R.nRuta; g += bloque) { ctx.beginPath(); ctx.moveTo(g * celda + .5, 0); ctx.lineTo(g * celda + .5, lado); ctx.moveTo(0, g * celda + .5); ctx.lineTo(lado, g * celda + .5); ctx.stroke(); }
       cj.innerHTML = '';
       var leyenda = document.createElement('div'); leyenda.className = 'mx-leyenda';
       leyenda.innerHTML = '<span><i class="az"></i>restricciones (A)</span><span><i class="or"></i>distancias (B·d)</span><span>líneas: cada ' + ($('orden').value === 'lugar' ? 'lugar' : 'tiempo') + '</span>';
@@ -730,7 +764,7 @@
     });
     // cada caso empieza con sus piezas: el triángulo con las dos restricciones, la red con todas
     function piezasDelCaso() {
-      var tri = $('caso').value === 'tri', on = tri ? ['coste', 'lugar', 'visita'] : ['coste', 'lugar', 'visita', 'saltos', 'inicio', 'fin'];
+      var tri = $('caso').value === 'tri', on = tri ? ['coste', 'lugar', 'visita'] : ['coste', 'lugar', 'visita1', 'saltos', 'inicio', 'fin'];
       Array.prototype.forEach.call(caja.querySelectorAll('[data-pieza]'), function (c) { c.checked = on.indexOf(c.getAttribute('data-pieza')) >= 0; });
     }
     $('caso').addEventListener('change', piezasDelCaso);

@@ -39,13 +39,18 @@
       ['E(\\theta) \\;\\ge\\; \\min_{b} H(b), \\qquad \\text{con igualdad} \\iff P(b) > 0 \\text{ solo en los mínimos}', 'Minimizar E obliga a mover toda la probabilidad hacia las rutas de menor costo.']
     ] },
     { t: 'Sin la cascada: campo medio', l: [
-      ['\\text{sin CZ:}\\quad E(\\theta) = \\text{cte} + \\sum_k h_k \\cos\\theta_k + \\sum_{k<l} J_{kl}\\cos\\theta_k\\cos\\theta_l', 'Con un estado producto, ⟨z_k z_l⟩ = ⟨z_k⟩⟨z_l⟩: cada qubit solo ve el promedio de los demás.'],
-      ['\\text{con CZ:}\\quad \\langle z_k z_l\\rangle_\\theta \\ne \\langle z_k\\rangle_\\theta\\langle z_l\\rangle_\\theta', 'La cascada deja expresar superposiciones correlacionadas, por ejemplo «x₁ o x₃ en t₁, pero no los dos», mientras el optimizador avanza.']
+      ['\\text{sin CZ:}\\quad E(\\theta) = \\text{cte} + \\sum_k h_k \\cos\\theta_k + \\sum_{k<l} J_{kl}\\cos\\theta_k\\cos\\theta_l', 'Con un estado producto, ⟨z_k z_l⟩ = ⟨z_k⟩⟨z_l⟩: cada qubit solo ve el promedio de los demás. Sin CZ, las dos capas se juntan: R_Y(φ_k)R_Y(θ_k) = R_Y(θ_k + φ_k).'],
+      ['c_k = \\cos\\theta_k \\in [-1, 1]:\\quad \\min_{c\\,\\in\\,[-1,1]^n} E(c) \\;=\\; \\min_{c\\,\\in\\,\\{\\pm 1\\}^n} E(c) \\;=\\; \\min_b H(b)', 'E es multilineal: fijados los demás, es lineal en cada c_k, así que el mínimo cae en un extremo, c_k = ±1. Repitiendo qubit por qubit se llega a una esquina, que es una cadena de bits. El campo medio también puede alcanzar la ruta óptima.']
     ] },
-    { t: 'La ruta es alcanzable', l: [
+    { t: 'La ruta es alcanzable, con o sin cascada', l: [
       ['\\theta_k = 0 \\Rightarrow |\\psi_1\\rangle = |0\\cdots 0\\rangle, \\qquad U_{\\mathrm{CZ}}|0\\cdots0\\rangle = |0\\cdots0\\rangle'],
-      ['\\varphi_k = \\pi\\, b^{*}_k \\;\\Rightarrow\\; R_Y(\\pi)|0\\rangle = |1\\rangle \\;\\Rightarrow\\; |\\psi(\\theta)\\rangle = |b^{*}\\rangle,\\quad E = H(b^{*}) = \\min_b H(b)', 'Con una sola capa, la familia de estados del ansatz ya contiene exactamente la ruta óptima b*.'],
+      ['\\varphi_k = \\pi\\, b^{*}_k \\;\\Rightarrow\\; R_Y(\\pi)|0\\rangle = |1\\rangle \\;\\Rightarrow\\; |\\psi(\\theta)\\rangle = |b^{*}\\rangle,\\quad E = H(b^{*}) = \\min_b H(b)', 'Basta la capa de R_Y(π): la cascada no interviene. La ruta óptima ya está en la familia del campo medio; el entrelazamiento no hace falta para alcanzarla.'],
       ['b^{*}_{1\\to2\\to3}:\\ x_{11} = x_{22} = x_{33} = 1 \\;\\Rightarrow\\; H(b^{*}) = ' + C + '{12}', 'En el triángulo: d₁₂ + d₂₃ = 5 + 7.']
+    ] },
+    { t: 'Para qué sirve la cascada: el paisaje', l: [
+      ['b \\text{ ruta válida}\\;\\Rightarrow\\; H(b \\oplus e_k) - H(b) \\;\\ge\\; A - 2B\\,d_{\\max} > 0', 'Cambiar un solo bit de una ruta válida rompe al menos una regla (cuesta A) y ahorra a lo más dos distancias. Cada ruta válida es un mínimo local: pasar de 1 → 3 → 2 a 1 → 2 → 3 exige cambiar cuatro bits a la vez.'],
+      ['\\text{con CZ:}\\quad \\langle z_k z_l\\rangle_\\theta \\ne \\langle z_k\\rangle_\\theta\\langle z_l\\rangle_\\theta', 'La cascada agrega direcciones correlacionadas, por ejemplo «x₂₂ y x₃₃ suben mientras x₃₂ y x₂₃ bajan», que pueden ayudar a salir de esos mínimos.'],
+      ['\\text{triángulo, 300 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{38\\,\\%} \\text{ con CZ}, \\quad 31\\,\\% \\text{ sin CZ}', 'Medido con la misma regla de abajo. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
     ] },
     { t: 'De θ al azar a la ruta: cada ángulo es un seno', l: [
       ['E(\\theta_j) = \\alpha_j \\cos(\\theta_j - \\beta_j) + \\gamma_j', 'Cada θ_j aparece en una sola R_Y, así que la energía, como función de ese ángulo, es una sinusoide.'],
@@ -113,7 +118,7 @@
   }
   function circuitoTexto() {
     return '<section class="dv-seccion az-circuito"><div class="dv-paso-tit">El circuito del ansatz para el triángulo</div>' +
-      '<p class="dv-nota">Es el ansatz del cuaderno con n = 9 qubits y una capa: ansatz(9, capas=1). Cada qubit es una variable x<sub>i,t</sub> en el orden k = (t − 1)N + i, así que la cascada recorre los tres lugares de un tiempo y salta al siguiente tiempo (en dorado).</p>' +
+      '<p class="dv-nota">Es el ansatz del cuaderno con n = 9 qubits y una capa: ansatz(9, capas=1). Cada qubit es una variable x<sub>i,t</sub> en el orden k = (t − 1)N + i, así que la cascada recorre los tres lugares de un tiempo y salta al siguiente tiempo (en dorado). Ojo: las matrices de Inicializar numeran por lugar, k = (i − 1)T + t (x<sub>12</sub> es el 2.º); aquí x<sub>12</sub> es q<sub>4</sub>. Es la misma H con los índices permutados, pero esta cascada solo sigue la estructura del Hamiltoniano con el orden por tiempo.</p>' +
       circuitoSVG() +
       tex(String.raw`|\psi(\boldsymbol\theta,\boldsymbol\varphi)\rangle = \Big[\bigotimes_{k=1}^{9} R_Y(\varphi_k)\Big]\;\Big[\prod_{k=1}^{8}\mathrm{CZ}_{k,k+1}\Big]\;\Big[\bigotimes_{k=1}^{9} R_Y(\theta_k)\Big]\;|0\rangle^{\otimes 9}`) +
       tex(String.raw`(q_1,\dots,q_9) = (x_{11},\,x_{21},\,x_{31},\,x_{12},\,x_{22},\,x_{32},\,x_{13},\,x_{23},\,x_{33}), \qquad q_k \leftrightarrow x_{i,t},\ k = (t-1)N + i`) +
@@ -125,7 +130,7 @@
     function pintarTexto() {
       numero = 0;
       return '<div class="dv-cab"><div class="mx-kicker">El ansatz en matemáticas</div><h3 class="dv-tit">De un θ al azar a la ruta, a través de la cascada</h3>' +
-        '<p class="dv-resumen"><b>Resumen.</b> Se sigue el estado del circuito desde |0⟩<sup>⊗n</sup>: la primera capa de R<sub>Y</sub>(θ) con ángulos al azar reparte amplitud entre todas las rutas, la cascada de CZ las marca con signos que dependen de pares vecinos y la capa final hace interferir esos signos. Se muestra que la energía es un promedio de las rutas, que la ruta óptima está dentro de la familia del ansatz y cómo se llega a ella ajustando un ángulo a la vez.</p></div>' +
+        '<p class="dv-resumen"><b>Resumen.</b> Se sigue el estado del circuito desde |0⟩<sup>⊗n</sup>: la primera capa de R<sub>Y</sub>(θ) con ángulos al azar reparte amplitud entre todas las rutas, la cascada de CZ las marca con signos que dependen de pares vecinos y la capa final hace interferir esos signos. Se muestra que la energía es un promedio de las rutas y que la ruta óptima está dentro de la familia del ansatz, incluso sin la cascada: lo que aportan las CZ no es alcanzar la ruta sino un mejor paisaje para el optimizador. Al final, cómo se llega ajustando un ángulo a la vez.</p></div>' +
         '<div class="dv-pizarra">' + circuitoTexto() + S.map(function (p, i) {
           return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' +
             p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + '</section>';
