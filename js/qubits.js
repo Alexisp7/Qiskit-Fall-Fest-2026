@@ -47,7 +47,11 @@
     }
 
     // la esfera queda fuera si su centro cae en la zona o la roza
+    // en pantallas angostas la zona libre de data-libre cubriría todo el ancho:
+    // ahí las esferas se ponen solo arriba y abajo del bloque de texto
+    var franjaTexto = null;
     function inFree(x, y) {
+      if (franjaTexto) return y + R + 6 > franjaTexto[0] && y - R - 6 < franjaTexto[1];
       if (profile.length < 2) return false;
       var pts = outline(), inside = false, m = R + 4;
       for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
@@ -109,6 +113,9 @@
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       qubits = []; current = [];
+      franjaTexto = null;
+      var textoEl = profile.length >= 2 && w < 700 ? section.querySelector('.hero-text') : null;
+      if (textoEl) { var rt = textoEl.getBoundingClientRect(), rs = section.getBoundingClientRect(); franjaTexto = [rt.top - rs.top, rt.bottom - rs.top]; }
       var boxes = blockers();
       var lineEl = lineSel && section.querySelector(lineSel);
       lineY = lineEl ? Math.round(lineEl.getBoundingClientRect().top - section.getBoundingClientRect().top) + 0.5 : null;
@@ -294,8 +301,10 @@
       ctx.restore();
       return sup;
     }
+    // con el dedo el área para tomar el medidor es más generosa
+    var holgura = 6;
     function onMeter(px, py) {
-      return meter && px >= meter.x - 6 && px <= meter.x + meter.w + 6 && py >= meter.y - 6 && py <= meter.y + meter.h + 6;
+      return meter && px >= meter.x - holgura && px <= meter.x + meter.w + holgura && py >= meter.y - holgura && py <= meter.y + meter.h + holgura;
     }
     // colapso en onda desde el medidor: cada esfera sale |0⟩ con
     // probabilidad cos²(θ/2). Un segundo clic deshace todo, también en onda
@@ -546,31 +555,37 @@
       section.style.cursor = onMeter(p[0], p[1]) ? (collapsed ? 'pointer' : 'grab') : '';
       activate(p[0], p[1]);
     });
-    section.addEventListener('mousedown', function (e) {
+    // mouse, dedo o lápiz: se usan eventos de puntero para que en el celular
+    // también se pueda arrastrar el medidor (la página sigue bajando en vertical)
+    section.addEventListener('pointerdown', function (e) {
+      holgura = e.pointerType === 'mouse' ? 6 : 18;
       var p = point(e);
       arrastrado = false;
       // con la medición activada el medidor queda fijo
       if (!onMeter(p[0], p[1]) || collapsed) return;
       e.preventDefault();
+      if (e.pointerType !== 'mouse' && section.setPointerCapture) { try { section.setPointerCapture(e.pointerId); } catch (er) {} }
       drag = { x: p[0], off: meterOff };
       arrastrado = false;
       section.style.cursor = 'grabbing';
       start();
     });
-    window.addEventListener('mousemove', function (e) {
+    window.addEventListener('pointermove', function (e) {
       if (!drag) return;
       var dx = point(e)[0] - drag.x;
       if (Math.abs(dx) > 3) arrastrado = true;
       meterOff = Math.max(-(lineHalf - 15), Math.min(lineHalf - 15, drag.off + dx));
       start();
     });
-    window.addEventListener('mouseup', function () {
+    function soltar() {
       if (!drag) return;
       drag = null;
       anclado = meterOff >= lineHalf - 15 - 12;
       section.style.cursor = '';
       start();
-    });
+    }
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('pointercancel', soltar);
     section.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('a, button, .nota')) return;
       // soltar después de arrastrar no cuenta como clic en el medidor

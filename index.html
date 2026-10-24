@@ -1350,6 +1350,8 @@
     .hero-qubits .hero-stats { gap: 34px; justify-content: center; flex-wrap: wrap; }
     .hero-qubits .stat-num { font-size: 32px; letter-spacing: 0; }
     .hero-qubits .stat-sub sub { font-size: .75em; }
+    /* en pantallas táctiles el gesto horizontal es para el medidor; el vertical sigue bajando la página */
+    .hero-qubits { touch-action: pan-y; }
 </style>
 </head>
 <body>
@@ -1421,6 +1423,6 @@
     // al volver con el botón atrás la portada se recarga entera, con sus esferas
     window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
   </script>
-  <script src="js/qubits.js?v=20261022l"></script>
+  <script src="js/qubits.js?v=20261024u"></script>
 </body>
 </html>
