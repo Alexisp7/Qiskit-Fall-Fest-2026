@@ -591,7 +591,8 @@
       // soltar después de arrastrar no cuenta como clic en el medidor
       if (arrastrado) { arrastrado = false; return; }
       var p = point(e);
-      if (onMeter(p[0], p[1])) return anclado ? qftAll() : collapseAll();
+      // con destino, un solo clic en el medidor mide y entra; anclado como QFT, el clic aplica la QFT primero
+      if (onMeter(p[0], p[1])) return anclado ? qftAll() : (destino ? mensaje() : collapseAll());
       freeze(p[0], p[1]);
     });
 
