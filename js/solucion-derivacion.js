@@ -136,7 +136,7 @@
     { t: 'El Hamiltoniano como operador y lo que busca el VQE', l: [
       ['z_k \\to \\hat Z_k = \\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}, \\qquad \\hat H = \\sum_{k<l} J_{kl}\\,\\hat Z_k\\otimes\\hat Z_l + \\sum_{k=1}^{M} h_k\\,\\hat Z_k'],
       ['\\hat Z_k\\otimes\\hat Z_l = \\mathrm{diag}(1,-1,-1,1) \\;\\Rightarrow\\; \\hat H \\text{ es diagonal en la base computacional}', 'Solo aparecen Z y Z ⊗ Z.'],
-      ['\\min_{\\theta} E(\\theta) = \\min_{\\theta}\\langle\\psi(\\theta)|\\hat H|\\psi(\\theta)\\rangle = \\min_\\theta \\Big[\\sum_{k<l} J_{kl}\\langle\\hat Z_k\\otimes\\hat Z_l\\rangle_\\theta + \\sum_k h_k\\langle\\hat Z_k\\rangle_\\theta\\Big]', 'El estado |ψ(θ)⟩ lo da el ansatz: la etapa siguiente.']
+      ['\\min_{\\theta,\\varphi} E(\\theta,\\varphi) = \\min_{\\theta,\\varphi}\\langle\\psi(\\theta,\\varphi)|\\hat H|\\psi(\\theta,\\varphi)\\rangle = \\min_{\\theta,\\varphi} \\Big[\\sum_{k<l} J_{kl}\\langle\\hat Z_k\\otimes\\hat Z_l\\rangle + \\sum_k h_k\\langle\\hat Z_k\\rangle\\Big]', 'El estado |ψ(θ, φ)⟩ lo da el ansatz: la etapa siguiente.']
     ] },
     { t: 'Para nuestro ejemplo: N = 3, T = 3, M = 9', l: [
       ['z_{11}\\to 1,\\ z_{12}\\to 2,\\ z_{13}\\to 3,\\ z_{21}\\to 4,\\ z_{22}\\to 5,\\ z_{23}\\to 6,\\ z_{31}\\to 7,\\ z_{32}\\to 8,\\ z_{33}\\to 9', 'Por ejemplo z₂₃: (2 − 1)·3 + 3 = 6.'],

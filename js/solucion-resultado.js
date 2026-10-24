@@ -95,7 +95,7 @@
       tabla(['ciclo del núcleo desde la planta', 'Q (km)'], [['1 → 2 → 8 → 5 → 1', '<b>5,7</b>'], ['1 → 5 → 8 → 2 → 1', '<b>5,7</b>'], ['1 → 2 → 5 → 8 → 1', '6,7'], ['1 → 8 → 5 → 2 → 1', '6,7'], ['1 → 5 → 2 → 8 → 1', '7,2'], ['1 → 8 → 2 → 5 → 1', '7,2']]) +
       linea(String.raw`E_{\min} = 5{,}7 \qquad\Rightarrow\qquad 5{,}7 + 1{,}614 = 7{,}314\ \text{km}`, 'Las dos soluciones empatadas son la misma ruta en sentidos opuestos. Los otros cuatro ciclos válidos cuestan 6,7 y 7,2.'));
     // 7 · VQE
-    var cuerpoVQE = linea(String.raw`E(\boldsymbol\theta) = \sum_b p_b(\boldsymbol\theta)\, e_b, \qquad p_b = |\langle b|\psi(\boldsymbol\theta)\rangle|^2`, 'Como H es diagonal, la energía es el producto de las probabilidades del estado por la energía de cada configuración. Se comprobó que da lo mismo que el valor esperado del SparsePauliOp.');
+    var cuerpoVQE = linea(String.raw`E(\boldsymbol\theta,\boldsymbol\varphi) = \sum_b p_b(\boldsymbol\theta,\boldsymbol\varphi)\, e_b, \qquad p_b = |\langle b|\psi(\boldsymbol\theta,\boldsymbol\varphi)\rangle|^2`, 'Como H es diagonal, la energía es el producto de las probabilidades del estado por la energía de cada configuración. Se comprobó que da lo mismo que el valor esperado del SparsePauliOp.');
     if (VQE) {
       cuerpoVQE += VQE.map(function (r) {
         return '<p class="rs-sub">' + r.capas + (r.capas === 1 ? ' capa' : ' capas') + ' · ' + r.npar + ' ángulos · 5 arranques con COBYLA (maxiter = 1500, ρ inicial = 0,5)</p>' +

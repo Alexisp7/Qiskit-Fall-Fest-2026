@@ -6,7 +6,7 @@ Sitio: https://qiskit-fall-fest-2026-iuhx.vercel.app
 
 ## El código de la solución
 
-Está en [`codigo/`](codigo): un notebook ejecutable ([`rutas_qubo_vqe.ipynb`](codigo/rutas_qubo_vqe.ipynb)), el mismo código como script y sus dependencias. Las instrucciones están en [`codigo/README.md`](codigo/README.md).
+Está en [`codigo/`](codigo): un notebook ejecutable ([`rutas_qubo_vqe.ipynb`](codigo/rutas_qubo_vqe.ipynb)), el mismo código como script y sus dependencias. **La solución final del track** está en [`codigo/solucion_final.py`](codigo/solucion_final.py): resuelve los 8 lugares de la mina (7,314 km, 13 pasos) de punta a punta. Las instrucciones están en [`codigo/README.md`](codigo/README.md).
 
 ## Estructura del repositorio
 
@@ -16,7 +16,7 @@ Está en [`codigo/`](codigo): un notebook ejecutable ([`rutas_qubo_vqe.ipynb`](c
 ├── solucion.html       La solución: inicializar, ansatz, solver y validación
 ├── equipo.html         El equipo
 ├── preguntas.html      Preguntas del público
-├── codigo/             Notebook y script de Python de la solución
+├── codigo/             Notebook, script y solucion_final.py (la solución final del track)
 ├── api/
 │   └── preguntas.js    Función de Vercel: guarda y lista las preguntas (Upstash Redis)
 ├── js/

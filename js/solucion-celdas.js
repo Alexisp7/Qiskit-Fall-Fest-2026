@@ -85,7 +85,7 @@ window.CELDAS = {
   {
    "id": "ansatzc",
    "titulo": "El ansatz propuesto",
-   "codigo": "def ansatz(n_qubits, capas):\n    \"\"\"Capas de RY con entrelazamiento CZ en cadena, mas una capa final de RY.\"\"\"\n    from qiskit.circuit import ParameterVector\n    th = ParameterVector(\"θ\", n_qubits * (capas + 1))\n    qc = QuantumCircuit(n_qubits)\n    p = 0\n    for _ in range(capas):\n        for k in range(n_qubits):\n            qc.ry(th[p], k)\n            p += 1\n        for k in range(n_qubits - 1):\n            qc.cz(k, k + 1)\n    for k in range(n_qubits):\n        qc.ry(th[p], k)\n        p += 1\n    return qc\n",
+   "codigo": "def ansatz(n_qubits, capas):\n    \"\"\"Capas de RY(θ) con entrelazamiento CZ en cadena, más una capa final de RY(φ).\"\"\"\n    from qiskit.circuit import ParameterVector\n    th = ParameterVector(\"θ\", n_qubits * capas)   # ángulos de las capas con la cascada de CZ\n    ph = ParameterVector(\"φ\", n_qubits)           # ángulos de la capa final\n    qc = QuantumCircuit(n_qubits)\n    p = 0\n    for _ in range(capas):\n        for k in range(n_qubits):\n            qc.ry(th[p], k)\n            p += 1\n        for k in range(n_qubits - 1):\n            qc.cz(k, k + 1)\n    for k in range(n_qubits):\n        qc.ry(ph[k], k)\n    return qc   # qc.parameters ordena primero los θ y luego los φ\n",
    "clave": true,
    "tipo": "code"
   },
@@ -127,7 +127,7 @@ window.CELDAS = {
   {
    "id": "por6",
    "titulo": "El tamaño del ansatz",
-   "codigo": "Con n qubits y una capa hay n parámetros en la primera fila de R<sub>Y</sub>, n en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13 dan 104 qubits de ruta más 8 × 3 = 24 de holgura: 128 qubits, 256 parámetros θ y 127 CZ.",
+   "codigo": "Con n qubits y una capa hay n ángulos θ en la primera fila de R<sub>Y</sub>, n ángulos φ en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13 dan 104 qubits de ruta más 8 × 3 = 24 de holgura: 128 qubits, 128 ángulos θ y 128 ángulos φ (256 parámetros) y 127 CZ.",
    "clave": true,
    "tipo": "md"
   },
@@ -149,15 +149,15 @@ window.CELDAS = {
   },
   {
    "id": "vqe2",
-   "titulo": "VQE · la energía como función de θ",
-   "codigo": "    def energia(theta):\n        psi = Statevector(qc.assign_parameters(theta))\n        return float(np.real(psi.expectation_value(Hn)))\n",
+   "titulo": "VQE · la energía como función de θ y φ",
+   "codigo": "    def energia(angulos):                  # angulos = (θ, φ): primero los θ, luego los φ\n        psi = Statevector(qc.assign_parameters(angulos))\n        return float(np.real(psi.expectation_value(Hn)))\n",
    "clave": true,
    "tipo": "code"
   },
   {
    "id": "vqe3",
    "titulo": "VQE · COBYLA desde varios arranques",
-   "codigo": "    mejor = None\n    historial = []\n    for _ in range(intentos):\n        theta0 = rng.uniform(0, 2 * np.pi, qc.num_parameters)\n        hist = []\n        res = minimize(energia, theta0, method=\"COBYLA\",\n                       callback=lambda th: hist.append(energia(th)),\n                       options={\"maxiter\": maxiter})\n        historial.append(np.array(hist) * escala + offset)\n        if mejor is None or res.fun < mejor.fun:\n            mejor = res\n",
+   "codigo": "    mejor = None\n    historial = []\n    for _ in range(intentos):\n        angulos0 = rng.uniform(0, 2 * np.pi, qc.num_parameters)   # θ y φ al azar\n        hist = []\n        res = minimize(energia, angulos0, method=\"COBYLA\",\n                       callback=lambda a: hist.append(energia(a)),\n                       options={\"maxiter\": maxiter})\n        historial.append(np.array(hist) * escala + offset)\n        if mejor is None or res.fun < mejor.fun:\n            mejor = res\n",
    "clave": true,
    "tipo": "code"
   },
@@ -252,7 +252,7 @@ window.CELDAS = {
    "titulo": "D · VQE con el ansatz del cuaderno (Statevector)",
    "clave": true,
    "tipo": "code",
-   "codigo": "def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):\n    n = qubo.n\n    e = qubo.energias_todas()\n    qc = ansatz(n, capas)\n    npar = len(qc.parameters)\n    def f(theta):                                  # H es diagonal: E = p · e\n        p = Statevector(qc.assign_parameters(theta)).probabilities()\n        return float(p @ e)\n    rng = np.random.default_rng(semilla)\n    mejor = None\n    for r in range(arranques):\n        x0 = rng.uniform(0, 2 * np.pi, npar)\n        res = minimize(f, x0, method=\"COBYLA\", options={\"maxiter\": maxiter, \"rhobeg\": 0.5})\n        print(f\"arranque {r}: E = {res.fun:.4f}\")\n        if mejor is None or res.fun < mejor.fun:\n            mejor = res\n    p = Statevector(qc.assign_parameters(mejor.x)).probabilities()\n    return mejor, p, e\n\n# Consistencia entre el diagonal y el SparsePauliOp (con un θ cualquiera)\nqc_t = ansatz(prob.n_qubits, 1)\nth = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))\nsv = Statevector(qc_t.assign_parameters(th))\nprint(np.isclose(sv.expectation_value(H).real + offset, sv.probabilities() @ e))   # True\n\nres, p, e = vqe(qubo)\ntop = int(np.argmax(p))\nprint(\"VQE: E =\", res.fun, \"| estado más probable:\", decodificar(prob, top),\n      \"| E(estado) =\", e[top], \"| P =\", p[top])\nprint(\"P de los óptimos exactos:\", p[optimos].sum())\n"
+   "codigo": "def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):\n    n = qubo.n\n    e = qubo.energias_todas()\n    qc = ansatz(n, capas)\n    npar = len(qc.parameters)\n    def f(angulos):                                # angulos = (θ, φ); H es diagonal: E = p · e\n        p = Statevector(qc.assign_parameters(angulos)).probabilities()\n        return float(p @ e)\n    rng = np.random.default_rng(semilla)\n    mejor = None\n    for r in range(arranques):\n        x0 = rng.uniform(0, 2 * np.pi, npar)\n        res = minimize(f, x0, method=\"COBYLA\", options={\"maxiter\": maxiter, \"rhobeg\": 0.5})\n        print(f\"arranque {r}: E = {res.fun:.4f}\")\n        if mejor is None or res.fun < mejor.fun:\n            mejor = res\n    p = Statevector(qc.assign_parameters(mejor.x)).probabilities()\n    return mejor, p, e\n\n# Consistencia entre el diagonal y el SparsePauliOp (con θ y φ cualesquiera)\nqc_t = ansatz(prob.n_qubits, 1)\nangulos = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))\nsv = Statevector(qc_t.assign_parameters(angulos))\nprint(np.isclose(sv.expectation_value(H).real + offset, sv.probabilities() @ e))   # True\n\nres, p, e = vqe(qubo)\ntop = int(np.argmax(p))\nprint(\"VQE: E =\", res.fun, \"| estado más probable:\", decodificar(prob, top),\n      \"| E(estado) =\", e[top], \"| P =\", p[top])\nprint(\"P de los óptimos exactos:\", p[optimos].sum())\n"
   },
   {
    "id": "expandir",

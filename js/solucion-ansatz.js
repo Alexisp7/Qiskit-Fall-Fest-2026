@@ -1,6 +1,6 @@
 // El ansatz en matemáticas: por qué, partiendo de ángulos θ al azar, la capa de
 // R_Y, la cascada de CZ y la capa final pueden llegar a la ruta de mínima
-// energía. El VQE en matemáticas (etapa Solver): la energía E(θ), la regla de la
+// energía. El VQE en matemáticas (etapa Solver): la energía E(θ, φ), la regla de la
 // sinusoide y, para el triángulo (9 qubits), el estado exacto simulado en el
 // navegador y optimizado parámetro por parámetro.
 (function () {
@@ -32,12 +32,12 @@
       ['\\big|(-1)^{\\sum_k b_k b_{k+1}}\\big| = 1 \\;\\Rightarrow\\; P(b) \\text{ no cambia}', 'Si se midiera aquí, todo sería igual que antes: por eso hace falta otra capa.']
     ] },
     { t: 'La capa final hace interferir los signos', l: [
-      ['|\\psi(\\theta)\\rangle = \\bigotimes_{k} R_Y(\\varphi_k)\\,|\\psi_2\\rangle \\;\\Rightarrow\\; \\psi(b) = \\sum_{b\'}\\Big[\\prod_{k} r_k(b_k, b\'_k)\\Big]\\,(-1)^{\\sum_k b\'_k b\'_{k+1}} \\prod_{k} a_k(b\'_k)', 'r_k(b, b′) son las entradas de R_Y(φ_k). Ahora cada amplitud final es una suma con signos: unas cadenas se refuerzan y otras se cancelan.'],
+      ['|\\psi(\\theta,\\varphi)\\rangle = \\bigotimes_{k} R_Y(\\varphi_k)\\,|\\psi_2\\rangle \\;\\Rightarrow\\; \\psi(b) = \\sum_{b\'}\\Big[\\prod_{k} r_k(b_k, b\'_k)\\Big]\\,(-1)^{\\sum_k b\'_k b\'_{k+1}} \\prod_{k} a_k(b\'_k)', 'r_k(b, b′) son las entradas de R_Y(φ_k). Ahora cada amplitud final es una suma con signos: unas cadenas se refuerzan y otras se cancelan.'],
       ['\\psi(b)\\in\\mathbb{R}, \\qquad \\sum_b \\psi(b)^{2} = 1', 'Los signos de la cascada dependen de pares vecinos, así que la interferencia crea correlaciones entre qubits vecinos.']
     ] },
     { t: 'La energía es un promedio de las rutas', l: [
-      ['E(\\theta) = \\langle\\psi(\\theta)|\\hat H|\\psi(\\theta)\\rangle = \\sum_{b} |\\psi(b)|^{2}\\, H(b)', 'Como Ĥ es diagonal, E(θ) es el promedio de las energías H(b) de todas las cadenas, pesado por su probabilidad.'],
-      ['E(\\theta) \\;\\ge\\; \\min_{b} H(b), \\qquad \\text{con igualdad} \\iff P(b) > 0 \\text{ solo en los mínimos}', 'Minimizar E obliga a mover toda la probabilidad hacia las rutas de menor costo.']
+      ['E(\\theta,\\varphi) = \\langle\\psi(\\theta,\\varphi)|\\hat H|\\psi(\\theta,\\varphi)\\rangle = \\sum_{b} |\\psi(b)|^{2}\\, H(b)', 'Como Ĥ es diagonal, E(θ, φ) es el promedio de las energías H(b) de todas las cadenas, pesado por su probabilidad.'],
+      ['E(\\theta,\\varphi) \\;\\ge\\; \\min_{b} H(b), \\qquad \\text{con igualdad} \\iff P(b) > 0 \\text{ solo en los mínimos}', 'Minimizar E obliga a mover toda la probabilidad hacia las rutas de menor costo.']
     ] },
     { t: 'Sin la cascada: campo medio', l: [
       ['\\text{sin CZ:}\\quad E(\\theta) = \\text{cte} + \\sum_k h_k \\cos\\theta_k + \\sum_{k<l} J_{kl}\\cos\\theta_k\\cos\\theta_l', 'Con un estado producto, ⟨z_k z_l⟩ = ⟨z_k⟩⟨z_l⟩: cada qubit solo ve el promedio de los demás. Sin CZ, las dos capas se juntan: R_Y(φ_k)R_Y(θ_k) = R_Y(θ_k + φ_k).'],
@@ -45,7 +45,7 @@
     ] },
     { t: 'La ruta es alcanzable, con o sin cascada', l: [
       ['\\theta_k = 0 \\Rightarrow |\\psi_1\\rangle = |0\\cdots 0\\rangle, \\qquad U_{\\mathrm{CZ}}|0\\cdots0\\rangle = |0\\cdots0\\rangle'],
-      ['\\varphi_k = \\pi\\, b^{*}_k \\;\\Rightarrow\\; R_Y(\\pi)|0\\rangle = |1\\rangle \\;\\Rightarrow\\; |\\psi(\\theta)\\rangle = |b^{*}\\rangle,\\quad E = H(b^{*}) = \\min_b H(b)', 'Basta la capa de R_Y(π): la cascada no interviene. La ruta óptima ya está en la familia del campo medio; el entrelazamiento no hace falta para alcanzarla.'],
+      ['\\varphi_k = \\pi\\, b^{*}_k \\;\\Rightarrow\\; R_Y(\\pi)|0\\rangle = |1\\rangle \\;\\Rightarrow\\; |\\psi(\\theta,\\varphi)\\rangle = |b^{*}\\rangle,\\quad E = H(b^{*}) = \\min_b H(b)', 'Basta la capa de R_Y(π): la cascada no interviene. La ruta óptima ya está en la familia del campo medio; el entrelazamiento no hace falta para alcanzarla.'],
       ['b^{*}_{1\\to2\\to3}:\\ x_{11} = x_{22} = x_{33} = 1 \\;\\Rightarrow\\; H(b^{*}) = ' + C + '{12}', 'En el triángulo: d₁₂ + d₂₃ = 5 + 7.']
     ] },
     { t: 'Para qué sirve la cascada: el paisaje', l: [
@@ -54,7 +54,7 @@
       ['\\text{triángulo, 2000 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{35\\,\\%} \\text{ con CZ}, \\quad 32\\,\\% \\text{ sin CZ}', 'Medido con la regla de la sinusoide de la etapa Solver. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
     ] },
     { t: 'De θ al azar a la ruta: cada ángulo es un seno', l: [
-      ['E(\\theta_j) = \\alpha_j \\cos(\\theta_j - \\beta_j) + \\gamma_j', 'Cada θ_j aparece en una sola R_Y, así que la energía, como función de ese ángulo, es una sinusoide.'],
+      ['E(\\theta_j) = \\alpha_j \\cos(\\theta_j - \\beta_j) + \\gamma_j', 'Cada ángulo (un θ_j o un φ_j) aparece en una sola R_Y, así que la energía, como función de ese ángulo, es una sinusoide.'],
       ['\\theta_j^{*} = \\theta_j - \\tfrac{\\pi}{2} - \\operatorname{atan2}\\big(2E(\\theta_j) - E(\\theta_j + \\tfrac{\\pi}{2}) - E(\\theta_j - \\tfrac{\\pi}{2}),\\ E(\\theta_j + \\tfrac{\\pi}{2}) - E(\\theta_j - \\tfrac{\\pi}{2})\\big)', 'Con tres evaluaciones se conoce la sinusoide entera y se salta a su mínimo. El cuaderno usa COBYLA, que busca lo mismo sin derivadas; la demostración de abajo usa esta regla, ángulo por ángulo.']
     ] }
   ];
@@ -338,7 +338,7 @@
     (function listo() { if (window.katex) { caja.querySelector('.az-texto').innerHTML = pintarTexto(); montarSlots(); } else setTimeout(listo, 300); })();
   };
 
-  // ── el VQE en matemáticas: la energía E(θ), la regla de la sinusoide y la demostración en vivo ──
+  // ── el VQE en matemáticas: la energía E(θ, φ), la regla de la sinusoide y la demostración en vivo ──
   // ── demostración en vivo del VQE: el ansatz real de 9 qubits, la energía con J y h, y el optimizador ──
   function grados(a) { return Math.round((((a * 180 / Math.PI) % 360) + 360) % 360); }
   function nomParam(j) { return (j < 9 ? 'θ' : 'φ') + '<sub>' + (j % 9 + 1) + '</sub>'; }
@@ -475,21 +475,21 @@
   window.montarVQEMat = function (caja) {
     function pintarTexto() {
       numero = 0;
-      return '<div class="dv-cab"><div class="mx-kicker">El VQE en matemáticas</div><h3 class="dv-tit">De la energía E(θ) a la ruta</h3>' +
-        '<p class="dv-resumen"><b>Resumen.</b> El ansatz propone un estado |ψ(θ)⟩; el VQE calcula su energía y ajusta los ángulos. Como Ĥ es diagonal, E(θ) es un promedio de las energías de las rutas, pesado por su probabilidad, y nunca baja del mínimo. Cada ángulo entra en una sola R<sub>Y</sub>, así que E es una sinusoide en ese ángulo: con tres evaluaciones se salta a su mínimo. Abajo se ve en vivo con el triángulo.</p></div>' +
+      return '<div class="dv-cab"><div class="mx-kicker">El VQE en matemáticas</div><h3 class="dv-tit">De la energía E(θ, φ) a la ruta</h3>' +
+        '<p class="dv-resumen"><b>Resumen.</b> El ansatz propone un estado |ψ(θ, φ)⟩; el VQE calcula su energía y ajusta los ángulos. Como Ĥ es diagonal, E(θ, φ) es un promedio de las energías de las rutas, pesado por su probabilidad, y nunca baja del mínimo. Cada ángulo entra en una sola R<sub>Y</sub>, así que E es una sinusoide en ese ángulo: con tres evaluaciones se salta a su mínimo. Abajo se ve en vivo con el triángulo.</p></div>' +
         '<div class="dv-pizarra">' + SV.map(seccion).join('') + '</div>';
     }
     var H0 = window.HAM_TRI, DISPAROS = 1024, MAXFUN = 300;
     caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>' +
       '<div class="az-demo vq-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
-      '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar con COBYLA</button><button type="button" class="dv-btn" data-az="paso">una iteración</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
+      '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ y φ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar con COBYLA</button><button type="button" class="dv-btn" data-az="paso">una iteración</button><button type="button" class="dv-btn" data-az="construido">θ y φ para 1 → 2 → 3</button>' +
       '<label class="vq-vel">velocidad <select data-az="vel"><option value="250">lenta</option><option value="60" selected>normal</option><option value="0">rápida</option></select></label></div>' +
             // 1 · el ansatz y lo que sale al medir
       '<div class="vq-paso"><span>1</span>El ansatz prepara el estado y se mide el Hamiltoniano</div>' +
       '<div data-az="circ"></div>' +
       '<div class="vq-sub">Lo que sale al medir: las configuraciones más probables</div><div data-az="prob"></div>' +
       '<div class="vq-sub">De dónde sale P(b): el estado del ansatz, vector por vector</div><div class="vq-amp"><div data-az="ampF"></div><div data-az="ampN"></div></div>' +
-      '<p class="vq-fund"><b>Fundamento.</b> El ansatz U(θ) prepara |ψ(θ)⟩ = U(θ)|0⟩<sup>⊗9</sup>, y lo que se mide es el Hamiltoniano Ĥ. Ĥ no es una compuerta (no es unitario): es el observable, la cantidad que se quiere conocer. Como solo tiene Z y Z⊗Z, medir Ĥ es medir los 9 qubits en la base Z: cada disparo da una cadena b, con probabilidad P(b) = |⟨b|ψ(θ)⟩|², y Ĥ vale H(b) en ella. Los qubits van por tiempo, así que q<sub>1</sub>q<sub>2</sub>q<sub>3</sub> es la columna t<sub>1</sub> de la matriz x, q<sub>4</sub>q<sub>5</sub>q<sub>6</sub> la t<sub>2</sub> y q<sub>7</sub>q<sub>8</sub>q<sub>9</sub> la t<sub>3</sub>.</p>' +
+      '<p class="vq-fund"><b>Fundamento.</b> El ansatz U(θ, φ) prepara |ψ(θ, φ)⟩ = U(θ, φ)|0⟩<sup>⊗9</sup>, y lo que se mide es el Hamiltoniano Ĥ. Ĥ no es una compuerta (no es unitario): es el observable, la cantidad que se quiere conocer. Como solo tiene Z y Z⊗Z, medir Ĥ es medir los 9 qubits en la base Z: cada disparo da una cadena b, con probabilidad P(b) = |⟨b|ψ(θ, φ)⟩|², y Ĥ vale H(b) en ella. Los qubits van por tiempo, así que q<sub>1</sub>q<sub>2</sub>q<sub>3</sub> es la columna t<sub>1</sub> de la matriz x, q<sub>4</sub>q<sub>5</sub>q<sub>6</sub> la t<sub>2</sub> y q<sub>7</sub>q<sub>8</sub>q<sub>9</sub> la t<sub>3</sub>.</p>' +
       // 2 · la energía
       '<div class="vq-paso"><span>2</span>La energía: el promedio de H(b) en los disparos</div>' +
       '<div class="vq-energia" data-az="energia"></div>' +
@@ -499,19 +499,19 @@
       '<div class="vq-bloque"><div class="vq-rot">J<sub>kl</sub> (k &lt; l)</div><table class="vq-tabla vq-num" data-az="J"></table></div>' +
       '<div class="vq-bloque"><div class="vq-rot">⟨z<sub>k</sub>z<sub>l</sub>⟩ (k &lt; l)</div><table class="vq-tabla vq-num" data-az="zz"></table></div></div>' +
       '<div class="vq-suma" data-az="suma"></div>' +
-      '<p class="vq-fund"><b>Fundamento.</b> El valor esperado de Ĥ en el estado es la energía: E(θ) = ⟨ψ(θ)|Ĥ|ψ(θ)⟩ = Σ<sub>b</sub> P(b) H(b). Un chip no la da de una vez: se repite el circuito y se promedia H(b) sobre los disparos. Es el número que el optimizador quiere bajar. (En otros ansatz, como QAOA, Ĥ también entra dentro del circuito como compuertas e<sup>−iγĤ</sup>; en este ansatz solo se mide.)</p>' +
+      '<p class="vq-fund"><b>Fundamento.</b> El valor esperado de Ĥ en el estado es la energía: E(θ, φ) = ⟨ψ(θ, φ)|Ĥ|ψ(θ, φ)⟩ = Σ<sub>b</sub> P(b) H(b). Un chip no la da de una vez: se repite el circuito y se promedia H(b) sobre los disparos. Es el número que el optimizador quiere bajar. (En otros ansatz, como QAOA, Ĥ también entra dentro del circuito como compuertas e<sup>−iγĤ</sup>; en este ansatz solo se mide.)</p>' +
       // 3 · COBYLA
       '<div class="vq-paso"><span>3</span>COBYLA decide cómo cambiar los ángulos, y el ciclo vuelve a empezar</div>' +
-      '<div class="vq-flujo"><span>θ</span>→<span>ansatz U(θ)</span>→<span>medir Ĥ: P(b) y H(b)</span>→<span>promedio: E(θ) = ⟨Ĥ⟩</span>→<span>COBYLA cambia θ</span>→<span>vuelve a empezar</span></div>' +
+      '<div class="vq-flujo"><span>θ, φ</span>→<span>ansatz U(θ, φ)</span>→<span>medir Ĥ: P(b) y H(b)</span>→<span>promedio: E(θ, φ) = ⟨Ĥ⟩</span>→<span>COBYLA cambia θ y φ</span>→<span>vuelve a empezar</span></div>' +
       '<div class="vq-cobyla"><div><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg></div><div class="vq-decision" data-az="decision"></div></div>' +
       '<div class="vq-log" data-az="log"></div>' +
-      '<p class="vq-fund"><b>Fundamento.</b> COBYLA no usa derivadas. Evalúa E en un símplex de 19 puntos (θ y θ + ρ en cada ángulo) y ajusta un plano: E(θ + d) ≈ E(θ) + g·d. Su pendiente g reemplaza al gradiente. El paso va en contra de g, con largo ρ (la región de confianza): d = −ρ g/|g|. Si la energía baja menos del 10 % de lo que predijo el plano, ρ se reduce a la mitad. Si un vértice del símplex queda muy lejos (η &gt; 2,1ρ) o casi sobre su cara opuesta (σ &lt; 0,25ρ), lo repara con un paso de geometría, también de largo ρ y hacia donde baja el plano. Con 18 ángulos el símplex se deforma seguido: en esta implementación, unas 9 de cada 10 evaluaciones son pasos de geometría. Como en el cuaderno (SciPy), se detiene a las ' + MAXFUN + ' evaluaciones; desde los mismos 200 arranques, sus resultados en el triángulo son equivalentes a los del COBYLA de SciPy (27 contra 22 llegan a E = 12).</p>' +
+      '<p class="vq-fund"><b>Fundamento.</b> COBYLA no usa derivadas. Evalúa E en un símplex de 19 puntos (θ y θ + ρ en cada ángulo) y ajusta un plano: E(θ + d) ≈ E(θ, φ) + g·d. Su pendiente g reemplaza al gradiente. El paso va en contra de g, con largo ρ (la región de confianza): d = −ρ g/|g|. Si la energía baja menos del 10 % de lo que predijo el plano, ρ se reduce a la mitad. Si un vértice del símplex queda muy lejos (η &gt; 2,1ρ) o casi sobre su cara opuesta (σ &lt; 0,25ρ), lo repara con un paso de geometría, también de largo ρ y hacia donde baja el plano. Con 18 ángulos el símplex se deforma seguido: en esta implementación, unas 9 de cada 10 evaluaciones son pasos de geometría. Como en el cuaderno (SciPy), se detiene a las ' + MAXFUN + ' evaluaciones; desde los mismos 200 arranques, sus resultados en el triángulo son equivalentes a los del COBYLA de SciPy (27 contra 22 llegan a E = 12).</p>' +
       '</div>';
     function $(k) { return caja.querySelector('[data-az="' + k + '"]'); }
     (function listo() {
       if (!window.katex) { setTimeout(listo, 300); return; }
       caja.querySelector('.az-texto').innerHTML = pintarTexto();
-      $('formula').innerHTML = tex(String.raw`E(\boldsymbol\theta) = c + \sum_{k} h_k\,\langle z_k\rangle + \sum_{k<l} J_{kl}\,\langle z_k z_l\rangle, \qquad \langle z_k\rangle = \sum_b P(b)\, z_k(b), \quad \langle z_k z_l\rangle = \sum_b P(b)\, z_k(b)\, z_l(b), \quad z = 1 - 2x`, true);
+      $('formula').innerHTML = tex(String.raw`E(\boldsymbol\theta,\boldsymbol\varphi) = c + \sum_{k} h_k\,\langle z_k\rangle + \sum_{k<l} J_{kl}\,\langle z_k z_l\rangle, \qquad \langle z_k\rangle = \sum_b P(b)\, z_k(b), \quad \langle z_k z_l\rangle = \sum_b P(b)\, z_k(b)\, z_l(b), \quad z = 1 - 2x`, true);
       $('ampF').innerHTML = [String.raw`|\psi_1\rangle = \bigotimes_{k=1}^{9} R_Y(\theta_k)|0\rangle = \bigotimes_{k=1}^{9}\begin{pmatrix}\cos\frac{\theta_k}{2}\\ \sin\frac{\theta_k}{2}\end{pmatrix}, \qquad \psi_1(b) = \prod_{k=1}^{9} a_k(b_k),\quad a_k(0) = \cos\tfrac{\theta_k}{2},\ a_k(1) = \sin\tfrac{\theta_k}{2}`,
         String.raw`\psi_2(b) = (-1)^{\,b_1b_2 + b_2b_3 + \cdots + b_8b_9}\;\psi_1(b)`,
         String.raw`\psi(b) = \sum_{b'} \Big[\prod_{k=1}^{9} R_Y(\varphi_k)_{b_k b'_k}\Big]\,\psi_2(b'), \qquad R_Y(\varphi) = \begin{pmatrix}\cos\frac{\varphi}{2} & -\sin\frac{\varphi}{2}\\ \sin\frac{\varphi}{2} & \cos\frac{\varphi}{2}\end{pmatrix}`,
@@ -629,7 +629,7 @@
       $('J').innerHTML = mat(function (a, b) { return H0.J[a][b]; }, function (v) { return v ? f2(v) : '0'; });
       $('zz').innerHTML = mat(function (a, b) { return r.ezz[a][b]; }, f3);
       $('suma').innerHTML =
-        '<div class="vq-linea"><span>Con J y h:</span> E(θ) = c + Σ h<sub>k</sub>⟨z<sub>k</sub>⟩ + Σ<sub>k&lt;l</sub> J<sub>kl</sub>⟨z<sub>k</sub>z<sub>l</sub>⟩ = ' + f2(H0.cte) + ' ' + (r.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.hz)) + ' ' + (r.jzz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.jzz)) + ' = <b>' + f2(H0.cte + r.hz + r.jzz) + '</b></div>' +
+        '<div class="vq-linea"><span>Con J y h:</span> E(θ, φ) = c + Σ h<sub>k</sub>⟨z<sub>k</sub>⟩ + Σ<sub>k&lt;l</sub> J<sub>kl</sub>⟨z<sub>k</sub>z<sub>l</sub>⟩ = ' + f2(H0.cte) + ' ' + (r.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.hz)) + ' ' + (r.jzz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.jzz)) + ' = <b>' + f2(H0.cte + r.hz + r.jzz) + '</b></div>' +
         '<div class="vq-linea"><span>Comprobación:</span> Σ<sub>b</sub> P(b)·H(b) = <b>' + f2(ex) + '</b> · diferencia ' + Math.abs(H0.cte + r.hz + r.jzz - ex).toExponential(1).replace('.', ',') + '</div>' +
         '<p class="vq-pnota">Cada ⟨z<sub>k</sub>⟩ va de −1 (la variable x<sub>k</sub> siempre vale 1) a +1 (siempre vale 0); ⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 si las dos variables salen siempre iguales y −1 si salen siempre distintas. Las matrices van por lugar, como en Inicializar: z<sub>it</sub> es el lugar i en el tiempo t. Al minimizar, COBYLA mueve estos valores esperados hasta que c + Σh⟨z⟩ + ΣJ⟨zz⟩ llega al mínimo.</p>';
     }
@@ -678,7 +678,7 @@
       e('line', { x1: 40, y1: Y(sim.min), x2: 410, y2: Y(sim.min), 'class': 'az-min' });
       e('text', { x: 408, y: Y(sim.min) - 5, 'class': 'az-txt', 'text-anchor': 'end' }).textContent = 'mínimo = ' + n2(sim.min);
       e('text', { x: 40, y: 212, 'class': 'az-txt' }).textContent = 'evaluaciones de COBYLA →';
-      e('text', { x: 36, y: 16, 'class': 'az-txt', 'text-anchor': 'start' }).textContent = 'E(θ)';
+      e('text', { x: 36, y: 16, 'class': 'az-txt', 'text-anchor': 'start' }).textContent = 'E(θ, φ)';
       evals.forEach(function (x, i) { e('circle', { cx: X(i), cy: Y(x.f), r: 1.8, 'class': 'vq-pto-eval' }); });
       var mejor = Infinity, d = '';
       evals.forEach(function (x, i) { mejor = Math.min(mejor, x.f); d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(mejor).toFixed(1); });

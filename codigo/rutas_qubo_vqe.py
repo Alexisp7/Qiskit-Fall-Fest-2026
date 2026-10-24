@@ -381,9 +381,10 @@ H, offset = qubo.a_ising()
 
 # ---- El ansatz propuesto ---------------------------------------------------
 def ansatz(n_qubits, capas):
-    """Capas de RY con entrelazamiento CZ en cadena, mas una capa final de RY."""
+    """Capas de RY(θ) con entrelazamiento CZ en cadena, más una capa final de RY(φ)."""
     from qiskit.circuit import ParameterVector
-    th = ParameterVector("θ", n_qubits * (capas + 1))
+    th = ParameterVector("θ", n_qubits * capas)   # ángulos de las capas con la cascada de CZ
+    ph = ParameterVector("φ", n_qubits)           # ángulos de la capa final
     qc = QuantumCircuit(n_qubits)
     p = 0
     for _ in range(capas):
@@ -393,9 +394,8 @@ def ansatz(n_qubits, capas):
         for k in range(n_qubits - 1):
             qc.cz(k, k + 1)
     for k in range(n_qubits):
-        qc.ry(th[p], k)
-        p += 1
-    return qc
+        qc.ry(ph[k], k)
+    return qc   # qc.parameters ordena primero los θ y luego los φ
 
 
 # ### ¿Por qué rotaciones R_Y?
@@ -419,7 +419,7 @@ def ansatz(n_qubits, capas):
 
 
 # ### El tamaño del ansatz
-# Con n qubits y una capa hay n parámetros en la primera fila de R_Y, n en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13 dan 104 qubits de ruta más 8 × 3 = 24 de holgura: 128 qubits, 256 parámetros θ y 127 CZ.
+# Con n qubits y una capa hay n ángulos θ en la primera fila de R_Y, n ángulos φ en la última y n − 1 compuertas CZ. En la red minera, N = 8 y T = 13 dan 104 qubits de ruta más 8 × 3 = 24 de holgura: 128 qubits, 128 ángulos θ y 128 ángulos φ (256 parámetros) y 127 CZ.
 
 
 # ### Escala y límites
@@ -437,16 +437,16 @@ def resolver_vqe(qubo, capas=1, intentos=6, maxiter=300, semilla=1, candidatos=2
     Hn = H / escala                          # normalizar ayuda al optimizador
     qc = ansatz(qubo.n, capas)
     rng = np.random.default_rng(semilla)
-    def energia(theta):
-        psi = Statevector(qc.assign_parameters(theta))
+    def energia(angulos):                  # angulos = (θ, φ): primero los θ, luego los φ
+        psi = Statevector(qc.assign_parameters(angulos))
         return float(np.real(psi.expectation_value(Hn)))
     mejor = None
     historial = []
     for _ in range(intentos):
-        theta0 = rng.uniform(0, 2 * np.pi, qc.num_parameters)
+        angulos0 = rng.uniform(0, 2 * np.pi, qc.num_parameters)   # θ y φ al azar
         hist = []
-        res = minimize(energia, theta0, method="COBYLA",
-                       callback=lambda th: hist.append(energia(th)),
+        res = minimize(energia, angulos0, method="COBYLA",
+                       callback=lambda a: hist.append(energia(a)),
                        options={"maxiter": maxiter})
         historial.append(np.array(hist) * escala + offset)
         if mejor is None or res.fun < mejor.fun:
@@ -713,8 +713,8 @@ def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):
     e = qubo.energias_todas()
     qc = ansatz(n, capas)
     npar = len(qc.parameters)
-    def f(theta):                                  # H es diagonal: E = p · e
-        p = Statevector(qc.assign_parameters(theta)).probabilities()
+    def f(angulos):                                # angulos = (θ, φ); H es diagonal: E = p · e
+        p = Statevector(qc.assign_parameters(angulos)).probabilities()
         return float(p @ e)
     rng = np.random.default_rng(semilla)
     mejor = None
@@ -727,10 +727,10 @@ def vqe(qubo, capas=2, arranques=5, maxiter=1500, semilla=0):
     p = Statevector(qc.assign_parameters(mejor.x)).probabilities()
     return mejor, p, e
 
-# Consistencia entre el diagonal y el SparsePauliOp (con un θ cualquiera)
+# Consistencia entre el diagonal y el SparsePauliOp (con θ y φ cualesquiera)
 qc_t = ansatz(prob.n_qubits, 1)
-th = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))
-sv = Statevector(qc_t.assign_parameters(th))
+angulos = np.random.default_rng(1).uniform(0, 2 * np.pi, len(qc_t.parameters))
+sv = Statevector(qc_t.assign_parameters(angulos))
 print(np.isclose(sv.expectation_value(H).real + offset, sv.probabilities() @ e))   # True
 
 res, p, e = vqe(qubo)
