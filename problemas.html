@@ -6,7 +6,7 @@
   <title>Problemas — Qiskit Fall Fest 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&amp;family=Inter:wght@300;400;500;600&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&amp;family=Inter:wght@300;400;500;600&amp;family=Caveat:wght@400;600;700&family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after {
       margin: 0;
@@ -1421,61 +1421,73 @@
     .reto-intro { max-width: 1280px; margin: 0 auto 18px; padding: 0 48px; box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
     .reto-intro .reto-titulo { font-size: 30px; }
     .reto-intro .reto-pregunta { margin-top: 0; }
-    .ejemplo { max-width: 1280px; margin: 0 auto; padding: 0 48px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
-    .plano { width: 100%; height: auto; display: block; }
-    .plano .rejilla { stroke: rgba(242,238,230,.07); }
-    .plano .eje { stroke: rgba(242,238,230,.35); }
-    .plano .marca { font-family: 'Space Mono', monospace; font-size: 9px; fill: #6f6a61; text-anchor: middle; }
-    .plano .eje-nombre { text-anchor: end; fill: #8a8478; }
-    .plano .posible { stroke: rgba(242,238,230,.16); stroke-dasharray: 3 4; }
-    .plano .tramo { stroke: var(--gold); stroke-width: 3; stroke-linecap: round; }
-    .plano .tramo-n { fill: #0f1626; stroke: var(--gold); stroke-width: 1.2; }
-    .plano .tramo-n-txt { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; fill: #E0C48C; text-anchor: middle; }
-    .plano .punto-g { cursor: pointer; outline: none; }
-    .plano .punto { fill: #0f1626; stroke: #F2EEE6; stroke-width: 1.6; transition: fill .2s; }
-    .plano .punto-g:hover .punto, .plano .punto-g:focus-visible .punto { stroke: var(--gold); stroke-width: 2.6; }
-    .plano .punto.visitado { fill: var(--gold); }
-    .plano .punto.almacen { stroke: var(--gold); stroke-width: 2.6; }
-    .plano .punto-etq { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 14px; fill: #F2EEE6; text-anchor: middle; pointer-events: none; }
-    .plano .punto.visitado + .punto-etq { fill: #111; }
-    .plano .punto-coord { font-family: 'Space Mono', monospace; font-size: 9px; fill: #A8A39A; text-anchor: middle; pointer-events: none; }
-    .ejemplo-texto { background: #FAF8F4; border: 1px solid #EEE9E0; border-left: none; padding: 24px 32px; }
-    .ejemplo-enunciado { font-size: 14.5px; line-height: 1.65; color: var(--gray); margin: 8px 0 14px; }
-    .ejemplo-enunciado b { color: var(--black); }
-    .fcoste { background: #fff; border: 1px solid #E5E2DC; border-top: 3px solid var(--gold); padding: 14px 18px 12px; margin-bottom: 14px; }
-    .fcoste-rot { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #7A7A7A; margin-bottom: 6px; }
-    .fcoste-formula { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 30px; line-height: 1.25; color: var(--black); }
-    .fcoste-formula .sumatoria { font-style: normal; font-size: 36px; display: inline-flex; flex-direction: column; vertical-align: middle; align-items: center; line-height: .8; margin: 0 2px; }
-    .fcoste-formula .sumatoria sub, .fcoste-formula .sumatoria sup { font-size: 12px; font-style: italic; line-height: 1; vertical-align: baseline; }
-    .fcoste-def { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: #1B2A4A; margin-top: 4px; }
-    .fcoste-qubo { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14px; color: #5A6478; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E2DC; line-height: 1.4; }
-    .fcoste-qubo span { font-family: 'Space Mono', monospace; font-style: normal; font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8a8478; margin-right: 6px; }
-    .exp-suma, .exp-num { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; color: var(--black); line-height: 1.35; }
-    .exp-num { color: #1B2A4A; }
-    .exp-total { font-style: normal; font-weight: 700; font-size: 32px; color: #8C6D33; font-variant-numeric: lining-nums; }
-    .exp-unidad { font-family: 'Space Mono', monospace; font-style: normal; font-size: 11px; color: #7A7A7A; }
-    .coste-estado { font-size: 13px; line-height: 1.55; color: var(--gray); margin: 8px 0 10px; min-height: 20px; }
-    .coste-estado.bien { color: #2F7A4F; font-weight: 600; }
-    .ejemplo-texto .calc-botones button { border-color: #1B2A4A; color: #1B2A4A; }
-    .ejemplo-texto .calc-botones button:hover { background: #1B2A4A; color: #fff; }
-    .distancias-wrap { max-width: 1280px; margin: 26px auto 10px; padding: 0 48px; box-sizing: border-box; }
-    .dist-cab { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
-    .dist-cab .reto-desc { margin: 0; font-size: 13px; }
-    .distancias { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-    .dij { border: 1px solid #E5E2DC; background: #fff; padding: 12px 14px; font-family: 'Cormorant Garamond', serif; font-style: italic; color: #1B2A4A; transition: border-color .25s, background .25s; }
-    .dij.usada { border-color: var(--gold); background: #FBF7EE; box-shadow: inset 0 3px 0 var(--gold); }
-    .dij-cab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-    .dij-nombre { font-size: 22px; font-weight: 600; color: var(--black); }
-    .dij-orden { font-family: 'Space Mono', monospace; font-style: normal; font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8C6D33; }
-    .dij-linea { font-size: 14px; line-height: 1.45; white-space: nowrap; }
-    .dij-valor { font-style: normal; font-weight: 700; font-size: 20px; color: #8C6D33; margin-top: 4px; font-variant-numeric: lining-nums; }
-    @media (max-width: 1100px) { .distancias { grid-template-columns: repeat(3, 1fr); } }
+    /* ── ejemplo en estilo cuaderno: hoja cuadriculada, tinta azul y roja ── */
+    .cuaderno {
+      --tinta-azul: #23408E; --tinta-roja: #C0392B; --tinta-negra: #1d1d1f;
+      max-width: 1184px; margin: 0 auto 30px; box-sizing: border-box; padding: 22px 30px 26px;
+      background-color: #FCFCF9;
+      background-image: linear-gradient(rgba(35,64,142,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(35,64,142,.09) 1px, transparent 1px);
+      background-size: 22px 22px; border: 1px solid #E3E1DA; box-shadow: 0 10px 30px -18px rgba(0,0,0,.25);
+      font-family: 'Caveat', 'Cormorant Garamond', cursive;
+    }
+    .cuaderno-arriba { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 30px; align-items: start; }
+    .c-kicker { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+    .cuaderno-grafo { width: 100%; height: auto; display: block; }
+    .cuaderno-grafo .c-arista { stroke: var(--tinta-azul); stroke-width: 1.8; stroke-linecap: round; }
+    .cuaderno-grafo .c-tramo { stroke: var(--gold); stroke-width: 5; stroke-linecap: round; opacity: .85; }
+    .cuaderno-grafo .c-tramo.roto { stroke: var(--tinta-roja); stroke-dasharray: 6 6; }
+    .cuaderno-grafo .c-dij { font-family: 'Caveat', cursive; font-size: 19px; fill: var(--tinta-azul); text-anchor: middle; }
+    .cuaderno-grafo .c-sub { font-size: 13px; }
+    .cuaderno-grafo .c-nodo-g { cursor: pointer; outline: none; }
+    .cuaderno-grafo .c-nodo { fill: #142a63; stroke: var(--tinta-roja); stroke-width: 2.2; transition: r .15s, fill .2s; }
+    .cuaderno-grafo .c-nodo-g:hover .c-nodo, .cuaderno-grafo .c-nodo-g:focus-visible .c-nodo { r: 10; }
+    .cuaderno-grafo .c-nodo.en-ruta { fill: var(--gold); stroke: #142a63; r: 9; }
+    .cuaderno-grafo .c-nodo.inicio { fill: #fff; stroke: var(--gold); stroke-width: 3; r: 10; }
+    .cuaderno-grafo .c-num { font-family: 'Caveat', cursive; font-size: 26px; font-weight: 700; fill: var(--tinta-roja); text-anchor: middle; }
+    .c-recuadro { border: 2.5px solid var(--tinta-azul); border-radius: 4px 10px 6px 12px; padding: 10px 18px; transform: rotate(-.4deg); background: rgba(255,255,255,.6); margin-top: 6px; }
+    .c-formula { font-family: 'Caveat', cursive; font-size: 40px; line-height: 1.15; color: var(--tinta-roja); white-space: nowrap; }
+    .c-formula sub { font-size: 20px; }
+    .c-sigma { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: .75; font-size: 44px; margin: 0 2px; }
+    .c-sigma sup, .c-sigma sub { font-size: 18px; line-height: 1; vertical-align: baseline; }
+    .c-nota, .m-nota { font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.55; color: #555; margin: 10px 0 8px; }
+    .c-b { display: inline-flex; align-items: center; gap: 6px; font-size: 26px; color: var(--tinta-azul); }
+    .c-b input, .m-celda input { font-family: 'Caveat', cursive; font-size: 24px; color: var(--tinta-negra); width: 58px; border: none; border-bottom: 2px solid var(--tinta-azul); background: transparent; text-align: center; padding: 0 2px; -moz-appearance: textfield; }
+    .c-b input::-webkit-inner-spin-button, .m-celda input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .c-b input:focus, .m-celda input:focus { outline: none; border-bottom-color: var(--gold); background: rgba(200,169,110,.12); }
+    .c-exp { margin-top: 8px; }
+    .c-exp-suma, .c-exp-num { font-size: 26px; line-height: 1.25; color: var(--tinta-azul); }
+    .c-exp-suma sub, .c-exp-num sub { font-size: 15px; }
+    .c-total { font-size: 38px; font-weight: 700; color: var(--tinta-roja); }
+    .c-estado { font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; color: #444; margin: 6px 0 10px; min-height: 20px; }
+    .c-estado.error { color: var(--tinta-roja); }
+    .c-estado.bien { color: #2F7A4F; font-weight: 600; }
+    .c-botones { display: flex; gap: 8px; flex-wrap: wrap; }
+    .c-botones button { font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 12px; cursor: pointer; border: 1.5px solid var(--tinta-azul); background: #fff; color: var(--tinta-azul); transition: background .2s, color .2s; }
+    .c-botones button:hover { background: var(--tinta-azul); color: #fff; }
+    .cuaderno-matriz { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 14px; margin-top: 18px; }
+    .m-igual { font-size: 34px; color: var(--tinta-azul); }
+    .m-parentesis { position: relative; padding: 6px 26px; }
+    .m-parentesis::before, .m-parentesis::after { content: ''; position: absolute; top: 0; bottom: 0; width: 18px; border: 2.5px solid var(--tinta-azul); }
+    .m-parentesis::before { left: 0; border-right: none; border-radius: 50% 0 0 50% / 10% 0 0 10%; }
+    .m-parentesis::after { right: 0; border-left: none; border-radius: 0 50% 50% 0 / 0 10% 10% 0; }
+    .matriz { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px 14px; }
+    .m-celda { display: flex; align-items: baseline; gap: 2px; padding: 2px 4px; border-radius: 3px; transition: background .2s; }
+    .m-rot { font-size: 22px; color: var(--tinta-azul); white-space: nowrap; }
+    .m-rot sub { font-size: 14px; }
+    .m-celda.diag input { color: #999; border-bottom-color: transparent; }
+    .m-celda.espejo input { color: #8a8478; border-bottom: 2px dotted rgba(35,64,142,.35); }
+    .m-celda.usada { background: rgba(200,169,110,.25); }
+    .m-nota { grid-column: 2; margin-top: 6px; }
+    @media (max-width: 1100px) { .matriz { grid-template-columns: repeat(5, auto); } .m-rot { font-size: 18px; } .m-celda input { width: 40px; } }
     @media (max-width: 900px) {
-      .reto-intro, .ejemplo { grid-template-columns: 1fr; padding: 0 16px; gap: 10px; }
-      .ejemplo-texto { border-left: 1px solid #EEE9E0; }
-      .distancias-wrap { padding: 0 16px; }
-      .distancias { grid-template-columns: repeat(2, 1fr); }
-      .dij-linea { white-space: normal; }
+      .cuaderno { margin: 0 16px 24px; padding: 18px 14px; }
+      .cuaderno-arriba { grid-template-columns: 1fr; }
+      .c-formula { font-size: 30px; white-space: normal; }
+      .cuaderno-matriz { grid-template-columns: 1fr; }
+      .m-igual { margin-bottom: 4px; }
+      .m-nota { grid-column: 1; }
+      .matriz { overflow-x: auto; }
+      .m-rot { display: none; }
     }
 </style>
   <script>
@@ -1523,39 +1535,34 @@
       </div>
     </div>
 
-    <!-- ejemplo de 5 puntos: la ruta del repartidor -->
-    <div class="ejemplo entra" style="--i:4">
-      <div class="reto-figura">
-        <svg class="plano" id="plano" viewBox="0 0 480 400" role="group" aria-label="Plano con los 5 puntos: toca los puntos en orden para armar la ruta"></svg>
-      </div>
-      <div class="ejemplo-texto">
-        <div class="reto-kicker">Ejemplo · 5 puntos</div>
-        <p class="ejemplo-enunciado">Un repartidor sale del almacén <b>A</b>, visita una vez a los clientes <b>B, C, D</b> y <b>E</b>, y vuelve a <b>A</b>. ¿En qué orden debe hacerlo para recorrer la menor distancia?</p>
-
-        <div class="fcoste">
-          <div class="fcoste-rot">Función de coste</div>
-          <div class="fcoste-formula">C(π) = <span class="sumatoria"><sup>5</sup>Σ<sub>k=1</sub></span> d<sub>π<sub>k</sub>π<sub>k+1</sub></sub> ,&nbsp;&nbsp; π<sub>6</sub> = π<sub>1</sub> = A</div>
-          <div class="fcoste-def">d<sub>ij</sub> = √((x<sub>i</sub> − x<sub>j</sub>)² + (y<sub>i</sub> − y<sub>j</sub>)²)</div>
-          <div class="fcoste-qubo"><span>Para el enfoque cuántico (QUBO):</span> H = A Σ<sub>i</sub>(1 − Σ<sub>t</sub> x<sub>i,t</sub>)² + A Σ<sub>t</sub>(1 − Σ<sub>i</sub> x<sub>i,t</sub>)² + Σ<sub>i≠j</sub> d<sub>ij</sub> Σ<sub>t</sub> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
+    <!-- ejemplo de 5 puntos, en estilo cuaderno -->
+    <div class="cuaderno entra" style="--i:4">
+      <div class="cuaderno-arriba">
+        <div class="cuaderno-grafo-caja">
+          <div class="c-kicker">Ejemplo · 5 puntos</div>
+          <svg class="cuaderno-grafo" id="cuaderno-grafo" viewBox="0 0 460 300" role="group" aria-label="Grafo de 5 puntos: toca los puntos en orden para armar la vuelta"></svg>
         </div>
-
-        <div class="expandida" aria-live="polite">
-          <div class="fcoste-rot">Tu ruta, expandida</div>
-          <div class="exp-suma" id="coste-suma"></div>
-          <div class="exp-num"><span id="coste-num"></span> <span class="exp-igual">=</span> <span class="exp-total" id="coste-total">0</span> <span class="exp-unidad">km</span></div>
-          <p class="coste-estado" id="coste-estado"></p>
-          <div class="calc-botones"><button type="button" id="coste-optima">Ver la vuelta más corta</button><button type="button" id="coste-reiniciar">Reiniciar</button></div>
+        <div class="cuaderno-lado">
+          <div class="c-recuadro">
+            <div class="c-formula">f<sub>C</sub> = B <span class="c-sigma"><sup>N</sup>Σ<sub>i,j</sub></span> d<sub>ij</sub> <span class="c-sigma"><sup>T</sup>Σ<sub>t</sub></span> x<sub>i,t</sub> x<sub>j,t+1</sub></div>
+          </div>
+          <p class="c-nota">x<sub>i,t</sub> = 1 si el punto i se visita en el turno t. Cada par de turnos seguidos suma la distancia d<sub>ij</sub> entre esos dos puntos.</p>
+          <label class="c-b">B = <input type="number" id="c-b" value="1" min="0" step="0.5" aria-label="Peso B"></label>
+          <div class="c-exp" aria-live="polite">
+            <div class="c-exp-suma" id="c-suma"></div>
+            <div class="c-exp-num"><span id="c-num"></span> = <span class="c-total" id="c-total">0</span></div>
+            <p class="c-estado" id="c-estado"></p>
+            <div class="c-botones"><button type="button" id="c-optima">Vuelta de menor coste</button><button type="button" id="c-reiniciar">Reiniciar</button></div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- cada distancia, calculada a mano -->
-    <div class="distancias-wrap entra" style="--i:5">
-      <div class="dist-cab">
-        <div class="reto-sub">Las 10 distancias d<sub>ij</sub>, una por una</div>
-        <p class="reto-desc">Con 5 puntos hay 5 × 4 / 2 = 10 pares. Las que usa tu ruta se marcan con su número de tramo.</p>
+      <div class="cuaderno-matriz">
+        <div class="m-igual">d<sub>ij</sub> =</div>
+        <div class="m-parentesis">
+          <div class="matriz" id="matriz"></div>
+        </div>
+        <p class="m-nota">Edita la mitad de arriba: la de abajo se copia sola (d<sub>ij</sub> = d<sub>ji</sub>). Deja una casilla vacía (∞) si no hay conexión directa.</p>
       </div>
-      <ol class="distancias" id="distancias"></ol>
     </div>
   </section>
 
@@ -1568,6 +1575,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=3"></script>
+  <script src="js/problemas.js?v=5"></script>
 </body>
 </html>
