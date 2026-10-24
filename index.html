@@ -1340,14 +1340,8 @@
     /* Salida tras la QFT: el texto se desvanece junto con las esferas */
     .hero-qubits .hero-text { transition: opacity 0.3s ease-out; }
     .saliendo .hero-qubits .hero-text { opacity: 0; }
-    /* mientras se van los qubits baja el menú de problemas, que allá ya
-       aparece en su sitio */
-    .header-salida {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 60;
-      transform: translateY(-100%); visibility: hidden;
-      transition: transform 0.9s cubic-bezier(.2,.7,.2,1) 0.3s, visibility 0s 0.3s;
-    }
-    .saliendo .header-salida { transform: none; visibility: visible; }
+    /* el menú está desde el inicio, fijo arriba, sobre el teselado de qubits */
+    .header-salida { position: fixed; top: 0; left: 0; right: 0; z-index: 60; }
     /* portada: los temas del proyecto en lugar de cifras */
     .hero-qubits .hero-stats { gap: 34px; justify-content: center; flex-wrap: wrap; }
     .hero-qubits .stat-num { font-size: 32px; letter-spacing: 0; }
@@ -1358,12 +1352,12 @@
 </head>
 <body>
 
-  <header class="header header-salida" aria-hidden="true">
+  <header class="header header-salida">
     <div class="header-inner">
       <nav class="main-nav">
-        <a href="index.html">Portada</a>
+        <a href="index.html" class="active">Portada</a>
         <span class="nav-sep">|</span>
-        <a href="problemas.html" class="active">Problemas</a>
+        <a href="problemas.html">Problemas</a>
         <span class="nav-sep">|</span>
         <a href="solucion.html">Solución</a>
         <span class="nav-sep">|</span>
@@ -1383,7 +1377,7 @@
       <div class="hero-kicker">Hackathon</div>
       <h1 class="hero-name">Qiskit Fall Fest<br/><em>2026</em></h1>
       <p class="hero-bio">En este espacio se desarrollarán los tracks del hackathon Qiskit Fall Fest 2026. Su fin es únicamente de referencia y didáctico.</p>
-      <p class="hero-pista">Arrastra el medidor a la derecha, activa la <b>QFT</b> y mídela</p>
+      <p class="hero-pista">Entra desde el menú, o arrastra el medidor a la derecha, activa la <b>QFT</b> y mídela</p>
       <div class="hero-stats">
         <div class="stat-item">
           <div class="stat-num">Optimización</div>
