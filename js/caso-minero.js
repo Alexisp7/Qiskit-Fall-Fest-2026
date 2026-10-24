@@ -179,7 +179,7 @@
       el('text', { 'class': 'caso-dist', x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 + 4 }, svg).textContent = km(c[2]);
     });
     var aqui = r.length && r.length < T ? r[r.length - 1] : null;
-    var conCamion = modo === 3 || modo === 6;
+    var conCamion = modo === 6;   // el camión solo recorre la ruta en el resumen
     var meta = modo === 3 && r.length === T - 1 ? f : null;
     L.forEach(function (k) {
       var p = POS[k], pts = [];
@@ -197,6 +197,19 @@
       if (!interactivo) return;
       g.addEventListener('click', function () { tocar(k); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
+    });
+    // reglas "visitar a antes que b": una flecha curva de a hacia b, sin texto
+    if (modo === 6) ANTES.forEach(function (q, n) {
+      if (!q.on || q.a === q.b) return;
+      var pa = POS[q.a], pb = POS[q.b], mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2, ex = pb[0] - pa[0], ey = pb[1] - pa[1], l = Math.hypot(ex, ey) || 1;
+      var curva = (n ? -1 : 1) * Math.min(70, l * .28), cx = mx - ey / l * curva, cy = my + ex / l * curva;
+      var ux = cx - pa[0], uy = cy - pa[1], ul = Math.hypot(ux, uy) || 1, vx = pb[0] - cx, vy = pb[1] - cy, vl = Math.hypot(vx, vy) || 1;
+      var sx = pa[0] + ux / ul * (R + 6), sy = pa[1] + uy / ul * (R + 6), fx = pb[0] - vx / vl * (R + 8), fy = pb[1] - vy / vl * (R + 8);
+      if (!svg.querySelector('#' + mid + '-a' + n)) {
+        var mk4 = el('marker', { id: mid + '-a' + n, viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, defs);
+        el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'caso-antes-punta caso-antes-' + n }, mk4);
+      }
+      el('path', { 'class': 'caso-antes caso-antes-' + n, d: 'M' + sx.toFixed(1) + ' ' + sy.toFixed(1) + ' Q' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ' ' + fx.toFixed(1) + ' ' + fy.toFixed(1), 'marker-end': 'url(#' + mid + '-a' + n + ')' }, svg);
     });
     if (conCamion && !quieto) camion(svg);
   }
@@ -239,8 +252,8 @@
   var viaje = { t0: 0, raf: 0 };
   function andar(ahora) {
     viaje.raf = requestAnimationFrame(andar);
-    var svg = raiz.querySelector(paso === 6 ? '[data-grafo="6"]' : '[data-grafo="3"]');
-    if (!svg || (paso !== 3 && paso !== 6)) return;
+    var svg = raiz.querySelector('[data-grafo="6"]');
+    if (!svg || paso !== 6) return;
     var c = svg.querySelector('.camion'); if (!c) return;
     var r = ruta.length > 1 ? ruta : null;
     if (!r) { c.setAttribute('opacity', '0'); return; }
@@ -254,7 +267,7 @@
     var ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey) || 1, nx = -ey / l * 5, ny = ex / l * 5, R0 = R + 4;
     // de borde a borde de los círculos, como la flecha
     var x1 = a[0] + ex / l * R0 + nx, y1 = a[1] + ey / l * R0 + ny, x2 = b[0] - ex / l * (R0 + 2) + nx, y2 = b[1] - ey / l * (R0 + 2) + ny;
-    var x = x1 + (x2 - x1) * k, y = y1 + (y2 - y1) * k - (vuela ? Math.sin(Math.PI * k) * 46 : 0);
+    var x = x1 + (x2 - x1) * k, y = y1 + (y2 - y1) * k;   // también el salto se desliza recto: solo cambian alas y color
     var ang = Math.atan2(ey, ex) * 180 / Math.PI, izq = ex < 0;
     var mal = vuela || (n === 0 && k < .2 && r[0] !== s) || (n === tramos - 1 && k > .8 && r.length === T && r[T - 1] !== f);
     c.setAttribute('opacity', '1');
@@ -434,9 +447,16 @@
       '<div class="caso-res-bloque"><div class="caso-col-rot">Ruta</div><div class="caso-res-ruta">' + ruta.map(function (k) { return '<span class="caso-res-paso">' + NOMBRE[k] + ' <i>(x' + sub(IDX[k]) + ')</i></span>'; }).join(' → ') + '</div></div>' +
       '<div class="caso-res-bloque"><div class="caso-col-rot">Distancia</div><div class="caso-res-num">' + km(D) + ' <span>· ' + usd(B() * D) + '</span></div></div>' +
       '<div class="caso-res-bloque"><div class="caso-col-rot">Castigos</div><div class="caso-res-chips">' +
-      [['tiempo', p.tiempo], ['visita', p.visita], ['salto', p.salto], ['inicio', p.inicio], ['fin', p.fin]].concat(ANTES[0].on ? [['antes,1', p.antesR[0]]] : []).concat(ANTES[1].on ? [['antes,2', p.antesR[1]]] : []).map(function (c) {
+      [['tiempo', p.tiempo], ['visita', p.visita], ['salto', p.salto], ['inicio', p.inicio], ['fin', p.fin]].map(function (c) {
         return '<span class="' + (c[1] ? 'roto' : '') + '">P' + sub(c[0]) + ' = ' + c[1] + '</span>';
-      }).join('') + '</div></div>';
+      }).join('') + '</div>' +
+      ANTES.map(function (q, n) {
+        if (!q.on) return '';
+        var ta = ruta.indexOf(q.a) + 1, tb = ruta.indexOf(q.b) + 1;
+        return '<div class="caso-res-antes caso-antes-' + n + (p.antesR[n] ? ' roto' : '') + '"><span class="caso-res-antes-p">P' + sub('antes,' + (n + 1)) + ' = ' + p.antesR[n] + '</span>' +
+          NOMBRE[q.a] + ' <i>(x' + sub(IDX[q.a]) + ')</i> → ' + NOMBRE[q.b] + ' <i>(x' + sub(IDX[q.b]) + ')</i>' +
+          '<span class="caso-res-antes-t">' + (ta ? 't = ' + ta : 'no aparece') + ' · ' + (tb ? 't = ' + tb : 'no aparece') + '</span></div>';
+      }).join('') + '</div>';
   }
 
   // ── pasos ──

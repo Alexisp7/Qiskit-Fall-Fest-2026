@@ -2367,6 +2367,19 @@
     .camion.mueve .camion-aire line { animation: camionAire 1.05s linear infinite; }
     @keyframes camionAire { 0% { opacity: 0; transform: translateX(6px); } 25% { opacity: .75; } 100% { opacity: 0; transform: translateX(-12px); } }
     @media (prefers-reduced-motion: reduce) { .camion-aire line { animation: none !important; } }
+    /* reglas "antes" en el resumen: flecha en el mapa y la regla escrita */
+    .caso-antes { fill: none; stroke-width: 2.2; stroke-dasharray: 6 4; }
+    .caso-antes-0 { stroke: #7A4FA8; }
+    .caso-antes-1 { stroke: #2C8C8C; }
+    .caso-antes-punta.caso-antes-0 { fill: #7A4FA8; stroke: none; }
+    .caso-antes-punta.caso-antes-1 { fill: #2C8C8C; stroke: none; }
+    .caso-res-antes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 8px; padding: 6px 10px; border-left: 3px solid #7A4FA8; background: rgba(122,79,168,.06); font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--black); font-variant-numeric: lining-nums; }
+    .caso-res-antes.caso-antes-1 { border-left-color: #2C8C8C; background: rgba(44,140,140,.06); }
+    .caso-res-antes.roto { background: #FCF4F1; }
+    .caso-res-antes i { font-size: .85em; color: #8C6D33; }
+    .caso-res-antes-p { font-style: italic; font-weight: 700; margin-right: 4px; }
+    .caso-res-antes.roto .caso-res-antes-p { color: #B5472E; }
+    .caso-res-antes-t { font-family: 'Space Mono', monospace; font-size: 10px; color: #6b665e; flex-basis: 100%; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2691,6 +2704,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=13"></script>
+  <script src="js/caso-minero.js?v=14"></script>
 </body>
 </html>
