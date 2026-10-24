@@ -107,23 +107,37 @@
     clearTimeout(avisoT); avisoT = setTimeout(contador, 1600);
   }
 
-  // ── tarjetas de rutas ──
+  // ── rutas: un solo desplegable con las 3! = 6 opciones ──
   var lista = document.getElementById('tm-rutas');
+  var selector = document.getElementById('tm-select'), selBtn = document.getElementById('tm-sel-btn');
   function rutas() {
     var min = Math.min.apply(null, RUTAS.map(coste)), elegida = indiceRuta();
     var B = Number(document.getElementById('tm-b').value) || 0;
+    function fila(r, n) {
+      var c = coste(r);
+      return '<span class="tm-r-n">Q' + sub('C') + '<sup>' + (n + 1) + '</sup></span>' +
+        '<span class="tm-r-camino">' + r.join(' → ') + '</span>' +
+        '<span class="tm-r-coste">' + usd(B * c) + '</span>' + (c === min ? '<span class="tm-r-min">mínima</span>' : '');
+    }
+    selBtn.innerHTML = (elegida >= 0 ? fila(RUTAS[elegida], elegida) : '<span class="tm-sel-vacio">Elige una ruta</span>') + '<i class="tm-sel-chev" aria-hidden="true"></i>';
     lista.innerHTML = '';
     RUTAS.forEach(function (r, n) {
       var li = document.createElement('li');
-      var c = coste(r);
-      li.className = 'tm-ruta' + (n === elegida ? ' elegida' : '') + (c === min ? ' minima' : '');
-      li.innerHTML = '<button type="button"><span class="tm-r-n">Q' + sub('C') + '<sup>' + (n + 1) + '</sup></span>' +
-        '<span class="tm-r-camino">' + r.join(' → ') + '</span>' +
-        '<span class="tm-r-coste">' + usd(B * c) + '</span>' + (c === min ? '<span class="tm-r-min">mínima</span>' : '') + '</button>';
-      li.querySelector('button').addEventListener('click', function () { ruta = r.slice(); nuevo = null; pintar(); });
+      li.className = 'tm-ruta' + (n === elegida ? ' elegida' : '') + (coste(r) === min ? ' minima' : '');
+      li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', n === elegida ? 'true' : 'false');
+      li.innerHTML = '<button type="button">' + fila(r, n) + '</button>';
+      li.querySelector('button').addEventListener('click', function () { ruta = r.slice(); nuevo = null; abrir(false); pintar(); });
       lista.appendChild(li);
     });
   }
+  function abrir(si) {
+    selector.classList.toggle('abierto', si);
+    selBtn.setAttribute('aria-expanded', si ? 'true' : 'false');
+  }
+  selBtn.addEventListener('click', function () { abrir(!selector.classList.contains('abierto')); });
+  document.addEventListener('click', function (ev) { if (!selector.contains(ev.target)) abrir(false); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') abrir(false); });
 
   // ── Q_C expandida y matriz x_{i,t} ──
   var outQ = document.getElementById('tm-q');
