@@ -2014,6 +2014,10 @@
     .tm-nav { margin-top: 18px; }
     /* paso 1: el grafo un poco más chico, deja ver cómo se estira */
     .tm-e1-fila .tm-slot-grafo .tm-grafo { width: 400px; max-height: 262px; }
+    /* cada nodo lleva su x_{i,t}; la letra de la ubicación va afuera */
+    .tm-letra-fuera { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 700; text-anchor: middle; fill: #8C6D33; }
+    .tm-xit-t { font-style: italic; }
+    .tm-nodo-g:not(.visitado) .tm-xit { fill: #6b7488; font-weight: 600; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2177,6 +2181,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=29"></script>
+  <script src="js/problemas.js?v=30"></script>
 </body>
 </html>

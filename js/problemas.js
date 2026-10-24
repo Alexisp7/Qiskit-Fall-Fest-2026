@@ -150,17 +150,22 @@
     }
     var aqui = r.length < T ? r[r.length - 1] : null;
     L.forEach(function (k, n) {
-      var p = POS[k], paso = r.indexOf(k) + 1;
-      var g = el('g', { 'class': 'tm-nodo-g' + (paso ? ' visitado' : ''), tabindex: '0', role: 'button', 'aria-label': 'Ir a ' + k });
+      var p = POS[k], pt = r.indexOf(k) + 1;   // pt: paso en que se visita (0 si aún no)
+      var g = el('g', { 'class': 'tm-nodo-g' + (pt ? ' visitado' : ''), tabindex: '0', role: 'button', 'aria-label': 'Ir a ' + k });
       // "estás aquí": el último nodo de una ruta a medias lleva un anillo que late
       if (k === aqui) el('circle', { 'class': 'tm-aqui', cx: p[0], cy: p[1], r: 24 }, g);
       el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 24 }, g);
-      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 15 }, g).textContent = k;
-      if (paso) {
-        var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 }, g);
-        t.appendChild(document.createTextNode('x'));
-        el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t).textContent = (n + 1) + ',' + paso;
-      }
+      // dentro, la variable x_{i,t}: la t se vuelve número cuando el camión pasa por ahí
+      var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 }, g);
+      t.appendChild(document.createTextNode('x'));
+      var sb = el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t);
+      sb.appendChild(document.createTextNode((n + 1) + ','));
+      if (pt) sb.appendChild(document.createTextNode(String(pt)));
+      else el('tspan', { 'class': 'tm-xit-t' }, sb).textContent = 't';
+      // afuera, la letra de la ubicación, del lado opuesto al centro del triángulo
+      var vx = p[0] - cen[0], vy = p[1] - cen[1], vl = Math.hypot(vx, vy) || 1;
+      var lx = Math.min(290, Math.max(10, p[0] + vx / vl * 37)), ly = Math.min(194, Math.max(14, p[1] + vy / vl * 37 + 7));
+      el('text', { 'class': 'tm-letra-fuera', x: lx, y: ly }, g).textContent = k;
       if (paso === 1) return;
       g.addEventListener('click', function () { tocar(k); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
