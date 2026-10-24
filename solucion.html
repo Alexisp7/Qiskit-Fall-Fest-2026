@@ -1761,6 +1761,112 @@
     @media (prefers-reduced-motion: reduce) {
       .nb-ej .ent, .nb-ej .ent-trazo, .ej-theta, .ej-aguja, .nb-exp.cambia > * { animation: none !important; stroke-dashoffset: 0 !important; }
     }
+    /* cuatro etapas: inicializar · ansatz · solver · validación */
+    .etapa-circuito.circuito-completo { width: 1760px; }
+    .etapas-pista .etapa[data-etapa="1"] { width: 300px; }
+    .etapas-pista .etapa[data-etapa="2"] { width: 400px; }
+    .etapas-pista .etapa[data-etapa="3"] { width: 600px; }
+    .etapas-pista .etapa[data-etapa="4"] { width: 400px; }
+    .etapa-circuito .region-ini { fill: #F3EFE7; stroke: #8C6D33; stroke-width: 1.4; }
+    .etapa-circuito .ini-arista { stroke: var(--tinta); stroke-width: 1.3; }
+    .etapa-circuito .ini-nodo { fill: #fff; stroke: var(--tinta); stroke-width: 1.5; }
+    .etapa-circuito .ini-txt { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; fill: var(--tinta); text-anchor: middle; }
+    .etapa-circuito .punta-ini { fill: none; stroke: var(--tinta); stroke-width: 1.4; }
+    /* ── cuaderno v2: red minera, celdas de razonamiento y matrices ── */
+    /* el ejemplo siempre entero en pantalla: sin un segundo scroll */
+    .nb-lado { top: 84px; max-height: calc(100vh - 100px); overflow: hidden; gap: 8px; }
+    .nb-ej { max-height: calc(100vh - 360px); min-height: 220px; width: auto; max-width: 100%; margin: 0 auto; }
+    .nb-exp { min-height: 0; padding-top: 8px; }
+    .nb-exp-tit { font-size: 19px; }
+    .nb-exp-txt { font-size: 12.5px; line-height: 1.55; }
+    .nb-exp-f { font-size: 18px; padding: 5px 10px; margin-top: 6px; }
+    .nb-celda.md { background: #FBF7EE; border-color: rgba(200,169,110,.55); }
+    .nb-celda.md .nb-cab { background: transparent; border-bottom-color: rgba(200,169,110,.35); }
+    .nb-celda.md .nb-in { color: #3E6FB0; }
+    .nb-md { padding: 14px 18px 16px; }
+    .nb-md p { margin: 0; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.72; color: #2b2b2b; }
+    .ej-sub { font-size: 8px; font-style: normal; }
+    .ej-nodo-t { font-size: 12px; }
+    .ej-col { font-family: 'Space Mono', monospace; font-size: 7px; fill: #9a958c; text-anchor: middle; }
+    .ej-fila { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; fill: #1B2A4A; text-anchor: end; }
+    .ej-nota { font-family: 'Inter', sans-serif; font-size: 9.5px; fill: #6b665e; }
+    .ej-nota.foco, .ej-chip-t.foco { fill: #8C6D33; font-weight: 700; }
+    .ej-celda.uno { fill: rgba(200,169,110,.55); stroke: #8C6D33; }
+    .ej-ruta { stroke: #8C6D33; stroke-width: 1.8; marker-end: url(#ej-flecha); }
+    .ej-salto { stroke: #B5472E; stroke-width: 1.8; stroke-dasharray: 4 3; fill: none; marker-end: url(#ej-flecha-r); }
+    .ej-punta-r { fill: #B5472E; }
+    .ej-par { fill: none; stroke: #3E6FB0; stroke-width: .9; opacity: .7; }
+    .ej-cup-c { opacity: .8; }
+    .ej-cup-0 { stroke: #B0AAA0; stroke-dasharray: 3 3; }
+    .ej-cup-r { stroke-width: 2.2; opacity: .9; }
+    .ej-vez { fill: #2F7A4F; }
+    .ej-vez.mal { fill: #B5472E; }
+    .ej-vez-0 { fill: none; stroke: #B5472E; stroke-width: 1.4; }
+    .ej-marca.bien { stroke: #2F7A4F; }
+    .ej-marca.mal { stroke: #B5472E; }
+    .ej-flechita { stroke: #B5472E; stroke-width: 1.4; fill: none; stroke-dasharray: 3 2; }
+    .ej-seg-c { fill: var(--gold); }
+    .ej-seg-r { fill: #B5472E; opacity: .85; }
+    .ej-spin { stroke: #A9B3C4; stroke-width: 1.3; }
+    .ej-spin.abajo { stroke: #8C6D33; stroke-width: 1.8; }
+    .ej-ry.foco { fill: var(--gold); stroke: #8C6D33; }
+    .ej-cz.foco { stroke: #8C6D33; stroke-width: 1.6; }
+    .ej-czp.foco { fill: #8C6D33; }
+    .ej-cz.salto-t { stroke: #B5472E; stroke-width: 2.4; }
+    .ej-cz.punteada { stroke-dasharray: 2 2; }
+    .ej-bloch { fill: none; stroke: #1B2A4A; stroke-width: 1.2; }
+    .ej-bloch-eje { stroke: #B0AAA0; stroke-width: 1; fill: none; }
+    .ej-vector { stroke: #8C6D33; stroke-width: 2.4; stroke-linecap: round; transform-origin: 120px 82px; animation: ejRy 2.6s ease-in-out infinite alternate; }
+    .ej-vector.gris { stroke: #A9B3C4; animation: none; }
+    @keyframes ejRy { from { transform: rotate(0deg); } to { transform: rotate(180deg); } }
+    .ej-fase { fill: none; stroke: #A9B3C4; stroke-dasharray: 3 3; }
+    .ej-plano { fill: #FBF7EE; stroke: var(--gold); }
+    .ej-pto { fill: #1B2A4A; }
+    .ej-caja { fill: #fff; stroke: #1B2A4A; stroke-width: 1; }
+    .ej-caja.foco { fill: #FBF7EE; stroke: #B5472E; stroke-width: 1.6; }
+    .ej-chip-t.chico { font-size: 12px; }
+    .ej-brk.verde { stroke: #2F7A4F; }
+    .ej-grande { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 46px; fill: #8C6D33; text-anchor: middle; font-variant-numeric: lining-nums; }
+    @media (prefers-reduced-motion: reduce) { .ej-vector { animation: none; } }
+    /* matrices explícitas */
+    .nb-matrices { grid-column: 1 / -1; position: relative; border: 1px solid #1B2A4A; background: #fff; padding: 22px 26px 24px; margin-top: 8px; scroll-margin-top: 90px; }
+    .mx-kicker { font-family: 'Space Mono', monospace; font-size: 10px; color: #8C6D33; letter-spacing: .1em; }
+    .mx-tit { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 30px; color: var(--black); margin: 4px 0 4px; }
+    .mx-formula { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 24px; color: #1B2A4A; }
+    .mx-nota { font-family: 'Inter', sans-serif; font-size: 12.5px; color: #6b665e; margin: 4px 0 12px; }
+    .mx-controles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 0; border-top: 1px solid #EEE9E0; border-bottom: 1px solid #EEE9E0; font-family: 'Inter', sans-serif; font-size: 12.5px; color: #1B2A4A; }
+    .mx-controles select, .mx-controles input[type=number] { font-family: 'Inter', sans-serif; font-size: 12.5px; padding: 3px 6px; border: 1px solid #C9C4BB; background: #fff; margin-left: 4px; }
+    .mx-controles input[type=number] { width: 64px; }
+    .mx-piezas { display: flex; flex-wrap: wrap; gap: 6px 12px; flex-basis: 100%; }
+    .mx-pieza { font-family: 'Space Mono', monospace; font-size: 10.5px; display: inline-flex; align-items: center; gap: 5px; }
+    .mx-pieza input { accent-color: #8C6D33; }
+    .mx-resumen { display: flex; gap: 22px; font-family: 'Inter', sans-serif; font-size: 12.5px; color: #555; margin: 10px 0; font-variant-numeric: lining-nums; }
+    .mx-resumen b { color: #1B2A4A; }
+    .mx-cuerpo { display: flex; align-items: flex-start; gap: 18px; overflow-x: auto; }
+    .mx-bloque { display: flex; align-items: center; gap: 8px; }
+    .mx-rot { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 22px; color: #1B2A4A; white-space: nowrap; }
+    .mx-vec { display: flex; flex-direction: column; border-left: 1.5px solid #1B2A4A; border-right: 1.5px solid #1B2A4A; border-radius: 10px; padding: 4px 8px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; line-height: 1.55; color: #1B2A4A; font-variant-numeric: lining-nums; }
+    .mx-vec.num { font-style: normal; text-align: right; }
+    .mx-vec.denso { font-size: 0; line-height: 0; padding: 4px 3px; }
+    .mx-vec.denso span { display: block; width: 40px; font-size: 0; }
+    .mx-z .mx-vec.denso span { background: repeating-linear-gradient(90deg, #E5E2DC 0 2px, transparent 2px 4px); }
+    .mx-h .mx-vec.denso span { background: #1B2A4A; opacity: .75; }
+    .mx-j-caja { border-left: 1.5px solid #1B2A4A; border-right: 1.5px solid #1B2A4A; border-radius: 10px; padding: 4px 6px; }
+    .mx-j-caja canvas { display: block; cursor: crosshair; }
+    .mx-num { border-collapse: collapse; font-family: 'Cormorant Garamond', serif; font-size: 16px; color: #1B2A4A; font-variant-numeric: lining-nums tabular-nums; }
+    .mx-num td { padding: 2px 9px; text-align: right; }
+    .mx-num.grande { font-size: 12px; }
+    .mx-num.grande th { position: sticky; top: 0; background: #FAF8F4; font-weight: 500; padding: 2px 6px; z-index: 1; }
+    .mx-num.grande tbody th { left: 0; position: sticky; }
+    .mx-num.grande td { padding: 1px 6px; }
+    .mx-num td.cero { color: #C9C4BB; }
+    .mx-leyenda { display: flex; gap: 14px; font-family: 'Inter', sans-serif; font-size: 11px; color: #6b665e; margin-top: 6px; }
+    .mx-leyenda i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+    .mx-leyenda .az { background: rgba(27,42,74,.85); }
+    .mx-leyenda .or { background: rgba(200,140,40,.8); }
+    .mx-pie { display: flex; gap: 10px; margin-top: 14px; }
+    .mx-tabla { margin-top: 12px; max-height: 460px; overflow: auto; border: 1px solid #E5E2DC; }
+    .mx-tip { position: absolute; z-index: 5; pointer-events: none; background: #1B2A4A; color: #fff; font-family: 'Cormorant Garamond', serif; font-size: 15px; padding: 4px 9px; white-space: nowrap; font-variant-numeric: lining-nums; }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
 </head>
@@ -1794,32 +1900,41 @@
              o se recorre con la rueda del mouse, solo en el eje x -->
         <div class="etapas">
           <div class="etapas-ventana">
-          <div class="etapas-pista" tabindex="0" aria-label="Las 3 etapas de la solución">
+          <div class="etapas-pista" tabindex="0" aria-label="Las 4 etapas de la solución">
             <div class="etapas-fila">
-              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1480 256" width="1480" height="256" aria-hidden="true"><rect class="region region-enc" x="56" y="30" width="300" height="196" rx="6"/><rect class="region region-med" x="424" y="30" width="96" height="196" rx="6"/><rect class="capas" x="70" y="38" width="196" height="180" rx="4"/><text class="capas-txt" x="168" y="24">× capas</text><line class="cable" x1="40" y1="60" x2="466" y2="60"/><line class="cable" x1="40" y1="92" x2="466" y2="92"/><line class="cable" x1="40" y1="124" x2="466" y2="124"/><line class="cable" x1="40" y1="182" x2="466" y2="182"/><text class="ket" x="10" y="66">|0⟩</text><text class="ket" x="10" y="98">|0⟩</text><text class="ket" x="10" y="130">|0⟩</text><text class="ket" x="10" y="188">|0⟩</text><text class="puntos" x="22" y="159">⋮</text><rect class="compuerta" x="88" y="48" width="60" height="24"/><text class="puerta" x="118" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="88" y="80" width="60" height="24"/><text class="puerta" x="118" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="88" y="112" width="60" height="24"/><text class="puerta" x="118" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="88" y="170" width="60" height="24"/><text class="puerta" x="118" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><text class="puntos" x="118" y="159">⋮</text><line class="cz" x1="176" y1="60" x2="176" y2="92"/><circle class="control cz-p" cx="176" cy="60" r="4"/><circle class="control cz-p" cx="176" cy="92" r="4"/><line class="cz" x1="202" y1="92" x2="202" y2="124"/><circle class="control cz-p" cx="202" cy="92" r="4"/><circle class="control cz-p" cx="202" cy="124" r="4"/><line class="cz" x1="228" y1="124" x2="228" y2="182"/><circle class="control cz-p" cx="228" cy="124" r="4"/><circle class="control cz-p" cx="228" cy="182" r="4"/><rect class="compuerta" x="276" y="48" width="60" height="24"/><text class="puerta" x="306" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="276" y="80" width="60" height="24"/><text class="puerta" x="306" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="276" y="112" width="60" height="24"/><text class="puerta" x="306" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="276" y="170" width="60" height="24"/><text class="puerta" x="306" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><text class="puntos" x="306" y="159">⋮</text><rect class="compuerta" x="440" y="48" width="26" height="24"/><path class="aguja" d="M445 66 A9 9 0 0 1 461 66 M453 66 L459 54"/><rect class="compuerta" x="440" y="80" width="26" height="24"/><path class="aguja" d="M445 98 A9 9 0 0 1 461 98 M453 98 L459 86"/><rect class="compuerta" x="440" y="112" width="26" height="24"/><path class="aguja" d="M445 130 A9 9 0 0 1 461 130 M453 130 L459 118"/><rect class="compuerta" x="440" y="170" width="26" height="24"/><path class="aguja" d="M445 188 A9 9 0 0 1 461 188 M453 188 L459 176"/><text class="puntos" x="453" y="159">⋮</text><line class="cable" x1="466" y1="60" x2="500" y2="124"/><line class="cable" x1="466" y1="92" x2="500" y2="124"/><line class="cable" x1="466" y1="124" x2="500" y2="124"/><line class="cable" x1="466" y1="182" x2="500" y2="124"/><circle class="control" cx="500" cy="124" r="2.5"/><line class="clasico" x1="500" y1="122" x2="600" y2="122"/><line class="clasico" x1="500" y1="126" x2="600" y2="126"/><text class="valor" x="550" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="600" y="72" width="170" height="104" rx="4"/><rect class="pc-pantalla" x="610" y="82" width="150" height="76"/><path class="pc-pie" d="M666 176 L660 188 L710 188 L704 176"/><text class="pc-txt" x="685" y="114">COBYLA</text><text class="pc-txt" x="685" y="132">mín ⟨H⟩ · arranques</text><path class="lazo" d="M685 188 V248 H118 V238"/><path class="punta" d="M114 243 L118 237 L122 243"/><text class="lazo-txt" x="400" y="252">Actualizar <tspan class="var">θ</tspan></text><line class="clasico" x1="770" y1="122" x2="1080" y2="122"/><line class="clasico" x1="770" y1="126" x2="1080" y2="126"/><text class="valor" x="925" y="112">bits</text><text class="rotulo" x="1225" y="52">validación</text><rect class="pc" x="1080" y="64" width="290" height="120" rx="4"/><rect class="pc-pantalla" x="1090" y="74" width="270" height="100"/><path class="pc-pie" d="M1203 184 L1197 200 L1253 200 L1247 184"/><rect class="bit bit-1" x="1112" y="86" width="12" height="12"/><rect class="bit" x="1128" y="86" width="12" height="12"/><rect class="bit" x="1144" y="86" width="12" height="12"/><rect class="bit" x="1160" y="86" width="12" height="12"/><rect class="bit" x="1112" y="102" width="12" height="12"/><rect class="bit bit-1" x="1128" y="102" width="12" height="12"/><rect class="bit" x="1144" y="102" width="12" height="12"/><rect class="bit" x="1160" y="102" width="12" height="12"/><rect class="bit" x="1112" y="118" width="12" height="12"/><rect class="bit" x="1128" y="118" width="12" height="12"/><rect class="bit bit-1" x="1144" y="118" width="12" height="12"/><rect class="bit" x="1160" y="118" width="12" height="12"/><rect class="bit" x="1112" y="134" width="12" height="12"/><rect class="bit" x="1128" y="134" width="12" height="12"/><rect class="bit" x="1144" y="134" width="12" height="12"/><rect class="bit bit-1" x="1160" y="134" width="12" height="12"/><text class="pc-txt" x="1142" y="166">exacto</text><rect class="bit bit-1" x="1262" y="86" width="12" height="12"/><rect class="bit" x="1278" y="86" width="12" height="12"/><rect class="bit" x="1294" y="86" width="12" height="12"/><rect class="bit" x="1310" y="86" width="12" height="12"/><rect class="bit" x="1262" y="102" width="12" height="12"/><rect class="bit bit-1" x="1278" y="102" width="12" height="12"/><rect class="bit" x="1294" y="102" width="12" height="12"/><rect class="bit" x="1310" y="102" width="12" height="12"/><rect class="bit" x="1262" y="118" width="12" height="12"/><rect class="bit" x="1278" y="118" width="12" height="12"/><rect class="bit bit-1" x="1294" y="118" width="12" height="12"/><rect class="bit" x="1310" y="118" width="12" height="12"/><rect class="bit" x="1262" y="134" width="12" height="12"/><rect class="bit" x="1278" y="134" width="12" height="12"/><rect class="bit" x="1294" y="134" width="12" height="12"/><rect class="bit bit-1" x="1310" y="134" width="12" height="12"/><text class="pc-txt" x="1292" y="166">VQE</text><text class="puerta" x="1218" y="120">=</text><path class="check" d="M1388 120 L1398 132 L1420 106"/><text class="rotulo" x="1404" y="152">¿coincide?</text></svg>
-            <article class="repo-panel etapa" data-etapa="1" tabindex="0" role="button" aria-expanded="false" data-titulo="Ansatz: del problema al circuito">
+              <svg class="etapa-circuito circuito-completo" viewBox="0 0 1760 256" width="1760" height="256" aria-hidden="true"><rect class="region region-ini" x="20" y="30" width="276" height="196" rx="6"/><line class="ini-arista" x1="46.0" y1="118.6" x2="121.2" y2="93.3"/><line class="ini-arista" x1="121.2" y1="93.3" x2="86.8" y2="66.0"/><line class="ini-arista" x1="121.2" y1="93.3" x2="155.6" y2="66.0"/><line class="ini-arista" x1="121.2" y1="93.3" x2="250.8" y2="118.6"/><line class="ini-arista" x1="121.2" y1="93.3" x2="155.6" y2="148.7"/><line class="ini-arista" x1="46.0" y1="118.6" x2="155.6" y2="148.7"/><line class="ini-arista" x1="250.8" y1="118.6" x2="155.6" y2="148.7"/><line class="ini-arista" x1="155.6" y1="148.7" x2="116.4" y2="173.2"/><line class="ini-arista" x1="155.6" y1="148.7" x2="194.8" y2="173.2"/><circle class="ini-nodo" cx="46.0" cy="118.6" r="7"/><circle class="ini-nodo" cx="121.2" cy="93.3" r="7"/><circle class="ini-nodo" cx="86.8" cy="66.0" r="7"/><circle class="ini-nodo" cx="155.6" cy="66.0" r="7"/><circle class="ini-nodo" cx="155.6" cy="148.7" r="7"/><circle class="ini-nodo" cx="116.4" cy="173.2" r="7"/><circle class="ini-nodo" cx="194.8" cy="173.2" r="7"/><circle class="ini-nodo" cx="250.8" cy="118.6" r="7"/><text class="ini-txt" x="158" y="214">Q → H = Σ J zz + Σ h z</text><path class="flujo" d="M296 124 L322 124"/><path class="punta-ini" d="M316 119 L322 124 L316 129"/><rect class="region region-enc" x="376.0" y="30" width="300" height="196" rx="6"/><rect class="region region-med" x="744.0" y="30" width="96" height="196" rx="6"/><rect class="capas" x="390.0" y="38" width="196" height="180" rx="4"/><text class="capas-txt" x="488.0" y="232">× capas</text><line class="cable" x1="360.0" y1="60" x2="786.0" y2="60"/><line class="cable" x1="360.0" y1="92" x2="786.0" y2="92"/><line class="cable" x1="360.0" y1="124" x2="786.0" y2="124"/><line class="cable" x1="360.0" y1="182" x2="786.0" y2="182"/><text class="ket" x="330.0" y="66">|0⟩</text><text class="ket" x="330.0" y="98">|0⟩</text><text class="ket" x="330.0" y="130">|0⟩</text><text class="ket" x="330.0" y="188">|0⟩</text><text class="puntos" x="342.0" y="159">⋮</text><rect class="compuerta" x="408.0" y="48" width="60" height="24"/><text class="puerta" x="438.0" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="408.0" y="80" width="60" height="24"/><text class="puerta" x="438.0" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="408.0" y="112" width="60" height="24"/><text class="puerta" x="438.0" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="408.0" y="170" width="60" height="24"/><text class="puerta" x="438.0" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><text class="puntos" x="438.0" y="159">⋮</text><line class="cz" x1="496.0" y1="60" x2="496.0" y2="92"/><circle class="control cz-p" cx="496.0" cy="60" r="4"/><circle class="control cz-p" cx="496.0" cy="92" r="4"/><line class="cz" x1="522.0" y1="92" x2="522.0" y2="124"/><circle class="control cz-p" cx="522.0" cy="92" r="4"/><circle class="control cz-p" cx="522.0" cy="124" r="4"/><line class="cz" x1="548.0" y1="124" x2="548.0" y2="182"/><circle class="control cz-p" cx="548.0" cy="124" r="4"/><circle class="control cz-p" cx="548.0" cy="182" r="4"/><rect class="compuerta" x="596.0" y="48" width="60" height="24"/><text class="puerta" x="626.0" y="65">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="596.0" y="80" width="60" height="24"/><text class="puerta" x="626.0" y="97">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="596.0" y="112" width="60" height="24"/><text class="puerta" x="626.0" y="129">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><rect class="compuerta" x="596.0" y="170" width="60" height="24"/><text class="puerta" x="626.0" y="187">R<tspan class="ind">Y</tspan>(<tspan class="var">θ</tspan>)</text><text class="puntos" x="626.0" y="159">⋮</text><rect class="compuerta" x="760.0" y="48" width="26" height="24"/><path class="aguja" d="M 765.0 66.0 A 9.0 9.0 0.0 0.0 1.0 781.0 66.0 M 773.0 66.0 L 779.0 54.0"/><rect class="compuerta" x="760.0" y="80" width="26" height="24"/><path class="aguja" d="M 765.0 98.0 A 9.0 9.0 0.0 0.0 1.0 781.0 98.0 M 773.0 98.0 L 779.0 86.0"/><rect class="compuerta" x="760.0" y="112" width="26" height="24"/><path class="aguja" d="M 765.0 130.0 A 9.0 9.0 0.0 0.0 1.0 781.0 130.0 M 773.0 130.0 L 779.0 118.0"/><rect class="compuerta" x="760.0" y="170" width="26" height="24"/><path class="aguja" d="M 765.0 188.0 A 9.0 9.0 0.0 0.0 1.0 781.0 188.0 M 773.0 188.0 L 779.0 176.0"/><text class="puntos" x="773.0" y="159">⋮</text><line class="cable" x1="786.0" y1="60" x2="820.0" y2="124"/><line class="cable" x1="786.0" y1="92" x2="820.0" y2="124"/><line class="cable" x1="786.0" y1="124" x2="820.0" y2="124"/><line class="cable" x1="786.0" y1="182" x2="820.0" y2="124"/><circle class="control" cx="820.0" cy="124" r="2.5"/><line class="clasico" x1="820.0" y1="122" x2="920.0" y2="122"/><line class="clasico" x1="820.0" y1="126" x2="920.0" y2="126"/><text class="valor" x="870.0" y="112">⟨<tspan class="var">H</tspan>⟩<tspan class="ind">θ</tspan></text><rect class="pc" x="920.0" y="72" width="170" height="104" rx="4"/><rect class="pc-pantalla" x="930.0" y="82" width="150" height="76"/><path class="pc-pie" d="M 986.0 176.0 L 980.0 188.0 L 1030.0 188.0 L 1024.0 176.0"/><text class="pc-txt" x="1005.0" y="114">COBYLA</text><text class="pc-txt" x="1005.0" y="132">mín ⟨H⟩ · arranques</text><path class="lazo" d="M 1005.0 188.0 V 248.0 H 438.0 V 238.0"/><path class="punta" d="M 434.0 243.0 L 438.0 237.0 L 442.0 243.0"/><text class="lazo-txt" x="720.0" y="252">Actualizar <tspan class="var">θ</tspan></text><line class="clasico" x1="1090.0" y1="122" x2="1400.0" y2="122"/><line class="clasico" x1="1090.0" y1="126" x2="1400.0" y2="126"/><text class="valor" x="1245.0" y="112">bits</text><text class="rotulo" x="1545.0" y="52">validación</text><rect class="pc" x="1400.0" y="64" width="290" height="120" rx="4"/><rect class="pc-pantalla" x="1410.0" y="74" width="270" height="100"/><path class="pc-pie" d="M 1523.0 184.0 L 1517.0 200.0 L 1573.0 200.0 L 1567.0 184.0"/><rect class="bit bit-1" x="1432.0" y="86" width="12" height="12"/><rect class="bit" x="1448.0" y="86" width="12" height="12"/><rect class="bit" x="1464.0" y="86" width="12" height="12"/><rect class="bit" x="1480.0" y="86" width="12" height="12"/><rect class="bit" x="1432.0" y="102" width="12" height="12"/><rect class="bit bit-1" x="1448.0" y="102" width="12" height="12"/><rect class="bit" x="1464.0" y="102" width="12" height="12"/><rect class="bit" x="1480.0" y="102" width="12" height="12"/><rect class="bit" x="1432.0" y="118" width="12" height="12"/><rect class="bit" x="1448.0" y="118" width="12" height="12"/><rect class="bit bit-1" x="1464.0" y="118" width="12" height="12"/><rect class="bit" x="1480.0" y="118" width="12" height="12"/><rect class="bit" x="1432.0" y="134" width="12" height="12"/><rect class="bit" x="1448.0" y="134" width="12" height="12"/><rect class="bit" x="1464.0" y="134" width="12" height="12"/><rect class="bit bit-1" x="1480.0" y="134" width="12" height="12"/><text class="pc-txt" x="1462.0" y="166">exacto</text><rect class="bit bit-1" x="1582.0" y="86" width="12" height="12"/><rect class="bit" x="1598.0" y="86" width="12" height="12"/><rect class="bit" x="1614.0" y="86" width="12" height="12"/><rect class="bit" x="1630.0" y="86" width="12" height="12"/><rect class="bit" x="1582.0" y="102" width="12" height="12"/><rect class="bit bit-1" x="1598.0" y="102" width="12" height="12"/><rect class="bit" x="1614.0" y="102" width="12" height="12"/><rect class="bit" x="1630.0" y="102" width="12" height="12"/><rect class="bit" x="1582.0" y="118" width="12" height="12"/><rect class="bit" x="1598.0" y="118" width="12" height="12"/><rect class="bit bit-1" x="1614.0" y="118" width="12" height="12"/><rect class="bit" x="1630.0" y="118" width="12" height="12"/><rect class="bit" x="1582.0" y="134" width="12" height="12"/><rect class="bit" x="1598.0" y="134" width="12" height="12"/><rect class="bit" x="1614.0" y="134" width="12" height="12"/><rect class="bit bit-1" x="1630.0" y="134" width="12" height="12"/><text class="pc-txt" x="1612.0" y="166">VQE</text><text class="puerta" x="1538.0" y="120">=</text><path class="check" d="M 1708.0 120.0 L 1718.0 132.0 L 1740.0 106.0"/><text class="rotulo" x="1724.0" y="152">¿coincide?</text></svg>
+            <article class="repo-panel etapa" data-etapa="1" tabindex="0" role="button" aria-expanded="false" data-titulo="Inicializar: de la red al Hamiltoniano">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
-                <div class="etapa-cab"><span class="etapa-num">00</span><span class="etapa-tag">Ansatz · inicializar</span></div>
-                <p class="etapa-pregunta">¿Cómo se escribe la ruta como un circuito?</p>
+                <div class="etapa-cab"><span class="etapa-num">00</span><span class="etapa-tag">Inicializar</span></div>
+                <p class="etapa-pregunta">¿Cómo se escribe la red como un Hamiltoniano?</p>
               </div>
             </article>
 
-            <article class="repo-panel etapa" data-etapa="2" tabindex="0" role="button" aria-expanded="false" data-titulo="Solver: VQE con COBYLA">
+            <article class="repo-panel etapa" data-etapa="2" tabindex="0" role="button" aria-expanded="false" data-titulo="Ansatz: el circuito que propone las rutas">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
-                <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Solver</span></div>
-                <p class="etapa-pregunta">¿Cómo encuentra el VQE la ruta de menor energía?</p>
+                <div class="etapa-cab"><span class="etapa-num">01</span><span class="etapa-tag">Ansatz</span></div>
+                <p class="etapa-pregunta">¿Por qué este circuito?</p>
               </div>
             </article>
 
-            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Validación: contra la solución exacta">
+            <article class="repo-panel etapa" data-etapa="3" tabindex="0" role="button" aria-expanded="false" data-titulo="Solver: VQE con COBYLA">
               <div class="etapa-resumen">
                 <div class="etapa-hueco"></div>
-                <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Validación</span></div>
+                <div class="etapa-cab"><span class="etapa-num">02</span><span class="etapa-tag">Solver</span></div>
+                <p class="etapa-pregunta">¿Cómo encuentra el VQE la energía mínima?</p>
+              </div>
+            </article>
+
+            <article class="repo-panel etapa" data-etapa="4" tabindex="0" role="button" aria-expanded="false" data-titulo="Validación: contra la solución exacta">
+              <div class="etapa-resumen">
+                <div class="etapa-hueco"></div>
+                <div class="etapa-cab"><span class="etapa-num">03</span><span class="etapa-tag">Validación</span></div>
                 <p class="etapa-pregunta">¿La ruta del VQE es la correcta?</p>
               </div>
             </article>
+
             </div>
           </div>
             <!-- al elegir una etapa, este panel blanco cubre el resto del circuito y la explica -->
@@ -1845,24 +1960,32 @@
 
   <!-- etapa 1: resumen al costado y el cuaderno debajo -->
   <template id="etapa-1-detalle">
+              <div class="etapa-col sol-resumen" data-resumen="inicializar">
+                <p class="etapa-nota">Los datos de la red, las variables x<sub>i,t</sub>, la función de coste y las restricciones se suman en un QUBO y se pasan a Ising: las matrices J y h.</p>
+                <ol class="sol-indice" data-indice="inicializar"></ol>
+              </div>
+              <div class="nb" data-nb="inicializar"></div>
+  </template>
+  <!-- etapa 2: resumen al costado y el cuaderno debajo -->
+  <template id="etapa-2-detalle">
               <div class="etapa-col sol-resumen" data-resumen="ansatz">
-                <p class="etapa-nota">Se definen los datos y las variables x<sub>i,t</sub>, se arma el QUBO con la función de coste y las restricciones, se pasa a Ising y se propone el ansatz.</p>
+                <p class="etapa-nota">El circuito que propone las rutas: R<sub>Y</sub>(θ) en cada qubit y una cascada de CZ. Aquí se explica por qué tiene esa forma.</p>
                 <ol class="sol-indice" data-indice="ansatz"></ol>
               </div>
               <div class="nb" data-nb="ansatz"></div>
   </template>
-  <!-- etapa 2: resumen al costado y el cuaderno debajo -->
-  <template id="etapa-2-detalle">
+  <!-- etapa 3: resumen al costado y el cuaderno debajo -->
+  <template id="etapa-3-detalle">
               <div class="etapa-col sol-resumen" data-resumen="solver">
-                <p class="etapa-nota">El VQE prepara el ansatz, mide ⟨H⟩ y COBYLA ajusta θ desde varios arranques; al final elige, entre los estados más probables, el de menor costo.</p>
+                <p class="etapa-nota">El VQE mide ⟨H⟩ con el ansatz y COBYLA ajusta θ desde varios arranques; al final elige, entre los estados más probables, el de menor costo.</p>
                 <ol class="sol-indice" data-indice="solver"></ol>
               </div>
               <div class="nb" data-nb="solver"></div>
   </template>
-  <!-- etapa 3: resumen al costado y el cuaderno debajo -->
-  <template id="etapa-3-detalle">
+  <!-- etapa 4: resumen al costado y el cuaderno debajo -->
+  <template id="etapa-4-detalle">
               <div class="etapa-col sol-resumen" data-resumen="validacion">
-                <p class="etapa-nota">Se revisan los 2<sup>n</sup> estados para tener la referencia exacta, se leen los bits como ruta y se compara con la del VQE.</p>
+                <p class="etapa-nota">Se compara con la referencia exacta, se leen los bits como ruta y se desglosa el costo por pieza.</p>
                 <ol class="sol-indice" data-indice="validacion"></ol>
               </div>
               <div class="nb" data-nb="validacion"></div>
@@ -1877,7 +2000,8 @@
       </div>
     </div>
   </footer>
-  <script src="js/solucion-celdas.js?v=1"></script>
-  <script src="js/solucion.js?v=20"></script>
+  <script src="js/solucion-celdas.js?v=2"></script>
+  <script src="js/solucion.js?v=21"></script>
+  <script src="js/solucion-cuaderno.js?v=2"></script>
 </body>
 </html>
