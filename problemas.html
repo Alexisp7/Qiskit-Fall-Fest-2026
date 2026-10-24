@@ -1524,6 +1524,39 @@
       .ex-grid { grid-template-columns: 1fr; font-size: 17px; }
     }
     .ex-grupo { grid-column: 1 / -1; font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-azul); margin-top: 8px; border-bottom: 1px solid rgba(35,64,142,.25); padding-bottom: 2px; }
+    /* sin hoja cuadriculada */
+    .cuaderno { background-image: none; background-color: #fff; }
+    /* ── el reto como cierre de la página ── */
+    .reto-cierre { background: linear-gradient(160deg, #0f1626 0%, #17233b 100%); color: #E9E2D3; padding: 64px 48px 70px; margin-top: 10px; }
+    .rc-interior { max-width: 1184px; margin: 0 auto; }
+    .rc-cab { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 56px; align-items: end; }
+    .rc-meta { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; }
+    .rc-linea { width: 40px; height: 1px; background: var(--gold); }
+    .rc-titulo { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 44px; line-height: 1.08; color: #F7F3EA; margin: 0; }
+    .rc-titulo em { font-style: italic; font-weight: 500; color: var(--gold); }
+    .rc-desc { font-size: 15.5px; line-height: 1.75; color: #B5B0A6; margin: 0; padding-left: 24px; border-left: 1px solid rgba(200,169,110,.35); }
+    .rc-pregunta { margin: 52px auto 50px; max-width: 900px; text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 32px; line-height: 1.35; color: #F2EEE6; position: relative; padding: 0 30px; }
+    .rc-pregunta::before { content: '“'; position: absolute; left: -10px; top: -34px; font-size: 110px; line-height: 1; color: rgba(200,169,110,.45); font-style: normal; }
+    .rc-construir { border-top: 1px solid rgba(242,238,230,.14); padding-top: 28px; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr); column-gap: 56px; row-gap: 26px; }
+    .rc-construir-tit { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+    .rc-construir-desc { margin: 0; font-size: 15px; line-height: 1.75; color: #CFC9BD; }
+    .rc-pasos { grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid rgba(242,238,230,.12); }
+    .rc-pasos li { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 6px; transition: background .3s; }
+    .rc-pasos li + li { border-left: 1px solid rgba(242,238,230,.12); }
+    .rc-pasos li:hover { background: rgba(200,169,110,.07); }
+    .rc-n { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; line-height: 1; color: var(--gold); font-variant-numeric: lining-nums; }
+    .rc-t { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: #F7F3EA; }
+    .rc-d { font-size: 13.5px; line-height: 1.55; color: #A8A39A; }
+    @media (max-width: 900px) {
+      .reto-cierre { padding: 44px 18px 50px; }
+      .rc-cab, .rc-construir { grid-template-columns: 1fr; row-gap: 18px; }
+      .rc-titulo { font-size: 32px; }
+      .rc-desc { padding-left: 16px; }
+      .rc-pregunta { font-size: 24px; margin: 36px auto; }
+      .rc-pasos { grid-template-columns: 1fr 1fr; }
+      .rc-pasos li:nth-child(3) { border-left: none; }
+      .rc-pasos li:nth-child(n+3) { border-top: 1px solid rgba(242,238,230,.12); }
+    }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1554,20 +1587,6 @@
         <h2 class="section-title">El problema a <em>resolver</em></h2>
       </div>
       <p class="problemas-intro entra" style="--i:2">El reto del hackathon Qiskit Fall Fest 2026 que desarrollamos en este espacio.</p>
-    </div>
-
-    <!-- el reto -->
-    <div class="reto-intro entra" style="--i:3">
-      <div>
-        <div class="reto-kicker">Track 01</div>
-        <h3 class="reto-titulo">Optimización de rutas y conexiones mediante algoritmos cuánticos</h3>
-        <p class="reto-desc">Muchos problemas requieren encontrar la mejor manera de conectar puntos, distribuir recursos o seleccionar combinaciones de elementos, minimizando costos y respetando determinadas restricciones.</p>
-      </div>
-      <div>
-        <p class="reto-pregunta">¿Cómo pueden los algoritmos de optimización cuántica contribuir a encontrar soluciones de buena calidad para estos problemas?</p>
-        <div class="reto-sub">Qué construir</div>
-        <p class="reto-desc">Un entorno que permita representar un problema de optimización, definir sus variables y costos, y explorar distintas soluciones mediante enfoques clásicos y cuánticos o híbridos. La aplicación deberá permitir visualizar y comparar los resultados obtenidos.</p>
-      </div>
     </div>
 
     <!-- ejemplo de 5 puntos, en estilo cuaderno -->
@@ -1612,6 +1631,28 @@
       </div>
     </div>
   </section>
+
+    <!-- el reto, al final: banda de cierre -->
+    <section class="reto-cierre entra" style="--i:6" aria-labelledby="reto-cierre-titulo">
+      <div class="rc-interior">
+        <div class="rc-cab">
+          <div class="rc-meta"><span class="rc-linea"></span>El reto · Track 01</div>
+          <h3 class="rc-titulo" id="reto-cierre-titulo">Optimización de rutas y conexiones mediante <em>algoritmos cuánticos</em></h3>
+          <p class="rc-desc">Muchos problemas requieren encontrar la mejor manera de conectar puntos, distribuir recursos o seleccionar combinaciones de elementos, minimizando costos y respetando determinadas restricciones.</p>
+        </div>
+        <blockquote class="rc-pregunta">¿Cómo pueden los algoritmos de optimización cuántica contribuir a encontrar soluciones de buena calidad para estos problemas?</blockquote>
+        <div class="rc-construir">
+          <div class="rc-construir-tit">Qué construir</div>
+          <p class="rc-construir-desc">Un entorno que permita representar un problema de optimización, definir sus variables y costos, y explorar distintas soluciones mediante enfoques clásicos y cuánticos o híbridos. La aplicación deberá permitir visualizar y comparar los resultados obtenidos.</p>
+          <ol class="rc-pasos">
+            <li><span class="rc-n">01</span><span class="rc-t">Representar</span><span class="rc-d">el problema de optimización</span></li>
+            <li><span class="rc-n">02</span><span class="rc-t">Definir</span><span class="rc-d">sus variables y costos</span></li>
+            <li><span class="rc-n">03</span><span class="rc-t">Explorar</span><span class="rc-d">soluciones clásicas y cuánticas o híbridas</span></li>
+            <li><span class="rc-n">04</span><span class="rc-t">Visualizar</span><span class="rc-d">y comparar los resultados obtenidos</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
 
   <hr class="gold-line"/>
 
