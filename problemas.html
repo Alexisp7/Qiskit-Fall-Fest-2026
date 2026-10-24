@@ -2380,6 +2380,11 @@
     .caso-res-antes-p { font-style: italic; font-weight: 700; margin-right: 4px; }
     .caso-res-antes.roto .caso-res-antes-p { color: #B5472E; }
     .caso-res-antes-t { font-family: 'Space Mono', monospace; font-size: 10px; color: #6b665e; flex-basis: 100%; }
+    /* reinicio del camión: un símbolo dentro de un círculo */
+    .caso-res-graf { position: relative; }
+    .caso-reinicio { position: absolute; top: 6px; left: 6px; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #1B2A4A; background: #fff; color: #1B2A4A; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; transition: background .2s, border-color .2s, color .2s; }
+    .caso-reinicio svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .caso-reinicio:hover, .caso-reinicio:focus-visible { background: var(--gold); border-color: var(--gold); color: #fff; outline: none; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2679,7 +2684,10 @@
         <div class="caso-q caso-q-total" data-c="q-total"></div>
         <div class="caso-res">
           <div class="caso-res-izq">
-            <svg class="caso-grafo" data-grafo="6" viewBox="0 0 660 300" aria-label="Red minera con la ruta elegida"></svg>
+            <div class="caso-res-graf">
+              <svg class="caso-grafo" data-grafo="6" viewBox="0 0 660 300" aria-label="Red minera con la ruta elegida"></svg>
+              <button type="button" class="caso-reinicio" data-c="camion-inicio" aria-label="Volver el camión al inicio" title="Volver al inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.1-5"/><path d="M5 4v4h4"/></svg></button>
+            </div>
             <div class="caso-mat" data-mat="6"></div>
           </div>
           <div class="caso-res-der" data-c="res-der"></div>
@@ -2704,6 +2712,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=14"></script>
+  <script src="js/caso-minero.js?v=15"></script>
 </body>
 </html>

@@ -171,14 +171,14 @@
     var x = unos([[1, 1], [2, 2], [3, 3]]);
     var RUTAS = [['1 → 2 → 3', [1, 2, 3]], ['1 → 3 → 2', [1, 3, 2]], ['2 → 1 → 3', [2, 1, 3]], ['2 → 3 → 1', [2, 3, 1]], ['3 → 1 → 2', [3, 1, 2]], ['3 → 2 → 1', [3, 2, 1]]];
     caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Comprobación con la matriz</div><h3 class="dv-tit">Tu trayectoria en z</h3>' +
-      '<p class="dv-resumen">Elige los x<sub>i,t</sub> (o una ruta). El estado se convierte en z = 1 − 2x y se evalúa con las matrices de arriba: H(z) = cte + h<sup>T</sup>z + ½ z<sup>T</sup>J z, con J simétrica. Debe dar lo mismo que Q(x) calculada directamente.</p></div>' +
+      '<p class="dv-resumen">Elige los x<sub>i,t</sub> (o una ruta). El estado se convierte en z = 1 − 2x y se evalúa con las matrices de arriba: H(z) = cte + h<sup>T</sup>z + ½ z<sup>T</sup>J z, con J simétrica. Abajo, la misma cuenta escrita con las matrices.</p></div>' +
       '<div class="cp-cuerpo"><div class="cp-izq">' +
       '<div class="cp-rutas">' + RUTAS.map(function (r, n) { return '<button type="button" class="nb-copiar" data-r="' + n + '">' + r[0] + '</button>'; }).join('') + '<button type="button" class="nb-copiar" data-r="vacia">vacía</button></div>' +
       '<table class="cp-malla"><tr><th></th><th>t<sub>1</sub></th><th>t<sub>2</sub></th><th>t<sub>3</sub></th></tr>' +
       [1, 2, 3].map(function (i) { return '<tr><th>lugar ' + i + '</th>' + [1, 2, 3].map(function (t) { return '<td><button type="button" class="cp-x" data-i="' + i + '" data-t="' + t + '" aria-label="x' + i + ',' + t + '"></button></td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
       '<svg class="cp-tri" viewBox="0 0 220 150" aria-hidden="true"></svg></div>' +
-      '<div class="cp-der" aria-live="polite"></div></div>';
-    var der = caja.querySelector('.cp-der'), tri = caja.querySelector('.cp-tri');
+      '<div class="cp-der" aria-live="polite"></div></div><div class="cp-mult"></div>';
+    var der = caja.querySelector('.cp-der'), tri = caja.querySelector('.cp-tri'), mult = caja.querySelector('.cp-mult');
     var P = { 1: [40, 36], 2: [180, 36], 3: [110, 124] }, NS = 'http://www.w3.org/2000/svg';
     function e(tag, at, padre) { var nn = document.createElementNS(NS, tag); for (var kk in at) nn.setAttribute(kk, at[kk]); padre.appendChild(nn); return nn; }
     function dibujarTri() {
@@ -208,16 +208,33 @@
       for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) z.push(1 - 2 * x[i][t]);
       var hz = 0, Jz = [], zJz = 0;
       for (var a = 0; a < M; a++) { hz += MAT.h[a] * z[a]; var s2 = 0; for (var b2 = 0; b2 < M; b2++) s2 += MAT.J[a][b2] * z[b2]; Jz.push(s2); zJz += z[a] * s2; }
-      var H = CTE + hz + zJz / 2, ok = Math.abs(H - q.total) < 1e-9;
+      var H = CTE + hz + zJz / 2;
       // vectores en fila (transpuestos) para que todo quepa a lo ancho
       var col = function (v) { return '(' + v.join(',\\;') + ')^{\\mathsf T}'; };
+      var fila = function (v) { return '\\begin{pmatrix}' + v.join(' & ') + '\\end{pmatrix}'; };
+      var columna = function (v) { return '\\begin{pmatrix}' + v.join(' \\\\ ') + '\\end{pmatrix}'; };
+      // J con el aporte de cada par: dorado si z_k z_l = +1 (suma), azul si = −1 (resta)
+      var Jtex = '\\begin{pmatrix}' + MAT.J.map(function (f, a) {
+        return f.map(function (v, b) {
+          if (!v) return '\\color{#C9C4BB}{0}';
+          return '\\colorbox{' + (z[a] * z[b] > 0 ? '#F1E4C6' : '#DCE7F5') + '}{$' + n(v) + '$}';
+        }).join(' & ');
+      }).join(' \\\\ ') + '\\end{pmatrix}';
+      var zs = z.map(String);
+      var terminos = function (u, v) { return u.map(function (a, k) { return n(a) + '\\cdot(' + v[k] + ')'; }).join(' + ').replace(/\+ -/g, '- '); };
       der.innerHTML =
-        tex('z = 1 - 2x = ' + col(z.map(String)) + '^{\\!\\mathsf T}\\ \\text{(transpuesta, en fila)}'.replace('^{\\!\\mathsf T}\\ \\text{(transpuesta, en fila)}', ''), true).replace('<span class="katex-display">', '<span class="katex-display cp-z">') +
+        tex('z = 1 - 2x = ' + col(zs), true) +
         tex('h^{\\mathsf T}z = \\sum_{k=1}^{9} h_k z_k = ' + C + '{' + n(hz) + '}', true) +
         tex('J z = ' + col(Jz.map(n)) + ' \\qquad \\tfrac12\\, z^{\\mathsf T}(Jz) = \\tfrac12(' + n(zJz) + ') = ' + C + '{' + n(zJz / 2) + '}', true) +
         tex('H(z) = \\underbrace{' + n(CTE) + '}_{\\text{cte}} + \\underbrace{(' + n(hz) + ')}_{h^{\\mathsf T}z} + \\underbrace{(' + n(zJz / 2) + ')}_{\\frac12 z^{\\mathsf T}Jz} = ' + C + '{\\mathbf{' + n(H) + '}}', true) +
-        tex('Q(x) = \\underbrace{' + n(q.c) + '}_{Q_C} + 100\\cdot\\underbrace{' + q.tem + '}_{Q_{\\text{tem}}} + 100\\cdot\\underbrace{' + q.esp + '}_{Q_{\\text{esp}}} = \\mathbf{' + n(q.total) + '} \\quad ' + (ok ? '\\checkmark' : '\\times'), true) +
-        '<p class="dv-nota">' + (q.tem || q.esp ? 'Rompe ' + [q.tem ? 'la regla temporal (' + q.tem + ')' : '', q.esp ? 'la espacial (' + q.esp + ')' : ''].filter(Boolean).join(' y ') + ': cada unidad suma A = 100.' : 'Cumple las dos restricciones: H(z) es solo la distancia recorrida.') + '</p>';
+        '<p class="dv-nota">' + (Qx(x).tem || Qx(x).esp ? 'Rompe ' + [Qx(x).tem ? 'la regla temporal' : '', Qx(x).esp ? 'la espacial' : ''].filter(Boolean).join(' y ') + ': los acoplamientos A/2 que se activan suben la energía.' : 'Cumple las dos restricciones: la energía es solo la distancia recorrida.') + '</p>';
+      // debajo: la multiplicación escrita con las matrices
+      mult.innerHTML = '<div class="cp-mult-tit">La multiplicación, con las matrices</div>' +
+        tex('z^{\\mathsf T} J\\, z = ' + fila(zs) + Jtex + columna(zs), true) +
+        tex('= (Jz)^{\\mathsf T} z = ' + terminos(Jz, zs) + ' = ' + C + '{' + n(zJz) + '}', true) +
+        tex('h^{\\mathsf T} z = ' + fila(MAT.h.map(n)) + columna(zs) + ' = ' + C + '{' + n(hz) + '}', true) +
+        tex('H(z) = \\text{cte} + h^{\\mathsf T}z + \\tfrac12\\, z^{\\mathsf T}Jz = ' + n(CTE) + ' + (' + n(hz) + ') + \\tfrac12(' + n(zJz) + ') = ' + C + '{\\mathbf{' + n(H) + '}}', true) +
+        '<p class="dv-nota">En J, dorado: pares con z<sub>k</sub>z<sub>l</sub> = +1, que suman J<sub>kl</sub>; azul: pares con z<sub>k</sub>z<sub>l</sub> = −1, que lo restan.</p>';
     }
     Array.prototype.forEach.call(caja.querySelectorAll('.cp-x'), function (b) {
       b.addEventListener('click', function () { var i = +b.getAttribute('data-i'), t = +b.getAttribute('data-t'); x[i][t] = 1 - x[i][t]; calcular(); });

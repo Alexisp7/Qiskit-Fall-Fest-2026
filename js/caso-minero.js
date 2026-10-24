@@ -481,6 +481,7 @@
     pintar();
     if (n === 4) animar();
     if (n === 5) tarjetasCastigo();
+    if (n === 6) viaje.t0 = 0;   // al entrar al resumen el camión sale desde el inicio de la ruta
   }
   atras.addEventListener('click', function () { if (paso > 1) irA(paso - 1); });
   adelante.addEventListener('click', function () { if (!adelante.disabled) irA(paso + 1); });
@@ -491,6 +492,7 @@
     li.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); volver(); } });
   });
   $('reiniciar').addEventListener('click', function () { ruta = []; nuevo = null; pintar(); });
+  $('camion-inicio').addEventListener('click', function () { viaje.t0 = 0; });
 
   // ── pesos y restricciones elegibles ──
   ['s', 'f', 'antes-a', 'antes-b', 'antes2-a', 'antes2-b'].forEach(function (n) {
