@@ -223,6 +223,9 @@
   function camion(svg) {
     var h = el('g', { 'class': 'camion' }, svg);
     var cuerpo = el('g', { 'class': 'camion-cuerpo' }, h);
+    // rayitas de aire que quedan atrás mientras avanza
+    var aire = el('g', { 'class': 'camion-aire' }, cuerpo);
+    [[-13, 0], [-9, .35], [-5, .7]].forEach(function (z) { el('line', { x1: -22, y1: z[0], x2: -34, y2: z[0], style: 'animation-delay:-' + z[1] + 's' }, aire); });
     el('path', { 'class': 'camion-ala', d: 'M-4 -14 C -14 -30, -30 -26, -36 -14 C -26 -18, -14 -16, -4 -12 Z' }, cuerpo);
     el('path', { 'class': 'camion-ala', d: 'M4 -14 C 10 -30, 26 -30, 30 -18 C 20 -20, 12 -17, 6 -12 Z' }, cuerpo);
     el('rect', { 'class': 'camion-caja', x: -16, y: -16, width: 20, height: 12, rx: 1.5 }, cuerpo);
@@ -231,6 +234,8 @@
     el('circle', { 'class': 'camion-rueda', cx: 9, cy: -2.5, r: 3 }, cuerpo);
     return h;
   }
+  // el camión va montado sobre la flecha de cada tramo (mismo corrimiento que la flecha),
+  // más lento, con una pausa breve en cada lugar y una larga al terminar la ruta
   var viaje = { t0: 0, raf: 0 };
   function andar(ahora) {
     viaje.raf = requestAnimationFrame(andar);
@@ -239,19 +244,25 @@
     var c = svg.querySelector('.camion'); if (!c) return;
     var r = ruta.length > 1 ? ruta : null;
     if (!r) { c.setAttribute('opacity', '0'); return; }
-    var TRAMO = 900, PAUSA = 220, ciclo = (r.length - 1) * (TRAMO + PAUSA) + 900;
+    var TRAMO = 1700, PAUSA = 450, FIN = 3200, tramos = r.length - 1, ciclo = tramos * (TRAMO + PAUSA) + FIN;
     if (!viaje.t0) viaje.t0 = ahora;
-    var e = (ahora - viaje.t0) % ciclo, n = Math.min(r.length - 2, Math.floor(e / (TRAMO + PAUSA)));
-    var u = Math.min(1, (e - n * (TRAMO + PAUSA)) / TRAMO); if (e >= (r.length - 1) * (TRAMO + PAUSA)) { n = r.length - 2; u = 1; }
-    u = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    var e = (ahora - viaje.t0) % ciclo, n = Math.min(tramos - 1, Math.floor(e / (TRAMO + PAUSA)));
+    var u = Math.min(1, (e - n * (TRAMO + PAUSA)) / TRAMO), mueve = u > 0 && u < 1;
+    if (e >= tramos * (TRAMO + PAUSA)) { n = tramos - 1; u = 1; mueve = false; }
+    var k = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
     var a = POS[r[n]], b = POS[r[n + 1]], vuela = !camino(r[n], r[n + 1]);
-    var x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u - (vuela ? Math.sin(Math.PI * u) * 46 : 0);
-    var mal = vuela || (n === 0 && u < .2 && r[0] !== s) || (n === r.length - 2 && u > .8 && r.length === T && r[T - 1] !== f);
+    var ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey) || 1, nx = -ey / l * 5, ny = ex / l * 5, R0 = R + 4;
+    // de borde a borde de los círculos, como la flecha
+    var x1 = a[0] + ex / l * R0 + nx, y1 = a[1] + ey / l * R0 + ny, x2 = b[0] - ex / l * (R0 + 2) + nx, y2 = b[1] - ey / l * (R0 + 2) + ny;
+    var x = x1 + (x2 - x1) * k, y = y1 + (y2 - y1) * k - (vuela ? Math.sin(Math.PI * k) * 46 : 0);
+    var ang = Math.atan2(ey, ex) * 180 / Math.PI, izq = ex < 0;
+    var mal = vuela || (n === 0 && k < .2 && r[0] !== s) || (n === tramos - 1 && k > .8 && r.length === T && r[T - 1] !== f);
     c.setAttribute('opacity', '1');
-    c.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + (y - R + 4).toFixed(1) + ')');
-    var cuerpo = c.firstChild;
-    cuerpo.setAttribute('transform', b[0] < a[0] ? 'scale(-1 1)' : '');
-    c.classList.toggle('vuela', vuela);
+    // sigue la dirección del tramo; si va hacia la izquierda se voltea para no quedar de cabeza
+    c.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + (izq ? ang + 180 : ang).toFixed(1) + ')');
+    c.firstChild.setAttribute('transform', izq ? 'scale(-1 1)' : '');
+    c.classList.toggle('mueve', mueve);
+    c.classList.toggle('vuela', vuela && mueve);
     c.classList.toggle('mal', mal);
   }
   if (!quieto) viaje.raf = requestAnimationFrame(andar);

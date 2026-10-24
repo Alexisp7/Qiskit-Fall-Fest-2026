@@ -2362,6 +2362,11 @@
     .ctx-vista[data-v="sat"].activa .ctx-marca { animation: ctxPin .9s cubic-bezier(.16,1,.3,1) .4s both; }
     @keyframes ctxPin { from { opacity: 0; transform: translate(-50%, -130%); } to { opacity: 1; transform: translate(-50%, -100%); } }
     @media (prefers-reduced-motion: reduce) { .ctx-vista[data-v="sat"].activa .ctx-marca { animation: none; } }
+    /* aire del camión: rayitas que se van hacia atrás, lentas, solo mientras avanza */
+    .camion-aire line { stroke: #8C6D33; stroke-width: 1.3; stroke-linecap: round; opacity: 0; }
+    .camion.mueve .camion-aire line { animation: camionAire 1.05s linear infinite; }
+    @keyframes camionAire { 0% { opacity: 0; transform: translateX(6px); } 25% { opacity: .75; } 100% { opacity: 0; transform: translateX(-12px); } }
+    @media (prefers-reduced-motion: reduce) { .camion-aire line { animation: none !important; } }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2686,6 +2691,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=12"></script>
+  <script src="js/caso-minero.js?v=13"></script>
 </body>
 </html>
