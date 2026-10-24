@@ -521,8 +521,8 @@
   var marco = document.querySelector('[data-ctx-marco]');
   var PIES = {
     sat: 'Vista satelital de la mina Orcopampa.',
-    cam: 'Foto satelital con sus posibles caminos. Los planos son reales.',
-    graf: 'Solo las distancias se reducen al grafo que tenemos: cada instalación es un nodo xᵢ.'
+    cam: 'Pasa el cursor por cada letra para ver la instalación. Los planos son reales.',
+    graf: 'Solo las distancias se reducen al grafo: cada instalación es un nodo xᵢ (pasa el cursor por ellos).'
   };
   var grafoCtx = document.querySelector('[data-grafo="ctx"]');
   var ciclo = 0, ciclando = false;
@@ -570,15 +570,52 @@
     }
     requestAnimationFrame(cuadro);
   }
-  // pasar el cursor por una instalación la resalta en el grafo
-  Array.prototype.forEach.call(document.querySelectorAll('.ctx-card[data-nodo]'), function (card) {
-    function foco(si) {
-      var n = grafoCtx && grafoCtx.querySelector('.caso-nodo[aria-label^="' + card.getAttribute('data-nodo') + ' "]');
-      if (n) n.classList.toggle('foco', si);
-    }
-    card.addEventListener('mouseenter', function () { foco(true); });
-    card.addEventListener('mouseleave', function () { foco(false); });
+  // pasar el cursor por una letra del mapa (o por su nodo en el grafo) desliza
+  // a la derecha una ficha con la foto y la descripción de la instalación
+  var ficha = document.querySelector('[data-ctx-ficha]'), fichaDe = null;
+  function mostrarFicha(nodo, ancla) {
+    var card = document.querySelector('.ctx-card[data-nodo="' + nodo + '"]');
+    if (!ficha || !card) return;
+    clearTimeout(ciclo); ciclando = false;
+    if (fichaDe !== nodo) { ficha.innerHTML = card.innerHTML; ficha.querySelector('img').removeAttribute('loading'); }
+    fichaDe = nodo;
+    var m = marco.getBoundingClientRect(), a = ancla.getBoundingClientRect();
+    var W = ficha.offsetWidth || 410, izq = a.right - m.left + 12 + W > m.width;
+    ficha.classList.toggle('izq', izq);
+    ficha.style.left = (izq ? a.left - m.left - 12 - W : a.right - m.left + 12) + 'px';
+    ficha.style.top = Math.max(0, a.top - m.top + a.height / 2 - 60) + 'px';
+    ficha.classList.add('ver');
+    Array.prototype.forEach.call(document.querySelectorAll('.ctx-punto'), function (b) { b.classList.toggle('activo', b === ancla); });
+    if (grafoCtx) Array.prototype.forEach.call(grafoCtx.querySelectorAll('.caso-nodo'), function (n) { n.classList.toggle('foco', n.getAttribute('data-ficha') === nodo); });
+  }
+  function ocultarFicha() {
+    if (!ficha) return;
+    ficha.classList.remove('ver');
+    Array.prototype.forEach.call(document.querySelectorAll('.ctx-punto.activo, .ctx-grafo .caso-nodo.foco'), function (n) { n.classList.remove('activo'); n.classList.remove('foco'); });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.ctx-punto'), function (b) {
+    b.addEventListener('mouseenter', function () { mostrarFicha(b.getAttribute('data-nodo'), b); });
+    b.addEventListener('mouseleave', ocultarFicha);
+    b.addEventListener('focus', function () { mostrarFicha(b.getAttribute('data-nodo'), b); });
+    b.addEventListener('blur', ocultarFicha);
+    // en táctil: tocar abre y vuelve a tocar cierra
+    b.addEventListener('click', function () { if (b.classList.contains('activo') && ficha.classList.contains('ver') && fichaDe === b.getAttribute('data-nodo')) ocultarFicha(); else mostrarFicha(b.getAttribute('data-nodo'), b); });
   });
+  if (grafoCtx) {
+    // el grafo se redibuja: se marca cada nodo con instalación y se delega el cursor
+    function marcarNodos() {
+      Array.prototype.forEach.call(grafoCtx.querySelectorAll('.caso-nodo'), function (n) {
+        var id = (n.getAttribute('aria-label') || '').split(' ')[0];
+        if (document.querySelector('.ctx-card[data-nodo="' + id + '"]')) n.setAttribute('data-ficha', id);
+      });
+    }
+    marcarNodos();
+    new MutationObserver(marcarNodos).observe(grafoCtx, { childList: true });
+    grafoCtx.addEventListener('mouseover', function (e) { var n = e.target.closest && e.target.closest('.caso-nodo[data-ficha]'); if (n) mostrarFicha(n.getAttribute('data-ficha'), n); });
+    grafoCtx.addEventListener('mouseout', function (e) { var n = e.target.closest && e.target.closest('.caso-nodo[data-ficha]'); if (n && !n.contains(e.relatedTarget)) ocultarFicha(); });
+    grafoCtx.addEventListener('click', function (e) { var n = e.target.closest && e.target.closest('.caso-nodo[data-ficha]'); if (n) mostrarFicha(n.getAttribute('data-ficha'), n); else ocultarFicha(); });
+  }
+  if (marco) Array.prototype.forEach.call(marco.querySelectorAll('[data-vista]'), function (b) { b.addEventListener('click', ocultarFicha); });
   if ('IntersectionObserver' in window) {
     var obs = new IntersectionObserver(function (ents) {
       ents.forEach(function (en) {

@@ -2240,6 +2240,28 @@
     @keyframes ctxAparece { from { opacity: 0; } to { opacity: 1; } }
     .ctx-grafo .caso-nodo.foco .tm-nodo { fill: var(--gold); stroke: #8C6D33; }
     .ctx-pie { font-family: 'Inter', sans-serif; font-size: 12px; color: #8C6D33; margin: 8px 0 0; min-height: 18px; transition: opacity .3s; }
+    /* mapa de caminos: zonas sobre cada letra y la ficha que se desliza a la derecha */
+    .ctx-marco { position: relative; }
+    .ctx-inst[hidden] { display: none; }
+    .ctx-vista[data-v="cam"] { container-type: size; }
+    .ctx-mapa { position: relative; width: min(100cqw, 100cqh * 1600 / 732); aspect-ratio: 1600 / 732; }
+    .ctx-mapa img { width: 100%; height: 100%; display: block; }
+    .ctx-punto { position: absolute; width: 6.9%; height: 14.4%; padding: 0; border: 0; background: transparent; cursor: pointer; clip-path: polygon(0 0, 100% 0, 50% 100%); transition: background .25s; }
+    .ctx-punto:hover, .ctx-punto:focus-visible, .ctx-punto.activo { background: rgba(200,169,110,.55); outline: none; }
+    .ctx-grafo .caso-nodo[data-ficha] { cursor: pointer; }
+    .ctx-ficha { position: absolute; z-index: 20; width: 410px; display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 14px; align-items: start; background: #fff; border: 1px solid var(--gold); border-left: 4px solid #1B2A4A; padding: 12px; box-shadow: 0 18px 40px rgba(27,42,74,.18); text-align: left; pointer-events: none; visibility: hidden; clip-path: inset(0 100% 0 0); transition: clip-path .45s cubic-bezier(.16,1,.3,1), visibility 0s linear .45s; }
+    .ctx-ficha.izq { border-left: 1px solid var(--gold); border-right: 4px solid #1B2A4A; clip-path: inset(0 0 0 100%); }
+    .ctx-ficha.ver { visibility: visible; clip-path: inset(0 0 0 0); transition: clip-path .45s cubic-bezier(.16,1,.3,1), visibility 0s; }
+    .ctx-ficha img { width: 130px; height: 96px; object-fit: cover; display: block; background: #F6F3EE; }
+    .ctx-ficha > div { opacity: 0; transform: translateX(-10px); transition: opacity .3s, transform .45s cubic-bezier(.16,1,.3,1); }
+    .ctx-ficha.ver > div { opacity: 1; transform: none; transition-delay: .12s; }
+    .ctx-ficha h4 { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 20px; line-height: 1.15; color: var(--black); margin: 0 0 5px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .ctx-ficha p { font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.55; color: #555; margin: 0; }
+    @media (max-width: 700px) {
+      .ctx-ficha { position: static; width: auto; margin-top: 10px; grid-template-columns: 96px minmax(0, 1fr); display: none; }
+      .ctx-ficha.ver { display: grid; }
+      .ctx-ficha img { width: 96px; height: 72px; }
+    }
     /* las seis instalaciones */
     .ctx-inst { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; text-align: left; }
     .ctx-card { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; align-items: start; border: 1px solid #E5E2DC; background: #fff; padding: 10px; transition: border-color .25s, box-shadow .25s, transform .25s; cursor: default; }
@@ -2551,20 +2573,21 @@
         </div>
         <div class="ctx-vistas">
           <figure class="ctx-vista activa" data-v="sat"><img src="img/orcopampa/vista.webp" alt="Vista satelital de la mina Orcopampa" width="1190" height="670"><div class="ctx-marca" aria-hidden="true"><span class="ctx-marca-txt">ORCOPAMPA</span><svg class="ctx-pin" viewBox="0 0 24 34"><path d="M12 33s11-12 11-20a11 11 0 0 0-22 0c0 8 11 20 11 20z"/><circle cx="12" cy="13" r="4.2"/></svg></div></figure>
-          <figure class="ctx-vista" data-v="cam"><img src="img/orcopampa/satelital.webp" alt="Foto satelital de la mina Orcopampa con sus posibles caminos y las instalaciones A, T, B, C, D y E" loading="lazy" width="1600" height="732"></figure>
+          <figure class="ctx-vista" data-v="cam"><div class="ctx-mapa"><img src="img/orcopampa/satelital.webp" alt="Foto satelital de la mina Orcopampa con sus posibles caminos y las instalaciones A, T, B, C, D y E" loading="lazy" width="1600" height="732"><button type="button" class="ctx-punto" data-nodo="x1" aria-label="Instalación A" style="left:8.75%;top:10.93%"></button><button type="button" class="ctx-punto" data-nodo="x3" aria-label="Instalación T" style="left:37.69%;top:19.81%"></button><button type="button" class="ctx-punto" data-nodo="x4" aria-label="Instalación B" style="left:46.12%;top:21.17%"></button><button type="button" class="ctx-punto" data-nodo="x7" aria-label="Instalación C" style="left:44.88%;top:77.60%"></button><button type="button" class="ctx-punto" data-nodo="x6" aria-label="Instalación D" style="left:50.31%;top:53.69%"></button><button type="button" class="ctx-punto" data-nodo="x8" aria-label="Instalación E" style="left:83.75%;top:12.30%"></button></div></figure>
           <figure class="ctx-vista" data-v="graf"><svg class="caso-grafo ctx-grafo" data-grafo="ctx" viewBox="0 0 660 300" aria-label="El grafo: las mismas instalaciones como nodos x1 a x8 y las distancias reales de cada camino"></svg></figure>
         </div>
+        <div class="ctx-ficha" data-ctx-ficha aria-live="polite"></div>
         <p class="ctx-pie" data-ctx-pie>Los planos son reales y salen de la mina Orcopampa.</p>
       </div>
 
       <!-- las instalaciones -->
-      <div class="ctx-inst">
-        <article class="ctx-card ctx-anim" data-nodo="x1"><img src="img/orcopampa/planta.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">A</span> Planta de procesamiento <span class="ctx-x">x<sub>1</sub></span></h4><p>Es la instalación industrial donde el mineral extraído de la mina se transforma en un producto de valor comercial.</p></div></article>
-        <article class="ctx-card ctx-anim" data-nodo="x3"><img src="img/orcopampa/tajo.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">T</span> Tajo <span class="ctx-x">x<sub>3</sub></span></h4><p>Zona donde se hace la extracción. Se excava en bancos, hay rampas y de aquí salen los camiones cargados.</p></div></article>
-        <article class="ctx-card ctx-anim" data-nodo="x4"><img src="img/orcopampa/botadero.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">B</span> Botadero <span class="ctx-x">x<sub>4</sub></span></h4><p>Lugar donde se deposita material estéril que no sirve para procesar. Es “la papelera geológica” de la mina (pero con mucha ingeniería).</p></div></article>
-        <article class="ctx-card ctx-anim" data-nodo="x7"><img src="img/orcopampa/baja-ley.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">C</span> Baja ley <span class="ctx-x">x<sub>7</sub></span></h4><p>Mineral que sí contiene metal, pero tan poco que no conviene procesarlo hoy. Se guarda para cuando suba el precio del metal… o cuando el jefe esté optimista.</p></div></article>
-        <article class="ctx-card ctx-anim" data-nodo="x6"><img src="img/orcopampa/lixiviacion.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">D</span> Lixiviación <span class="ctx-x">x<sub>6</sub></span></h4><p>Proceso donde un agente químico (por ejemplo cianuro o ácido) disuelve el metal.</p></div></article>
-        <article class="ctx-card ctx-anim" data-nodo="x8"><img src="img/orcopampa/relaves.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">E</span> Relaves <span class="ctx-x">x<sub>8</sub></span></h4><p>Restos sin valor después de procesar el mineral. Los relaves finos se envían a un embalse donde se decanta el agua.</p></div></article>
+      <div class="ctx-inst" hidden>
+        <article class="ctx-card" data-nodo="x1"><img src="img/orcopampa/planta.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">A</span> Planta de procesamiento <span class="ctx-x">x<sub>1</sub></span></h4><p>Es la instalación industrial donde el mineral extraído de la mina se transforma en un producto de valor comercial.</p></div></article>
+        <article class="ctx-card" data-nodo="x3"><img src="img/orcopampa/tajo.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">T</span> Tajo <span class="ctx-x">x<sub>3</sub></span></h4><p>Zona donde se hace la extracción. Se excava en bancos, hay rampas y de aquí salen los camiones cargados.</p></div></article>
+        <article class="ctx-card" data-nodo="x4"><img src="img/orcopampa/botadero.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">B</span> Botadero <span class="ctx-x">x<sub>4</sub></span></h4><p>Lugar donde se deposita material estéril que no sirve para procesar. Es “la papelera geológica” de la mina (pero con mucha ingeniería).</p></div></article>
+        <article class="ctx-card" data-nodo="x7"><img src="img/orcopampa/baja-ley.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">C</span> Baja ley <span class="ctx-x">x<sub>7</sub></span></h4><p>Mineral que sí contiene metal, pero tan poco que no conviene procesarlo hoy. Se guarda para cuando suba el precio del metal… o cuando el jefe esté optimista.</p></div></article>
+        <article class="ctx-card" data-nodo="x6"><img src="img/orcopampa/lixiviacion.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">D</span> Lixiviación <span class="ctx-x">x<sub>6</sub></span></h4><p>Proceso donde un agente químico (por ejemplo cianuro o ácido) disuelve el metal.</p></div></article>
+        <article class="ctx-card" data-nodo="x8"><img src="img/orcopampa/relaves.webp" alt="" loading="lazy"><div><h4><span class="ctx-letra">E</span> Relaves <span class="ctx-x">x<sub>8</sub></span></h4><p>Restos sin valor después de procesar el mineral. Los relaves finos se envían a un embalse donde se decanta el agua.</p></div></article>
       </div>
     </div>
 
@@ -2712,6 +2735,6 @@
     </div>
   </footer>
   <script src="js/problemas.js?v=32"></script>
-  <script src="js/caso-minero.js?v=15"></script>
+  <script src="js/caso-minero.js?v=17"></script>
 </body>
 </html>
