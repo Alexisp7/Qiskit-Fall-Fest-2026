@@ -343,23 +343,73 @@
   function grados(a) { return Math.round((((a * 180 / Math.PI) % 360) + 360) % 360); }
   function nomParam(j) { return (j < 9 ? 'θ' : 'φ') + '<sub>' + (j % 9 + 1) + '</sub>'; }
   // el circuito del triángulo con los ángulos actuales; 'activo' = el parámetro que se está ajustando
-  function circuitoValores(th, activos) {   // activos: los parámetros que se acaban de mover
-    var N = 3, n = 9, dy = 30, y0 = 40;
-    var o = '<svg class="az-circ vq-circ" viewBox="0 0 900 ' + (y0 + (n - 1) * dy + 28) + '" role="img" aria-label="Ansatz de 9 qubits con sus ángulos actuales">';
+  function circuitoValores(th, activos, res) {   // activos: los parámetros que se acaban de mover; res: lo medido
+    var N = 3, n = 9, dy = 30, y0 = 40, W = res ? 1210 : 900;
+    var o = '<svg class="az-circ vq-circ" viewBox="0 0 ' + W + ' ' + (y0 + (n - 1) * dy + 28) + '" role="img" aria-label="Ansatz de 9 qubits con sus ángulos actuales, la medida, el Hamiltoniano y la energía">';
     o += '<text class="azc-col" x="170" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text><text class="azc-col" x="420" y="16">cascada de CZ</text><text class="azc-col" x="670" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text><text class="azc-col" x="790" y="16">medir</text>';
     for (var k = 0; k < n; k++) {
       var y = y0 + k * dy, i = k % N + 1, t = Math.floor(k / N) + 1;
       o += '<text class="azc-q" x="6" y="' + (y + 5) + '">q<tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3"> · x</tspan><tspan class="azc-sub" dy="3">' + i + t + '</tspan></text>';
-      o += '<text class="azc-ket" x="90" y="' + (y + 5) + '">|0⟩</text><line class="azc-cable" x1="114" y1="' + y + '" x2="812" y2="' + y + '"/>';
+      o += '<text class="azc-ket" x="90" y="' + (y + 5) + '">|0⟩</text><line class="azc-cable" x1="114" y1="' + y + '" x2="776" y2="' + y + '"/>';
       [[k, 132, th[k]], [n + k, 632, th[n + k]]].forEach(function (g) {
         o += '<rect class="azc-ry' + (activos.indexOf(g[0]) >= 0 ? ' vq-activo' : '') + '" x="' + g[1] + '" y="' + (y - 11) + '" width="76" height="22"/><text class="azc-g vq-g" x="' + (g[1] + 38) + '" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(' + grados(g[2]) + '°)</tspan></text>';
       });
       o += '<rect class="azc-ry" x="776" y="' + (y - 11) + '" width="28" height="22"/><path class="azc-aguja" d="M781 ' + (y + 6) + ' A9 9 0 0 1 799 ' + (y + 6) + ' M790 ' + (y + 6) + ' L797 ' + (y - 6) + '"/>';
     }
-    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="114" y1="' + yy + '" x2="812" y2="' + yy + '"/>'; });
+    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="114" y1="' + yy + '" x2="776" y2="' + yy + '"/>'; });
     for (var c = 0; c < n - 1; c++) {
       var xc = 250 + c * 44, ya = y0 + c * dy, yb = ya + dy, cruza = (c + 1) % N === 0;
       o += '<line class="azc-cz' + (cruza ? ' cruza' : '') + '" x1="' + xc + '" y1="' + ya + '" x2="' + xc + '" y2="' + yb + '"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + ya + '" r="4"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + yb + '" r="4"/>';
+    }
+    if (res) {
+      var yt = y0 - 14, yf = y0 + (n - 1) * dy + 14, ym = (yt + yf) / 2;
+      o += '<text class="azc-col" x="878" y="16">aplicar H</text><text class="azc-col" x="985" y="16">lo que salió</text><text class="azc-col" x="1135" y="16">energía</text>';
+      for (var k2 = 0; k2 < n; k2++) { var y2 = y0 + k2 * dy; o += '<line class="vq-clasico" x1="804" y1="' + (y2 - 1.5) + '" x2="850" y2="' + (y2 - 1.5) + '"/><line class="vq-clasico" x1="804" y1="' + (y2 + 1.5) + '" x2="850" y2="' + (y2 + 1.5) + '"/>'; }
+      o += '<rect class="vq-hbox" x="850" y="' + yt + '" width="56" height="' + (yf - yt) + '"/><text class="vq-hletra" x="878" y="' + (ym + 12) + '">H</text>';
+      res.top.slice(0, 4).forEach(function (cf, q) {
+        var yc = yt + 6 + q * 66, x0 = 934;
+        o += '<line class="vq-clasico" x1="906" y1="' + (yc + 14) + '" x2="' + (x0 - 4) + '" y2="' + (yc + 14) + '"/>';
+        for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) o += '<rect class="vq-celda' + (cf.x[a][b] ? ' on' : '') + '" x="' + (x0 + b * 10) + '" y="' + (yc + a * 10) + '" width="9" height="9"/>';
+        o += '<text class="vq-ctxt" x="' + (x0 + 38) + '" y="' + (yc + 11) + '">×' + cf.veces + '</text><text class="vq-ctxt" x="' + (x0 + 38) + '" y="' + (yc + 25) + '">H = ' + n2(cf.H) + '</text>';
+        o += '<text class="vq-ctxt ' + (cf.ok ? 'ok' : 'mal') + '" x="' + x0 + '" y="' + (yc + 44) + '">' + (cf.ok ? '✓ ruta válida' : '✗ rompe una regla') + '</text>';
+      });
+      o += '<path class="vq-llave" d="M1046 ' + yt + ' q10 0 10 12 V' + (ym - 8) + ' q0 8 8 8 q-8 0 -8 8 V' + (yf - 12) + ' q0 12 -10 12"/>';
+      var ye = ym - 70;
+      o += '<rect class="vq-ebox" x="1072" y="' + ye + '" width="132" height="140"/>';
+      o += '<text class="vq-eletra" x="1138" y="' + (ye + 18) + '">E medida</text><text class="vq-enum" x="1138" y="' + (ye + 52) + '">' + n2(res.E) + '</text>';
+      [['distancia', res.dist], ['+ A · tiempo', res.at], ['+ A · lugar', res.al]].forEach(function (pt, q) {
+        o += '<text class="vq-eparte" x="1080" y="' + (ye + 76 + q * 16) + '">' + pt[0] + '</text><text class="vq-eparte num" x="1196" y="' + (ye + 76 + q * 16) + '">' + n2(pt[1]) + '</text>';
+      });
+      o += '<text class="vq-eparte gris" x="1138" y="' + (ye + 130) + '">promedio de ' + res.n + ' disparos</text>';
+    }
+    return o + '</svg>';
+  }
+  // la trayectoria de una configuración x (filas = lugares, columnas = tiempos) sobre el triángulo
+  var POS3 = [[16, 56], [50, 12], [84, 56]], DTRI = [[0, 5, 9], [5, 0, 7], [9, 7, 0]];
+  function lugaresPorTiempo(x) { var r = []; for (var t = 0; t < 3; t++) { var l = []; for (var i = 0; i < 3; i++) if (x[i][t]) l.push(i); r.push(l); } return r; }
+  function motivos(x) {
+    var lt = lugaresPorTiempo(x), m = [];
+    lt.forEach(function (l, t) { if (!l.length) m.push('nadie en t' + (t + 1)); if (l.length > 1) m.push(l.length + ' lugares en t' + (t + 1)); });
+    for (var i = 0; i < 3; i++) { var c = x[i][0] + x[i][1] + x[i][2]; if (!c) m.push('x' + (i + 1) + ' no se visita'); if (c > 1) m.push('x' + (i + 1) + ' ' + c + ' veces'); }
+    return m;
+  }
+  function trayectoriaSVG(x, grande) {
+    var lt = lugaresPorTiempo(x), ok = !motivos(x).length, w = grande ? 200 : 100, o = '<svg class="vq-tray' + (grande ? ' grande' : '') + '" viewBox="0 0 100 70" width="' + w + '" height="' + (w * .7) + '" aria-hidden="true">';
+    [[0, 1], [1, 2], [0, 2]].forEach(function (e) {
+      var a = POS3[e[0]], b = POS3[e[1]];
+      o += '<line class="vq-tr-arista" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/><text class="vq-tr-d" x="' + ((a[0] + b[0]) / 2 + (e[0] === 0 && e[1] === 2 ? 0 : (e[0] === 0 ? -7 : 7))) + '" y="' + ((a[1] + b[1]) / 2 + (e[0] === 0 && e[1] === 2 ? 9 : 0)) + '">' + DTRI[e[0]][e[1]] + '</text>';
+    });
+    for (var t = 0; t < 2; t++) lt[t].forEach(function (a) { lt[t + 1].forEach(function (b) {
+      if (a === b) return;
+      var p = POS3[a], q = POS3[b], dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+      var x1 = p[0] + ux * 9, y1 = p[1] + uy * 9, x2 = q[0] - ux * 10, y2 = q[1] - uy * 10;
+      o += '<line class="vq-tr-tramo' + (ok ? '' : ' mal') + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>';
+      o += '<path class="vq-tr-punta' + (ok ? '' : ' mal') + '" d="M' + x2 + ' ' + y2 + ' L' + (x2 - ux * 5 - uy * 3) + ' ' + (y2 - uy * 5 + ux * 3) + ' L' + (x2 - ux * 5 + uy * 3) + ' ' + (y2 - uy * 5 - ux * 3) + 'Z"/>';
+    }); });
+    for (var i = 0; i < 3; i++) {
+      var ts = []; for (var t2 = 0; t2 < 3; t2++) if (x[i][t2]) ts.push(t2 + 1);
+      o += '<circle class="vq-tr-nodo' + (ts.length ? ' visitado' : '') + (ts.length > 1 ? ' mal' : '') + '" cx="' + POS3[i][0] + '" cy="' + POS3[i][1] + '" r="8"/><text class="vq-tr-t" x="' + POS3[i][0] + '" y="' + (POS3[i][1] + 3) + '">' + (ts.length ? 't' + ts.join(',') : '') + '</text>';
+      o += '<text class="vq-tr-x" x="' + POS3[i][0] + '" y="' + (POS3[i][1] + (i === 1 ? -10 : 15)) + '">x' + (i + 1) + '</text>';
     }
     return o + '</svg>';
   }
@@ -482,14 +532,23 @@
       '<span class="az-estado" data-az="estado"></span></div>' +
       '<div class="vq-paso"><span>1</span>El ansatz real: 9 qubits con sus ángulos de ahora</div>' +
       '<div data-az="circ"></div>' +
-      '<p class="dv-nota">Cada qubit q<sub>k</sub> es una variable x<sub>i,t</sub> (orden por tiempo). En dorado, los ángulos que acaba de mover el optimizador.</p>' +
+      '<p class="dv-nota">Cada qubit q<sub>k</sub> es una variable x<sub>i,t</sub> (orden por tiempo). En dorado, los ángulos que acaba de mover el optimizador. Tras medir, cada disparo da 9 bits; H les asigna su energía y el promedio de los ' + DISPAROS + ' disparos es la E medida, separada en sus partes.</p>' +
       '<div class="vq-paso"><span>2</span>Ejecutar y medir: ' + DISPAROS + ' disparos</div>' +
-      '<div class="vq-medida" data-az="medida"></div>' +
+      '<div class="vq-con-lado"><div class="vq-medida" data-az="medida"></div><aside class="vq-explica">' +
+        '<div class="vq-explica-tit">Cómo leer lo que salió</div>' +
+        '<p><b>Los cuadritos de 3 × 3</b> son una configuración x: filas = lugares x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>; columnas = tiempos t<sub>1</sub>, t<sub>2</sub>, t<sub>3</sub>. Un cuadro dorado es x<sub>i,t</sub> = 1 (el camión está en el lugar i en el tiempo t); uno vacío es 0. Una ruta válida tiene exactamente un dorado en cada fila y en cada columna.</p>' +
+        '<p><b>¿Por qué tantas, si son 3 nodos?</b> Cada uno de los 9 qubits sale 0 o 1, así que hay 2<sup>9</sup> = 512 configuraciones. Solo 3! = 6 son rutas: un lugar en cada tiempo y cada lugar una vez. Las otras 506 rompen alguna regla. El circuito reparte probabilidad entre las 512 y cada disparo saca una al azar.</p>' +
+        '<p><b>H por partes.</b> H(b) = distancia + A·(regla de tiempo) + A·(regla de lugar), con A = 100: cada regla rota suma 100. Es la misma cuenta que c + hᵀz + ΣJ<sub>kl</sub>z<sub>k</sub>z<sub>l</sub> (comprobado en los 512 estados).</p>' +
+        '<p><b>Minimizar E</b> es mover la probabilidad hacia las configuraciones de H bajo: primero las 6 válidas, sin castigo, y entre ellas la de menor distancia, 1 → 2 → 3 o 3 → 2 → 1 (5 + 7 = 12).</p></aside></div>' +
       '<div class="vq-paso"><span>3</span>La misma energía con las matrices J y h (valor exacto)</div>' +
       '<div class="vq-formula" data-az="formula"></div>' +
       '<div class="vq-mats"><div class="vq-bloque"><div class="vq-rot">h<sub>k</sub> · ⟨z<sub>k</sub>⟩</div><table class="vq-tabla" data-az="h"></table></div>' +
       '<div class="vq-bloque"><div class="vq-rot">J<sub>kl</sub> &nbsp;(color: ⟨z<sub>k</sub>z<sub>l</sub>⟩ en vivo)</div><table class="vq-tabla vq-j" data-az="J"></table>' +
-      '<div class="vq-ley"><i class="vq-ley-o"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 <i class="vq-ley-a"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = −1 · solo cuenta k &lt; l</div></div></div>' +
+      '<div class="vq-ley"><i class="vq-ley-o"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 <i class="vq-ley-a"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = −1 · solo cuenta k &lt; l</div></div>' +
+      '<aside class="vq-explica"><div class="vq-explica-tit">Qué significan los colores</div>' +
+        '<p><b>Cada casilla</b> es un par de variables (k, l) con su J<sub>kl</sub>: 50 si están en el mismo tiempo o en el mismo lugar (la regla no deja que las dos valgan 1) y d/4 (1,25 · 1,75 · 2,25) si son tiempos seguidos en lugares distintos: la distancia.</p>' +
+        '<p><b>El color</b> es ⟨z<sub>k</sub>z<sub>l</sub>⟩ del estado de ahora: dorado = las dos variables salen iguales (las dos 0 o las dos 1), azul = salen distintas (una 1 y la otra 0), blanco = mitad y mitad.</p>' +
+        '<p><b>Con la minimización:</b> cada casilla aporta J<sub>kl</sub>·⟨z<sub>k</sub>z<sub>l</sub>⟩. Con J > 0 ese término baja en azul: en una ruta válida, en cada tiempo y cada lugar hay un solo 1, así que los pares que lo incluyen quedan azules. El balance final lo cierran h y c; por eso lo que se minimiza es la suma completa de abajo.</p></aside></div>' +
       '<div class="vq-suma" data-az="suma"></div>' +
       '<div class="vq-paso"><span>4</span>El optimizador: COBYLA, evaluación por evaluación</div>' +
       '<div class="az-cuerpo"><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg><div class="vq-log" data-az="log"></div></div>' +
@@ -513,17 +572,33 @@
     function sortear() { nuevo(); th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); }
     function construido() { nuevo(); th = []; var b = [1, 0, 0, 0, 1, 0, 0, 0, 1]; for (var j = 0; j < 9; j++) th.push(0); for (var q = 0; q < 9; q++) th.push(Math.PI * b[q]); }
 
+    // H por partes para una configuración: distancia, regla de tiempo y regla de lugar (A = 100)
+    function partes(s) {
+      var x = rutaDe(sim, s), d = 0, rt = 0, rl = 0;
+      for (var t = 0; t < 2; t++) for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) if (a !== b) d += DTRI[a][b] * x[a][t] * x[b][t + 1];
+      for (var t2 = 0; t2 < 3; t2++) rt += Math.pow(1 - x[0][t2] - x[1][t2] - x[2][t2], 2);
+      for (var a2 = 0; a2 < 3; a2++) rl += Math.pow(1 - x[a2][0] - x[a2][1] - x[a2][2], 2);
+      return { x: x, dist: d, rt: rt, rl: rl, ok: rt + rl === 0 };
+    }
+    function resumen(m) {
+      var orden = Object.keys(m.cuenta).sort(function (a, b) { return m.cuenta[b] - m.cuenta[a]; }), d = 0, rt = 0, rl = 0;
+      orden.forEach(function (s) { var p = partes(+s), c = m.cuenta[s]; d += c * p.dist; rt += c * p.rt; rl += c * p.rl; });
+      return { orden: orden, n: m.n, E: emedida(m), dist: d / m.n, at: 100 * rt / m.n, al: 100 * rl / m.n,
+               top: orden.slice(0, 4).map(function (s) { var p = partes(+s); return { s: +s, veces: m.cuenta[s], H: sim.E[s], x: p.x, ok: p.ok }; }) };
+    }
     function pintarMedida(psi, m) {
-      var em = emedida(m), ex = energia(sim, th), sd = 0;
+      var r = resumen(m), em = r.E, ex = energia(sim, th), sd = 0, orden = r.orden;
       for (var s in m.cuenta) sd += m.cuenta[s] * Math.pow(sim.E[s] - em, 2);
       sd = Math.sqrt(sd / m.n);
-      var orden = Object.keys(m.cuenta).sort(function (a, b) { return m.cuenta[b] - m.cuenta[a]; });
-      var h = '<div class="vq-grande"><span>E medida</span><b>' + f2(em) + '</b><small>promedio de H(b) en ' + m.n + ' disparos</small></div>';
-      h += '<div class="vq-disparos"><div class="vq-rot">Los primeros 16 disparos: el resultado b (q<sub>1</sub>…q<sub>9</sub>) y su energía H(b) = c + hᵀz + Σ J<sub>kl</sub>z<sub>k</sub>z<sub>l</sub></div><ol>' +
+      var p0 = partes(+orden[0]), mot = motivos(p0.x);
+      var h = '<div class="vq-izq"><div class="vq-grande"><span>E medida</span><b>' + f2(em) + '</b><small>= distancia ' + f2(r.dist) + ' + A·tiempo ' + f2(r.at) + ' + A·lugar ' + f2(r.al) + '</small></div>' +
+        '<div class="vq-tray-caja"><div class="vq-rot">Trayectoria del resultado más frecuente (×' + m.cuenta[orden[0]] + ')</div>' + trayectoriaSVG(p0.x, true) +
+        '<div class="vq-tray-txt ' + (p0.ok ? 'ok' : 'mal') + '">' + (p0.ok ? '✓ ' + lugaresPorTiempo(p0.x).map(function (l) { return 'x' + (l[0] + 1); }).join(' → ') + ' · distancia ' + p0.dist : '✗ ' + mot.join(' · ')) + ' · H = ' + f2(sim.E[orden[0]]) + '</div></div></div>';
+      h += '<div class="vq-conteo"><div class="vq-rot">Resultados más frecuentes y su trayectoria</div><table class="vq-tabla vq-tfrec"><tr><th>x</th><th>trayectoria</th><th>veces</th><th>distancia</th><th>reglas rotas</th><th>H(b)</th></tr>' +
+        orden.slice(0, 5).map(function (s) { var p = partes(+s), mm = motivos(p.x); return '<tr><td>' + malla(+s) + '</td><td>' + trayectoriaSVG(p.x, false) + '</td><td>' + m.cuenta[s] + '</td><td>' + p.dist + '</td><td class="' + (p.ok ? 'ok' : 'mal') + '">' + (p.ok ? '0 ✓' : (p.rt + p.rl) + ' · ' + mm.join(', ')) + '</td><td><b>' + f2(sim.E[s]) + '</b></td></tr>'; }).join('') +
+        '<tr class="vq-otros"><td colspan="6">… ' + Math.max(0, orden.length - 5) + ' configuraciones distintas más</td></tr></table></div>';
+      h += '<div class="vq-disparos"><div class="vq-rot">Los primeros 16 disparos: el resultado b (q<sub>1</sub>…q<sub>9</sub>), su configuración y su H(b)</div><ol>' +
         m.primeros.map(function (s) { return '<li><code>' + bits(s) + '</code>' + malla(s) + '<b>' + f2(sim.E[s]) + '</b></li>'; }).join('') + '</ol></div>';
-      h += '<div class="vq-conteo"><div class="vq-rot">Resultados más frecuentes</div><table class="vq-tabla"><tr><th>b</th><th>ruta</th><th>veces</th><th>H(b)</th><th>veces · H(b)</th></tr>' +
-        orden.slice(0, 6).map(function (s) { return '<tr><td><code>' + bits(+s) + '</code></td><td>' + malla(+s) + '</td><td>' + m.cuenta[s] + '</td><td>' + f2(sim.E[s]) + '</td><td>' + f2(m.cuenta[s] * sim.E[s]) + '</td></tr>'; }).join('') +
-        '<tr class="vq-otros"><td colspan="5">… ' + Math.max(0, orden.length - 6) + ' resultados distintos más</td></tr></table></div>';
       h += '<div class="vq-linea"><span>Medida:</span> E = Σ veces · H(b) / ' + m.n + ' = <b>' + f2(em) + '</b> &nbsp;·&nbsp; exacta Σ P(b) H(b) = ' + f2(ex) + ' &nbsp;·&nbsp; diferencia ' + f2(em - ex) + ' (ruido de muestreo esperado ≈ ±' + f2(sd / Math.sqrt(m.n)) + ')</div>';
       $('medida').innerHTML = h;
     }
@@ -569,9 +644,9 @@
         (log.length ? log.slice(-12).reverse().map(function (r) { return '<tr class="' + (r.mejora ? 'vq-mejora' : '') + '"><td>' + r.k + '</td><td>' + r.que + '</td><td>' + r.rho + '</td><td>' + r.cambio + '</td><td>' + f2(r.f) + '</td><td>' + f2(r.m) + '</td></tr>'; }).join('') : '<tr><td colspan="6" class="vq-vacio">Pulsa «optimizar con COBYLA».</td></tr>') + '</table>';
     }
     function pintar(m) {
-      $('circ').innerHTML = circuitoValores(th, activos);
       var psi = estado(sim, th);
       ultimaMedida = m || medirDisparos(psi, DISPAROS);
+      $('circ').innerHTML = circuitoValores(th, activos, resumen(ultimaMedida));
       pintarMedida(psi, ultimaMedida);
       pintarEnergia(psi);
       pintarCurva(); pintarLog();

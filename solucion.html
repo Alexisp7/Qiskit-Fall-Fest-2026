@@ -2077,7 +2077,42 @@
     .vq-linea span:first-child { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6b665e; margin-right: 6px; }
     .vq-err { color: #2F7A4F; }
     .vq-malla { display: inline-grid; vertical-align: middle; margin-left: 8px; }
-    .vq-medida { display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+    .vq-medida { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px 20px; align-items: start; min-width: 0; }
+    .vq-medida > .vq-disparos { grid-column: 1 / -1; }
+    .vq-disparos ol { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    .vq-con-lado { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 22px; align-items: start; }
+    .vq-explica { border-left: 2px solid var(--gold); padding: 2px 0 2px 14px; font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.6; color: #444; }
+    .vq-explica-tit { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; color: #1a1a1a; margin-bottom: 4px; }
+    .vq-explica p { margin: 0 0 9px; }
+    .vq-explica b { color: #1a1a1a; }
+    .vq-mats { grid-template-columns: auto minmax(0, 1fr) 260px !important; }
+    .vq-izq { display: flex; flex-direction: column; gap: 12px; }
+    .vq-grande small { display: block; margin-top: 4px; line-height: 1.5; }
+    .vq-tray-caja { border: 1px solid #E5E2DC; padding: 8px 10px; text-align: center; }
+    .vq-tray-txt { font-family: 'Inter', sans-serif; font-size: 11.5px; margin-top: 2px; }
+    .vq-tray-txt.ok, .vq-tfrec td.ok { color: #2F7A4F; } .vq-tray-txt.mal, .vq-tfrec td.mal { color: #B3362B; }
+    .vq-tfrec td { vertical-align: middle; }
+    .vq-tfrec td.mal { font-size: 10.5px; text-align: left; max-width: 170px; white-space: normal; }
+    .vq-tray { display: block; margin: 0 auto; }
+    .vq-tr-arista { stroke: #D9D4CA; stroke-width: 1.2; }
+    .vq-tr-d { font-family: 'Inter', sans-serif; font-size: 6.5px; fill: #9a958c; text-anchor: middle; }
+    .vq-tr-tramo { stroke: var(--gold); stroke-width: 2.4; } .vq-tr-tramo.mal { stroke: #B3362B; stroke-dasharray: 3 2; }
+    .vq-tr-punta { fill: var(--gold); } .vq-tr-punta.mal { fill: #B3362B; }
+    .vq-tr-nodo { fill: #fff; stroke: #1B2A4A; stroke-width: 1.3; } .vq-tr-nodo.visitado { fill: #F4ECDD; } .vq-tr-nodo.mal { stroke: #B3362B; stroke-width: 1.8; }
+    .vq-tr-t { font-family: 'Space Mono', monospace; font-size: 5.5px; font-weight: 700; fill: #1B2A4A; text-anchor: middle; }
+    .vq-tr-x { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 8px; fill: #6b665e; text-anchor: middle; }
+    .vq-clasico { stroke: #1a1a1a; stroke-width: .9; }
+    .vq-hbox { fill: #1B2A4A; }
+    .vq-hletra { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 38px; fill: #fff; text-anchor: middle; }
+    .vq-celda { fill: #fff; stroke: #C9C4BB; stroke-width: 1; } .vq-celda.on { fill: var(--gold); stroke: #8C6D33; }
+    .vq-ctxt { font-family: 'Inter', sans-serif; font-size: 10px; fill: #444; } .vq-ctxt.ok { fill: #2F7A4F; } .vq-ctxt.mal { fill: #B3362B; }
+    .vq-llave { fill: none; stroke: #1a1a1a; stroke-width: 1.2; }
+    .vq-ebox { fill: #FCFBF9; stroke: #1B2A4A; stroke-width: 1.4; }
+    .vq-eletra { font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; fill: #6b665e; text-anchor: middle; }
+    .vq-enum { font-family: 'Cormorant Garamond', serif; font-size: 34px; fill: #8C6D33; text-anchor: middle; }
+    .vq-eparte { font-family: 'Inter', sans-serif; font-size: 10px; fill: #444; } .vq-eparte.num { text-anchor: end; font-weight: 600; } .vq-eparte.gris { fill: #9a958c; font-size: 8.5px; text-anchor: middle; }
+    .vq-circ { max-width: 1100px !important; }
+    @media (max-width: 1000px) { .vq-con-lado { grid-template-columns: 1fr; } .vq-mats { grid-template-columns: 1fr !important; } .vq-medida { grid-template-columns: 1fr; } }
     .vq-medida > .vq-linea { grid-column: 1 / -1; border-top: 2px solid #1B2A4A; padding-top: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-variant-numeric: tabular-nums; }
     .vq-grande { border: 1px solid #1B2A4A; padding: 14px 16px; text-align: center; background: #FCFBF9; }
     .vq-grande span { display: block; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #6b665e; }
@@ -2241,7 +2276,7 @@
   <script src="js/solucion-celdas.js?v=4"></script>
   <script src="js/solucion.js?v=21"></script>
   <script src="js/solucion-derivacion.js?v=8"></script>
-  <script src="js/solucion-ansatz.js?v=16"></script>
+  <script src="js/solucion-ansatz.js?v=17"></script>
   <script src="js/solucion-cuaderno.js?v=9"></script>
 </body>
 </html>
