@@ -59,7 +59,17 @@
   // ── matriz editable ──
   var matriz = document.getElementById('matriz');
   var celdas = {};
+  // encabezados: columnas j arriba y filas i a la izquierda
+  function cabecera(txt, clase) {
+    var h = document.createElement('div');
+    h.className = 'm-cab ' + clase;
+    h.textContent = txt;
+    matriz.appendChild(h);
+  }
+  cabecera('', 'esquina');
+  for (var c = 1; c <= N; c++) cabecera(c, 'col');
   for (var i = 1; i <= N; i++) for (var j = 1; j <= N; j++) (function (i, j) {
+    if (j === 1) cabecera(i, 'fila');
     var celda = document.createElement('div');
     celda.className = 'm-celda' + (i === j ? ' diag' : j < i ? ' espejo' : '');
     var rot = document.createElement('span');
