@@ -1390,6 +1390,33 @@
     /* el reto entra completo en la primera vista */
     .problemas-wrap .problemas-intro { margin-bottom: 22px; }
     .reto-texto { padding: 28px 38px; }
+    /* grafo interactivo y calculadora del gasto */
+    .reto-red .arista { stroke: rgba(242,238,230,.22); stroke-width: 1.4; transition: stroke .25s, stroke-width .25s; }
+    .reto-red .arista.elegida { stroke: var(--gold); stroke-width: 3.4; stroke-linecap: round; }
+    .reto-red .peso { font-family: 'Space Mono', monospace; font-size: 10px; fill: #8a8478; text-anchor: middle; transition: fill .25s; }
+    .reto-red .peso.elegido { fill: #E0C48C; font-weight: 700; font-size: 11px; }
+    .reto-red .nodo-g { cursor: pointer; outline: none; }
+    .reto-red .nodo { fill: #0f1626; stroke: rgba(242,238,230,.75); stroke-width: 1.4; transition: fill .2s, stroke .2s, r .2s; }
+    .reto-red .nodo-g:hover .nodo, .reto-red .nodo-g:focus-visible .nodo { stroke: var(--gold); stroke-width: 2.4; }
+    .reto-red .nodo.siguiente { stroke: #E0C48C; stroke-width: 2; stroke-dasharray: 3 3; }
+    .reto-red .nodo.en-ruta { fill: var(--gold); stroke: #F2EEE6; }
+    .reto-red .nodo.inicio { fill: #F2EEE6; stroke: var(--gold); stroke-width: 2.6; }
+    .calc { margin-top: 8px; border-top: 1px solid rgba(242,238,230,.14); padding-top: 12px; color: #E9E2D3; }
+    .calc-fila { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+    .calc-fila-2 { margin-top: 8px; align-items: center; }
+    .calc-rot { display: block; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: #8a8478; margin-bottom: 4px; }
+    .calc-ruta { font-family: 'Space Mono', monospace; font-size: 13px; letter-spacing: .06em; color: #F2EEE6; }
+    .calc-total-caja { text-align: right; white-space: nowrap; }
+    .calc-suma { font-family: 'Space Mono', monospace; font-size: 11px; color: #A8A39A; margin-right: 8px; }
+    .calc-total { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; line-height: 1; color: var(--gold); font-variant-numeric: lining-nums; }
+    .calc-estado { margin: 0; font-size: 12.5px; line-height: 1.5; color: #CFC9BD; min-height: 19px; }
+    .calc-estado.error { color: #F0A58C; }
+    .calc-botones { display: flex; gap: 8px; flex-shrink: 0; }
+    .calc-botones button { font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 12px; cursor: pointer; border: 1px solid var(--gold); background: transparent; color: var(--gold); transition: background .2s, color .2s; }
+    .calc-botones button:hover { background: var(--gold); color: #111; }
+    /* el grafo se ajusta al alto disponible para que todo entre en una vista */
+    .reto-red#grafo { max-height: max(250px, calc(100vh - 430px)); width: 100%; }
+    .reto-figura { padding-top: 18px; padding-bottom: 16px; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1424,24 +1451,25 @@
 
     <div class="reto entra" style="--i:3">
       <div class="reto-figura">
-        <svg class="reto-red" viewBox="0 0 480 360" role="img" aria-label="Red de puntos conectados con la ruta de menor costo resaltada">
-              <line class="arista" x1="60" y1="80" x2="175" y2="48"/><line class="arista" x1="175" y1="48" x2="295" y2="92"/><line class="arista" x1="295" y1="92" x2="420" y2="58"/><line class="arista" x1="60" y1="80" x2="112" y2="192"/><line class="arista" x1="175" y1="48" x2="232" y2="168"/><line class="arista" x1="295" y1="92" x2="232" y2="168"/><line class="arista" x1="295" y1="92" x2="360" y2="200"/><line class="arista" x1="420" y1="58" x2="360" y2="200"/><line class="arista" x1="112" y1="192" x2="232" y2="168"/><line class="arista" x1="232" y1="168" x2="360" y2="200"/><line class="arista" x1="112" y1="192" x2="70" y2="300"/><line class="arista" x1="232" y1="168" x2="205" y2="302"/><line class="arista" x1="360" y1="200" x2="330" y2="312"/><line class="arista" x1="360" y1="200" x2="438" y2="282"/><line class="arista" x1="420" y1="58" x2="438" y2="282"/><line class="arista" x1="70" y1="300" x2="205" y2="302"/><line class="arista" x1="205" y1="302" x2="330" y2="312"/><line class="arista" x1="330" y1="312" x2="438" y2="282"/><line class="arista" x1="112" y1="192" x2="205" y2="302"/><line class="arista" x1="232" y1="168" x2="330" y2="312"/>
-              <path class="ruta" d="M60 80 L112 192 L232 168 L360 200 L438 282" pathLength="1"/>
-              <text class="costo" x="94.0" y="128.0">3</text><text class="costo" x="180.0" y="172.0">2</text><text class="costo" x="304.0" y="176.0">4</text><text class="costo" x="407.0" y="233.0">1</text><circle class="nodo en-ruta" cx="60" cy="80" r="9"/><text class="etq" x="60" y="65">A</text><circle class="nodo" cx="175" cy="48" r="7"/><text class="etq" x="175" y="33">B</text><circle class="nodo" cx="295" cy="92" r="7"/><text class="etq" x="295" y="77">C</text><circle class="nodo" cx="420" cy="58" r="7"/><text class="etq" x="420" y="43">D</text><circle class="nodo en-ruta" cx="112" cy="192" r="9"/><text class="etq" x="112" y="177">E</text><circle class="nodo en-ruta" cx="232" cy="168" r="9"/><text class="etq" x="232" y="153">F</text><circle class="nodo en-ruta" cx="360" cy="200" r="9"/><text class="etq" x="360" y="185">G</text><circle class="nodo" cx="70" cy="300" r="7"/><text class="etq" x="70" y="285">H</text><circle class="nodo" cx="205" cy="302" r="7"/><text class="etq" x="205" y="287">I</text><circle class="nodo" cx="330" cy="312" r="7"/><text class="etq" x="330" y="297">J</text><circle class="nodo en-ruta" cx="438" cy="282" r="9"/><text class="etq" x="438" y="267">K</text>
-              <circle class="viajero" r="5"><animateMotion dur="5s" repeatCount="indefinite" path="M60 80 L112 192 L232 168 L360 200 L438 282" keyPoints="0;1" keyTimes="0;1" calcMode="linear"/></circle>
-            </svg>
-        <div class="reto-leyenda"><span class="ley ley-ruta"></span>ruta de menor costo · <span class="ley ley-arista"></span>conexiones posibles</div>
+        <svg class="reto-red" id="grafo" viewBox="0 0 480 360" role="group" aria-label="Grafo: toca puntos conectados para armar una ruta"></svg>
+        <div class="calc" aria-live="polite">
+          <div class="calc-fila">
+            <div class="calc-ruta-caja"><span class="calc-rot">Ruta</span><span class="calc-ruta" id="calc-ruta">—</span></div>
+            <div class="calc-total-caja"><span class="calc-rot">Gasto total</span><span class="calc-suma" id="calc-suma"></span><span class="calc-total" id="calc-total">0</span></div>
+          </div>
+          <div class="calc-fila calc-fila-2">
+            <p class="calc-estado" id="calc-estado"></p>
+            <div class="calc-botones"><button type="button" id="calc-optima">Ver ruta óptima</button><button type="button" id="calc-reiniciar">Reiniciar</button></div>
+          </div>
+        </div>
       </div>
       <div class="reto-texto">
-        <div class="reto-kicker">Reto · Track 01</div>
+        <div class="reto-kicker">Track 01</div>
         <h3 class="reto-titulo">Optimización de rutas y conexiones mediante algoritmos cuánticos</h3>
         <p class="reto-desc">Muchos problemas requieren encontrar la mejor manera de conectar puntos, distribuir recursos o seleccionar combinaciones de elementos, minimizando costos y respetando determinadas restricciones.</p>
         <p class="reto-pregunta">¿Cómo pueden los algoritmos de optimización cuántica contribuir a encontrar soluciones de buena calidad para estos problemas?</p>
         <div class="reto-sub">Qué construir</div>
         <p class="reto-desc">Un entorno que permita representar un problema de optimización, definir sus variables y costos, y explorar distintas soluciones mediante enfoques clásicos y cuánticos o híbridos. La aplicación deberá permitir visualizar y comparar los resultados obtenidos.</p>
-        <ul class="reto-pasos">
-          <li>Representar</li><li>Variables y costos</li><li>Clásico</li><li>Cuántico · híbrido</li><li>Visualizar y comparar</li>
-        </ul>
       </div>
     </div>
   </section>
@@ -1455,5 +1483,6 @@
       </div>
     </div>
   </footer>
+  <script src="js/problemas.js"></script>
 </body>
 </html>
