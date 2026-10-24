@@ -100,7 +100,7 @@
       cuerpoVQE += VQE.map(function (r) {
         return '<p class="rs-sub">' + r.capas + (r.capas === 1 ? ' capa' : ' capas') + ' · ' + r.npar + ' ángulos · 5 arranques con COBYLA (maxiter = 1500, ρ inicial = 0,5)</p>' +
           tabla(['arranque', 'E final'], r.arranques.map(function (e, i) { return [i, String(e).replace('.', ',')]; })) +
-          '<p class="dv-nota">Mejor: E = <b>' + c(r.mejor) + '</b>. Estado más probable: ' + r.top + ', con P = ' + c(r.p) + '. Probabilidad total de las dos rutas óptimas: <b>' + c(r.pOpt) + '</b>.</p>';
+          '<p class="dv-nota">Mejor: E = <b>' + c(r.mejor) + '</b>. Estado más probable: ' + r.top + ', con P ' + r.p + '. Probabilidad total de las dos rutas óptimas: <b>' + r.pOpt + '</b>.</p>';
       }).join('') + '<p class="dv-nota">' + VQE_NOTA + '</p>';
     }
     h += seccion(7, 'El VQE con el ansatz del cuaderno', cuerpoVQE);
