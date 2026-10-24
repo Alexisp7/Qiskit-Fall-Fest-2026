@@ -2077,6 +2077,26 @@
     .vq-linea span:first-child { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6b665e; margin-right: 6px; }
     .vq-err { color: #2F7A4F; }
     .vq-malla { display: inline-grid; vertical-align: middle; margin-left: 8px; }
+    .vq-medida { display: grid; grid-template-columns: 200px minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+    .vq-medida > .vq-linea { grid-column: 1 / -1; border-top: 2px solid #1B2A4A; padding-top: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .vq-grande { border: 1px solid #1B2A4A; padding: 14px 16px; text-align: center; background: #FCFBF9; }
+    .vq-grande span { display: block; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #6b665e; }
+    .vq-grande b { display: block; font-family: 'Cormorant Garamond', serif; font-size: 46px; line-height: 1.1; color: #8C6D33; font-variant-numeric: lining-nums tabular-nums; }
+    .vq-grande small { font-family: 'Inter', sans-serif; font-size: 11px; color: #8a857c; }
+    .vq-disparos ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 14px; counter-reset: d; }
+    .vq-disparos li { counter-increment: d; display: grid; grid-template-columns: 22px auto auto 1fr; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+    .vq-disparos li::before { content: counter(d); color: #9a958c; font-size: 10px; text-align: right; }
+    .vq-disparos li b { text-align: right; font-weight: 600; }
+    .vq-medida code, .vq-tlog code { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: .04em; }
+    .vq-medida .az-malla { grid-template-columns: repeat(3, 6px); gap: 1px; }
+    .vq-medida .az-malla i { width: 6px; height: 6px; }
+    .vq-otros td { color: #9a958c; font-style: italic; text-align: left; }
+    .vq-log { min-width: 0; overflow-x: auto; }
+    .vq-tlog td { text-align: left; font-size: 11px; white-space: nowrap; }
+    .vq-tlog tr.vq-mejora td { background: rgba(47,122,79,.08); }
+    .vq-vacio { color: #9a958c; font-style: italic; }
+    .vq-pto-eval { fill: #9a958c; } .vq-pto-med { fill: rgba(43,108,176,.55); }
+    @media (max-width: 1000px) { .vq-medida { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .vq-mats { grid-template-columns: 1fr; } }
     .az-cmp-pie { font-family: 'Inter', sans-serif; font-size: 11px; color: #8a857c; margin: 4px 0 8px; }
     @media (max-width: 800px) { .az-2q-juego { grid-template-columns: 1fr; } .az-2q-juego > * { grid-column: 1 !important; } }
@@ -2221,7 +2241,7 @@
   <script src="js/solucion-celdas.js?v=4"></script>
   <script src="js/solucion.js?v=21"></script>
   <script src="js/solucion-derivacion.js?v=8"></script>
-  <script src="js/solucion-ansatz.js?v=12"></script>
+  <script src="js/solucion-ansatz.js?v=16"></script>
   <script src="js/solucion-cuaderno.js?v=9"></script>
 </body>
 </html>
