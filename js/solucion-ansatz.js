@@ -71,7 +71,7 @@
       var e = H0.cte; for (var a = 0; a < n; a++) { e += H0.h[a] * z[a]; for (var b = a + 1; b < n; b++) e += H0.J[a][b] * z[a] * z[b]; }
       E[s] = e; if (e < min) min = e;
     }
-    return { N: N, T: T, n: n, dim: dim, E: E, min: min };
+    return { N: N, T: T, n: n, dim: dim, E: E, min: min, kDe: kDe };
   }
   function estado(sim, th) {   // th: 2n ángulos (primera capa y capa final)
     var psi = new Float64Array(sim.dim); psi[0] = 1;
@@ -339,6 +339,47 @@
   };
 
   // ── el VQE en matemáticas: la energía E(θ), la regla de la sinusoide y la demostración en vivo ──
+  // ── demostración en vivo del VQE: el ansatz real de 9 qubits, la energía con J y h, y el optimizador ──
+  function grados(a) { return Math.round((((a * 180 / Math.PI) % 360) + 360) % 360); }
+  function nomParam(j) { return (j < 9 ? 'θ' : 'φ') + '<sub>' + (j % 9 + 1) + '</sub>'; }
+  // el circuito del triángulo con los ángulos actuales; 'activo' = el parámetro que se está ajustando
+  function circuitoValores(th, activo) {
+    var N = 3, n = 9, dy = 30, y0 = 40;
+    var o = '<svg class="az-circ vq-circ" viewBox="0 0 900 ' + (y0 + (n - 1) * dy + 28) + '" role="img" aria-label="Ansatz de 9 qubits con sus ángulos actuales">';
+    o += '<text class="azc-col" x="170" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text><text class="azc-col" x="420" y="16">cascada de CZ</text><text class="azc-col" x="670" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text><text class="azc-col" x="790" y="16">medir</text>';
+    for (var k = 0; k < n; k++) {
+      var y = y0 + k * dy, i = k % N + 1, t = Math.floor(k / N) + 1;
+      o += '<text class="azc-q" x="6" y="' + (y + 5) + '">q<tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3"> · x</tspan><tspan class="azc-sub" dy="3">' + i + t + '</tspan></text>';
+      o += '<text class="azc-ket" x="90" y="' + (y + 5) + '">|0⟩</text><line class="azc-cable" x1="114" y1="' + y + '" x2="812" y2="' + y + '"/>';
+      [[k, 132, th[k]], [n + k, 632, th[n + k]]].forEach(function (g) {
+        o += '<rect class="azc-ry' + (g[0] === activo ? ' vq-activo' : '') + '" x="' + g[1] + '" y="' + (y - 11) + '" width="76" height="22"/><text class="azc-g vq-g" x="' + (g[1] + 38) + '" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(' + grados(g[2]) + '°)</tspan></text>';
+      });
+      o += '<rect class="azc-ry" x="776" y="' + (y - 11) + '" width="28" height="22"/><path class="azc-aguja" d="M781 ' + (y + 6) + ' A9 9 0 0 1 799 ' + (y + 6) + ' M790 ' + (y + 6) + ' L797 ' + (y - 6) + '"/>';
+    }
+    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="114" y1="' + yy + '" x2="812" y2="' + yy + '"/>'; });
+    for (var c = 0; c < n - 1; c++) {
+      var xc = 250 + c * 44, ya = y0 + c * dy, yb = ya + dy, cruza = (c + 1) % N === 0;
+      o += '<line class="azc-cz' + (cruza ? ' cruza' : '') + '" x1="' + xc + '" y1="' + ya + '" x2="' + xc + '" y2="' + yb + '"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + ya + '" r="4"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + yb + '" r="4"/>';
+    }
+    return o + '</svg>';
+  }
+  // ⟨z_a⟩ y ⟨z_a z_b⟩ en el orden de las matrices (por lugar), y la energía de las dos maneras
+  function energiaJh(sim, psi) {
+    var H0 = window.HAM_TRI, n = sim.n, ez = new Float64Array(n), ezz = [], directa = 0, z = new Array(n), mejor = 0;
+    for (var a = 0; a < n; a++) ezz.push(new Float64Array(n));
+    for (var s = 0; s < sim.dim; s++) {
+      var p = psi[s] * psi[s];
+      if (p > psi[mejor] * psi[mejor]) mejor = s;
+      if (p < 1e-15) continue;
+      for (var q = 0; q < n; q++) z[sim.kDe[q]] = ((s >> q) & 1) ? -1 : 1;
+      for (var a2 = 0; a2 < n; a2++) { ez[a2] += p * z[a2]; for (var b = a2 + 1; b < n; b++) ezz[a2][b] += p * z[a2] * z[b]; }
+      directa += p * sim.E[s];
+    }
+    var hz = 0, jzz = 0;
+    for (var a3 = 0; a3 < n; a3++) { hz += H0.h[a3] * ez[a3]; for (var b2 = a3 + 1; b2 < n; b2++) jzz += H0.J[a3][b2] * ezz[a3][b2]; }
+    return { ez: ez, ezz: ezz, hz: hz, jzz: jzz, cte: H0.cte, E: H0.cte + hz + jzz, directa: directa, mejor: mejor, pMejor: psi[mejor] * psi[mejor] };
+  }
+
   window.montarVQEMat = function (caja) {
     function pintarTexto() {
       numero = 0;
@@ -346,28 +387,77 @@
         '<p class="dv-resumen"><b>Resumen.</b> El ansatz propone un estado |ψ(θ)⟩; el VQE calcula su energía y ajusta los ángulos. Como Ĥ es diagonal, E(θ) es un promedio de las energías de las rutas, pesado por su probabilidad, y nunca baja del mínimo. Cada ángulo entra en una sola R<sub>Y</sub>, así que E es una sinusoide en ese ángulo: con tres evaluaciones se salta a su mínimo. Abajo se ve en vivo con el triángulo.</p></div>' +
         '<div class="dv-pizarra">' + SV.map(seccion).join('') + '</div>';
     }
+    var H0 = window.HAM_TRI;
+    function etq(a) { return 'z<sub>' + (Math.floor(a / 3) + 1) + (a % 3 + 1) + '</sub>'; }   // matrices por lugar: a = (i − 1)T + (t − 1)
     caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>' +
-      '<div class="az-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
+      '<div class="az-demo vq-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
       '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
+      '<label class="vq-vel">velocidad <select data-az="vel"><option value="160">lenta</option><option value="45" selected>normal</option><option value="0">rápida</option></select></label>' +
       '<span class="az-estado" data-az="estado"></span></div>' +
+      '<div class="vq-paso"><span>1</span>El ansatz real: 9 qubits con sus ángulos de ahora</div>' +
+      '<div data-az="circ"></div>' +
+      '<p class="dv-nota">Cada qubit q<sub>k</sub> es una variable x<sub>i,t</sub> (orden por tiempo). En dorado, el ángulo que el optimizador está ajustando.</p>' +
+      '<div class="vq-paso"><span>2</span>La energía con las matrices J y h, en vivo</div>' +
+      '<div class="vq-formula" data-az="formula"></div>' +
+      '<div class="vq-mats"><div class="vq-bloque"><div class="vq-rot">h<sub>k</sub> · ⟨z<sub>k</sub>⟩</div><table class="vq-tabla" data-az="h"></table></div>' +
+      '<div class="vq-bloque"><div class="vq-rot">J<sub>kl</sub> &nbsp;(color: ⟨z<sub>k</sub>z<sub>l</sub>⟩ en vivo)</div><table class="vq-tabla vq-j" data-az="J"></table>' +
+      '<div class="vq-ley"><i class="vq-ley-o"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 <i class="vq-ley-a"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = −1 · solo cuenta k &lt; l</div></div></div>' +
+      '<div class="vq-suma" data-az="suma"></div>' +
+      '<div class="vq-paso"><span>3</span>El optimizador</div>' +
       '<div class="az-cuerpo"><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada barrido"></svg><div class="az-top" data-az="top"></div></div>' +
-      '<p class="dv-nota">La energía se calcula con el estado exacto del circuito del ansatz: E(θ) = Σ<sub>b</sub> |ψ(b)|² H(b). Cada barrido ajusta los 18 ángulos uno por uno con la regla de la sinusoide. Desde distintos θ al azar puede quedar en un mínimo local: vuelve a sortear y a optimizar.</p></div>';
-    (function listo() { if (window.katex) caja.querySelector('.az-texto').innerHTML = pintarTexto(); else setTimeout(listo, 300); })();
+      '<p class="dv-nota">Cada barrido recorre los 18 ángulos: para cada uno se evalúa la energía en θ y θ ± π/2 y se salta al mínimo de su sinusoide. Desde distintos θ al azar puede quedar en un mínimo local (otra ruta válida): vuelve a sortear y a optimizar.</p></div>';
+    function $(k) { return caja.querySelector('[data-az="' + k + '"]'); }
+    (function listo() {
+      if (!window.katex) { setTimeout(listo, 300); return; }
+      caja.querySelector('.az-texto').innerHTML = pintarTexto();
+      $('formula').innerHTML = tex(String.raw`E(\boldsymbol\theta) = c + \sum_{k} h_k\,\langle z_k\rangle_{\boldsymbol\theta} + \sum_{k<l} J_{kl}\,\langle z_k z_l\rangle_{\boldsymbol\theta}, \qquad \langle z_k\rangle_{\boldsymbol\theta} = \sum_b P_{\boldsymbol\theta}(b)\, z_k(b), \quad \langle z_k z_l\rangle_{\boldsymbol\theta} = \sum_b P_{\boldsymbol\theta}(b)\, z_k(b)\, z_l(b)`, true);
+    })();
     var sim = prepararSim();
-    var th = [], hist = [], tim = 0, corriendo = false;
-    function sortear() { th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); hist = [energia(sim, th)]; }
-    function construido() { th = []; var b = [1, 0, 0, 0, 1, 0, 0, 0, 1]; for (var j = 0; j < 9; j++) th.push(0); for (var q = 0; q < 9; q++) th.push(Math.PI * b[q]); hist = [energia(sim, th)]; }
-    function barrido() {
-      for (var j = 0; j < 18; j++) {
-        var e0 = energia(sim, th), t0 = th[j];
-        th[j] = t0 + Math.PI / 2; var ep = energia(sim, th);
-        th[j] = t0 - Math.PI / 2; var em = energia(sim, th);
-        th[j] = t0 - Math.PI / 2 - Math.atan2(2 * e0 - ep - em, ep - em);
+    if (!sim || !H0) return;
+    var th = [], hist = [], tim = 0, corriendo = false, activo = -1, jSig = 0, barridos = 0;
+    function sortear() { th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); hist = [energia(sim, th)]; activo = -1; jSig = 0; barridos = 0; }
+    function construido() { th = []; var b = [1, 0, 0, 0, 1, 0, 0, 0, 1]; for (var j = 0; j < 9; j++) th.push(0); for (var q = 0; q < 9; q++) th.push(Math.PI * b[q]); hist = [energia(sim, th)]; activo = -1; jSig = 0; barridos = 0; }
+    // ajusta un solo ángulo con la regla de la sinusoide; devuelve [antes, después] en grados y en energía
+    function ajustar(j) {
+      var e0 = energia(sim, th), t0 = th[j];
+      th[j] = t0 + Math.PI / 2; var ep = energia(sim, th);
+      th[j] = t0 - Math.PI / 2; var em = energia(sim, th);
+      th[j] = t0 - Math.PI / 2 - Math.atan2(2 * e0 - ep - em, ep - em);
+      return [grados(t0), grados(th[j]), e0, energia(sim, th)];
+    }
+    function f2(v) { return n2(v); }
+    function color(v) { return v >= 0 ? 'rgba(200,169,110,' + (v * .85).toFixed(3) + ')' : 'rgba(43,108,176,' + (-v * .7).toFixed(3) + ')'; }
+    function pintarEnergia(psi) {
+      var r = energiaJh(sim, psi), n = sim.n, h = '<tr><th></th><th>h<sub>k</sub></th><th>⟨z<sub>k</sub>⟩</th><th>h<sub>k</sub>⟨z<sub>k</sub>⟩</th></tr>';
+      for (var a = 0; a < n; a++) h += '<tr><th>' + etq(a) + '</th><td>' + f2(H0.h[a]) + '</td><td style="background:' + color(r.ez[a]) + '">' + f2(r.ez[a]) + '</td><td>' + f2(H0.h[a] * r.ez[a]) + '</td></tr>';
+      $('h').innerHTML = h;
+      var J = '<tr><th></th>' + Array.from({ length: n }, function (_, b) { return '<th>' + etq(b) + '</th>'; }).join('') + '</tr>';
+      for (var a2 = 0; a2 < n; a2++) {
+        J += '<tr><th>' + etq(a2) + '</th>';
+        for (var b = 0; b < n; b++) {
+          var v = H0.J[a2][b];
+          if (b <= a2) J += '<td class="vq-bajo">' + (b === a2 ? '' : f2(v)) + '</td>';
+          else J += '<td style="background:' + color(r.ezz[a2][b]) + '" title="⟨' + etq(a2).replace(/<[^>]+>/g, '') + ' ' + etq(b).replace(/<[^>]+>/g, '') + '⟩ = ' + f2(r.ezz[a2][b]) + ' · aporte J·⟨zz⟩ = ' + f2(v * r.ezz[a2][b]) + '">' + (v ? f2(v) : '·') + '</td>';
+        }
+        J += '</tr>';
       }
-      hist.push(energia(sim, th));
+      $('J').innerHTML = J;
+      // el estado más probable, con la multiplicación explícita
+      var zb = [], x = rutaDe(sim, r.mejor), Hb = H0.cte, hzb = 0, jzb = 0;
+      for (var q = 0; q < n; q++) zb[sim.kDe[q]] = ((r.mejor >> q) & 1) ? -1 : 1;
+      for (var a3 = 0; a3 < n; a3++) { hzb += H0.h[a3] * zb[a3]; for (var b3 = a3 + 1; b3 < n; b3++) jzb += H0.J[a3][b3] * zb[a3] * zb[b3]; }
+      Hb += hzb + jzb;
+      var err = Math.abs(r.E - r.directa);
+      $('suma').innerHTML =
+        '<div class="vq-linea"><span>Con J y h:</span> E(θ) = c + Σ h<sub>k</sub>⟨z<sub>k</sub>⟩ + Σ<sub>k&lt;l</sub> J<sub>kl</sub>⟨z<sub>k</sub>z<sub>l</sub>⟩ = ' + f2(r.cte) + ' ' + (r.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.hz)) + ' ' + (r.jzz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.jzz)) + ' = <b>' + f2(r.E) + '</b></div>' +
+        '<div class="vq-linea"><span>Comprobación:</span> Σ<sub>b</sub> P(b) H(b) sobre los 512 estados = <b>' + f2(r.directa) + '</b> &nbsp;·&nbsp; error |diferencia| = <b class="vq-err">' + (err < 1e-9 ? err.toExponential(1).replace('.', ',') : f2(err)) + '</b></div>' +
+        '<div class="vq-linea"><span>Estado más probable</span> (' + (r.pMejor * 100).toFixed(1).replace('.', ',') + ' %): z = (' + zb.map(function (v) { return v > 0 ? '+1' : '−1'; }).join(', ') + ') → c + hᵀz + Σ<sub>k&lt;l</sub> J<sub>kl</sub>z<sub>k</sub>z<sub>l</sub> = ' + f2(H0.cte) + ' ' + (hzb < 0 ? '−' : '+') + ' ' + f2(Math.abs(hzb)) + ' ' + (jzb < 0 ? '−' : '+') + ' ' + f2(Math.abs(jzb)) + ' = <b>' + f2(Hb) + '</b> ' +
+        '<span class="az-malla vq-malla">' + x.map(function (f) { return f.map(function (v) { return '<i class="' + (v ? 'on' : '') + '"></i>'; }).join(''); }).join('') + '</span></div>';
     }
     function pintar() {
-      if (!sim) return;
+      $('circ').innerHTML = circuitoValores(th, activo);
+      var psi = estado(sim, th);
+      pintarEnergia(psi);
       var svg = caja.querySelector('.az-curva'), NS = 'http://www.w3.org/2000/svg';
       while (svg.firstChild) svg.removeChild(svg.firstChild);
       function e(tag, at) { var nn = document.createElementNS(NS, tag); for (var k in at) nn.setAttribute(k, at[k]); svg.appendChild(nn); return nn; }
@@ -379,30 +469,38 @@
       e('text', { x: 36, y: 16, 'class': 'az-txt', 'text-anchor': 'start' }).textContent = 'E(θ)';
       if (hist.length > 1) e('path', { d: hist.map(function (v, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); }).join(' '), 'class': 'az-linea' });
       hist.forEach(function (v, i) { e('circle', { cx: X(i), cy: Y(v), r: 3, 'class': 'az-pto' }); });
-      // los estados más probables
-      var psi = estado(sim, th), orden = [];
+      var orden = [];
       for (var s = 0; s < sim.dim; s++) orden.push(s);
       orden.sort(function (a, b) { return psi[b] * psi[b] - psi[a] * psi[a]; });
-      caja.querySelector('[data-az="top"]').innerHTML = orden.slice(0, 6).map(function (s) {
+      $('top').innerHTML = orden.slice(0, 6).map(function (s) {
         var p = psi[s] * psi[s], x = rutaDe(sim, s);
         var malla = '<span class="az-malla">' + x.map(function (f) { return f.map(function (v) { return '<i class="' + (v ? 'on' : '') + '"></i>'; }).join(''); }).join('') + '</span>';
         return '<div class="az-fila">' + malla + '<span class="az-barra"><span style="width:' + (p * 100).toFixed(1) + '%"></span></span><span class="az-p">' + (p * 100).toFixed(1) + '%</span><span class="az-h">H = ' + n2(sim.E[s]) + '</span></div>';
-      }).join('') + '<p class="az-ley">Cada cuadrito es la matriz x: filas = lugares, columnas = tiempos.</p>';
-      caja.querySelector('[data-az="estado"]').textContent = 'barrido ' + (hist.length - 1) + ' · E(θ) = ' + n2(hist[hist.length - 1]);
+      }).join('') + '<p class="az-ley">Los 6 estados más probables. Cada cuadrito es la matriz x: filas = lugares, columnas = tiempos.</p>';
     }
+    function estadoTxt(cambio) {
+      $('estado').innerHTML = 'barrido ' + barridos + (cambio ? ' · ' + nomParam(activo) + ': ' + cambio[0] + '° → ' + cambio[1] + '° · E: ' + n2(cambio[2]) + ' → ' + n2(cambio[3]) : ' · E(θ) = ' + n2(hist[hist.length - 1]));
+    }
+    function parar() { clearTimeout(tim); corriendo = false; }
     function correr() {
       if (corriendo) return; corriendo = true;
-      var k = 0;
+      var inicio = barridos;
       (function paso() {
-        barrido(); pintar(); k++;
-        var listo = hist.length > 2 && Math.abs(hist[hist.length - 1] - hist[hist.length - 2]) < 1e-6;
-        if (k < 25 && !listo) tim = setTimeout(paso, quieto ? 0 : 260); else corriendo = false;
+        var vel = +$('vel').value;
+        // en "rápida" se hace un barrido entero por cuadro
+        do {
+          activo = jSig; var cambio = ajustar(jSig); jSig++;
+          if (jSig === 18) { jSig = 0; barridos++; hist.push(energia(sim, th)); }
+        } while (vel === 0 && jSig !== 0);
+        pintar(); estadoTxt(cambio);
+        var n = hist.length, listo = jSig === 0 && n > 2 && Math.abs(hist[n - 1] - hist[n - 2]) < 1e-6;
+        if (!listo && barridos - inicio < 25) tim = setTimeout(paso, quieto ? 0 : Math.max(vel, 16));
+        else { corriendo = false; activo = -1; pintar(); estadoTxt(); }
       })();
     }
-    if (!sim) return;
-    caja.querySelector('[data-az="azar"]').addEventListener('click', function () { clearTimeout(tim); corriendo = false; sortear(); pintar(); });
-    caja.querySelector('[data-az="opt"]').addEventListener('click', correr);
-    caja.querySelector('[data-az="construido"]').addEventListener('click', function () { clearTimeout(tim); corriendo = false; construido(); pintar(); });
-    sortear(); pintar();
+    $('azar').addEventListener('click', function () { parar(); sortear(); pintar(); estadoTxt(); });
+    $('opt').addEventListener('click', correr);
+    $('construido').addEventListener('click', function () { parar(); construido(); pintar(); estadoTxt(); });
+    sortear(); pintar(); estadoTxt();
   };
 })();

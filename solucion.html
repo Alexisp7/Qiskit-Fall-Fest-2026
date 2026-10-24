@@ -2044,6 +2044,32 @@
     .az-cmp td { border-bottom: 1px solid #EFECE6; padding: 8px 10px 8px 0; vertical-align: top; font-variant-numeric: tabular-nums; }
     .az-cmp tr.az-cmp-yo td { background: rgba(200,169,110,.14); }
     .az-cmp tr.az-cmp-yo td:first-child { font-weight: 700; box-shadow: inset 3px 0 0 var(--gold); padding-left: 8px; }
+    /* demostración del VQE: circuito con ángulos, energía con J y h */
+    .vq-demo { max-width: 1100px; }
+    .vq-vel { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .08em; color: #6b665e; display: inline-flex; align-items: center; gap: 6px; }
+    .vq-vel select { font-family: inherit; font-size: 11px; border: 1px solid #1B2A4A; background: #fff; padding: 4px 6px; }
+    .vq-paso { display: flex; align-items: center; gap: 8px; margin: 18px 0 4px; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: #1a1a1a; }
+    .vq-paso span { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #1B2A4A; color: #fff; font-family: 'Space Mono', monospace; font-size: 11px; }
+    .vq-circ { max-width: 900px; }
+    .vq-circ text { font-variant-numeric: lining-nums; }
+    .vq-g { font-size: 13px; font-style: normal; }
+    .azc-ry.vq-activo { fill: rgba(200,169,110,.55); stroke: #8C6D33; stroke-width: 2; }
+    .vq-formula .katex-display { margin: .3em 0; overflow-x: auto; overflow-y: hidden; }
+    .vq-mats { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 22px; align-items: start; margin-top: 6px; }
+    .vq-bloque { min-width: 0; overflow-x: auto; }
+    .vq-rot { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: #6b665e; margin-bottom: 4px; }
+    .vq-tabla { border-collapse: collapse; font-family: 'Inter', sans-serif; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+    .vq-tabla th { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-weight: 600; color: #6b665e; padding: 2px 6px; text-align: center; font-variant-numeric: lining-nums; }
+    .vq-tabla td { border: 1px solid #EFECE6; padding: 3px 6px; text-align: right; min-width: 34px; transition: background .2s; }
+    .vq-tabla td.vq-bajo { color: #C9C4BB; background: #FAF9F6; }
+    .vq-ley { font-family: 'Inter', sans-serif; font-size: 11px; color: #8a857c; margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .vq-ley i { display: inline-block; width: 12px; height: 12px; border: 1px solid #E5E2DC; }
+    .vq-ley-o { background: rgba(200,169,110,.85); } .vq-ley-a { background: rgba(43,108,176,.7); }
+    .vq-suma { margin-top: 12px; border-top: 2px solid #1B2A4A; padding-top: 8px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.75; color: #1a1a1a; font-variant-numeric: tabular-nums; }
+    .vq-linea span:first-child { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6b665e; margin-right: 6px; }
+    .vq-err { color: #2F7A4F; }
+    .vq-malla { display: inline-grid; vertical-align: middle; margin-left: 8px; }
+    @media (max-width: 900px) { .vq-mats { grid-template-columns: 1fr; } }
     .az-cmp-pie { font-family: 'Inter', sans-serif; font-size: 11px; color: #8a857c; margin: 4px 0 8px; }
     @media (max-width: 800px) { .az-2q-juego { grid-template-columns: 1fr; } .az-2q-juego > * { grid-column: 1 !important; } }
 </style>
@@ -2184,7 +2210,7 @@
   <script src="js/solucion-celdas.js?v=4"></script>
   <script src="js/solucion.js?v=21"></script>
   <script src="js/solucion-derivacion.js?v=8"></script>
-  <script src="js/solucion-ansatz.js?v=10"></script>
+  <script src="js/solucion-ansatz.js?v=12"></script>
   <script src="js/solucion-cuaderno.js?v=9"></script>
 </body>
 </html>
