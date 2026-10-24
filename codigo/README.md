@@ -21,13 +21,14 @@ o, sin Jupyter:
 python rutas_qubo_vqe.py
 ```
 
-## Las cinco partes
+## Las seis partes
 
 1. **Inicializar.** La red minera de Orcopampa (8 lugares, 9 caminos, T = 13) se escribe como un QUBO armado por piezas: distancia, un lugar por tiempo, visitar al menos una vez (con variables de holgura), saltos prohibidos, partir y terminar en la planta. Luego pasa a un Hamiltoniano de Ising con x = (1 − z)/2.
 2. **Ansatz.** Una capa de R<sub>Y</sub>(θ), una cascada de CZ entre vecinos y una capa final de R<sub>Y</sub>.
 3. **Solver.** `resolver_vqe` minimiza ⟨ψ(θ)|H|ψ(θ)⟩ con COBYLA desde varios arranques al azar.
 4. **Validación.** Método exacto (para n pequeño), lectura de la ruta, desglose por pieza y dibujo.
 5. **Correr.** La referencia clásica, el exacto y el VQE.
+6. **Resultado: los 8 lugares.** Las hojas pasan a un costo fijo (1,614 km) y el núcleo 1, 2, 5, 8 se completa con las distancias mínimas: 16 qubits. El exacto revisa los 65 536 estados (E = 5,7), se comprueba H(z) = Q(x) con fórmulas cerradas, el VQE con el mismo ansatz llega a 5,7 y la ruta se expande a 13 pasos: **7,314 km**. El VQE de esta parte tarda unos minutos.
 
 ## Dos casos
 

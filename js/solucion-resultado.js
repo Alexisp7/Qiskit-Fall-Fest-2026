@@ -37,7 +37,11 @@
   }
 
   // resultados del VQE (celda D, corrida con capas = 1 y capas = 2, 5 arranques, maxiter = 1500, rhobeg = 0,5)
-  var VQE = window.RESULTADO_VQE || null;
+  var VQE = [
+    { capas: 1, npar: 32, arranques: [14.0006, 5.7, 23.4938, 17.4003, 5.7026], mejor: 5.7, top: '1 → 5 → 8 → 2', p: '≈ 1,000', pOpt: '≈ 1,000' },
+    { capas: 2, npar: 48, arranques: [5.7007, 5.7036, 7.2058, 17.0027, 17.4005], mejor: 5.7007, top: '1 → 2 → 8 → 5', p: '≈ 1,000', pOpt: '≈ 1,000' }
+  ];
+  var VQE_NOTA = 'Con una capa, 2 de 5 arranques llegan a 5,7; con dos capas, también 2 de 5 (otro queda en 7,2, un ciclo válido más largo, y los demás en configuraciones que rompen reglas). El mejor arranque de cada caso deja prácticamente toda la probabilidad en una de las dos rutas óptimas, la misma que da el exacto: el VQE resuelve el núcleo. Como siempre con COBYLA, el resultado depende del arranque, por eso se usan varios.';
 
   function texto() {
     numero = 0;
@@ -95,9 +99,9 @@
     if (VQE) {
       cuerpoVQE += VQE.map(function (r) {
         return '<p class="rs-sub">' + r.capas + (r.capas === 1 ? ' capa' : ' capas') + ' · ' + r.npar + ' ángulos · 5 arranques con COBYLA (maxiter = 1500, ρ inicial = 0,5)</p>' +
-          tabla(['arranque', 'E final'], r.arranques.map(function (e, i) { return [i, c(e)]; })) +
+          tabla(['arranque', 'E final'], r.arranques.map(function (e, i) { return [i, String(e).replace('.', ',')]; })) +
           '<p class="dv-nota">Mejor: E = <b>' + c(r.mejor) + '</b>. Estado más probable: ' + r.top + ', con P = ' + c(r.p) + '. Probabilidad total de las dos rutas óptimas: <b>' + c(r.pOpt) + '</b>.</p>';
-      }).join('') + '<p class="dv-nota">' + window.RESULTADO_VQE_NOTA + '</p>';
+      }).join('') + '<p class="dv-nota">' + VQE_NOTA + '</p>';
     }
     h += seccion(7, 'El VQE con el ansatz del cuaderno', cuerpoVQE);
     // 8 · la ruta
