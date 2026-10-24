@@ -343,8 +343,8 @@
   function grados(a) { return Math.round((((a * 180 / Math.PI) % 360) + 360) % 360); }
   function nomParam(j) { return (j < 9 ? 'θ' : 'φ') + '<sub>' + (j % 9 + 1) + '</sub>'; }
   // el circuito del triángulo con los ángulos actuales; 'activo' = el parámetro que se está ajustando
-  function circuitoValores(th, activos, res) {   // activos: los parámetros que se acaban de mover; res: lo medido
-    var N = 3, n = 9, dy = 30, y0 = 40, W = res ? 1210 : 900;
+  function circuitoValores(th, activos) {   // activos: los parámetros que se acaban de mover
+    var N = 3, n = 9, dy = 30, y0 = 40, W = 900;
     var o = '<svg class="az-circ vq-circ" viewBox="0 0 ' + W + ' ' + (y0 + (n - 1) * dy + 28) + '" role="img" aria-label="Ansatz de 9 qubits con sus ángulos actuales, la medida, el Hamiltoniano y la energía">';
     o += '<text class="azc-col" x="170" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text><text class="azc-col" x="420" y="16">cascada de CZ</text><text class="azc-col" x="670" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text><text class="azc-col" x="790" y="16">medir</text>';
     for (var k = 0; k < n; k++) {
@@ -361,27 +361,9 @@
       var xc = 250 + c * 44, ya = y0 + c * dy, yb = ya + dy, cruza = (c + 1) % N === 0;
       o += '<line class="azc-cz' + (cruza ? ' cruza' : '') + '" x1="' + xc + '" y1="' + ya + '" x2="' + xc + '" y2="' + yb + '"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + ya + '" r="4"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + yb + '" r="4"/>';
     }
-    if (res) {
-      var yt = y0 - 14, yf = y0 + (n - 1) * dy + 14, ym = (yt + yf) / 2;
-      o += '<text class="azc-col" x="878" y="16">aplicar H</text><text class="azc-col" x="985" y="16">lo que salió</text><text class="azc-col" x="1135" y="16">energía</text>';
-      for (var k2 = 0; k2 < n; k2++) { var y2 = y0 + k2 * dy; o += '<line class="vq-clasico" x1="804" y1="' + (y2 - 1.5) + '" x2="850" y2="' + (y2 - 1.5) + '"/><line class="vq-clasico" x1="804" y1="' + (y2 + 1.5) + '" x2="850" y2="' + (y2 + 1.5) + '"/>'; }
-      o += '<rect class="vq-hbox" x="850" y="' + yt + '" width="56" height="' + (yf - yt) + '"/><text class="vq-hletra" x="878" y="' + (ym + 12) + '">H</text>';
-      res.top.slice(0, 4).forEach(function (cf, q) {
-        var yc = yt + 6 + q * 66, x0 = 934;
-        o += '<line class="vq-clasico" x1="906" y1="' + (yc + 14) + '" x2="' + (x0 - 4) + '" y2="' + (yc + 14) + '"/>';
-        for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) o += '<rect class="vq-celda' + (cf.x[a][b] ? ' on' : '') + '" x="' + (x0 + b * 10) + '" y="' + (yc + a * 10) + '" width="9" height="9"/>';
-        o += '<text class="vq-ctxt" x="' + (x0 + 38) + '" y="' + (yc + 11) + '">×' + cf.veces + '</text><text class="vq-ctxt" x="' + (x0 + 38) + '" y="' + (yc + 25) + '">H = ' + n2(cf.H) + '</text>';
-        o += '<text class="vq-ctxt ' + (cf.ok ? 'ok' : 'mal') + '" x="' + x0 + '" y="' + (yc + 44) + '">' + (cf.ok ? '✓ ruta válida' : '✗ rompe una regla') + '</text>';
-      });
-      o += '<path class="vq-llave" d="M1046 ' + yt + ' q10 0 10 12 V' + (ym - 8) + ' q0 8 8 8 q-8 0 -8 8 V' + (yf - 12) + ' q0 12 -10 12"/>';
-      var ye = ym - 70;
-      o += '<rect class="vq-ebox" x="1072" y="' + ye + '" width="132" height="140"/>';
-      o += '<text class="vq-eletra" x="1138" y="' + (ye + 18) + '">E medida</text><text class="vq-enum" x="1138" y="' + (ye + 52) + '">' + n2(res.E) + '</text>';
-      [['distancia', res.dist], ['+ A · tiempo', res.at], ['+ A · lugar', res.al]].forEach(function (pt, q) {
-        o += '<text class="vq-eparte" x="1080" y="' + (ye + 76 + q * 16) + '">' + pt[0] + '</text><text class="vq-eparte num" x="1196" y="' + (ye + 76 + q * 16) + '">' + n2(pt[1]) + '</text>';
-      });
-      o += '<text class="vq-eparte gris" x="1138" y="' + (ye + 130) + '">promedio de ' + res.n + ' disparos</text>';
-    }
+    // tras medir salen los 9 bits b (cables dobles: información clásica)
+    for (var k2 = 0; k2 < n; k2++) { var y2 = y0 + k2 * dy; o += '<line class="vq-clasico" x1="804" y1="' + (y2 - 1.5) + '" x2="846" y2="' + (y2 - 1.5) + '"/><line class="vq-clasico" x1="804" y1="' + (y2 + 1.5) + '" x2="846" y2="' + (y2 + 1.5) + '"/><text class="vq-bit-q" x="852" y="' + (y2 + 4) + '">b<tspan class="azc-sub" dy="3">' + (k2 + 1) + '</tspan></text>'; }
+    o += '<text class="azc-col" x="862" y="16">bits</text>';
     return o + '</svg>';
   }
   // la trayectoria de una configuración x (filas = lugares, columnas = tiempos) sobre el triángulo
@@ -413,23 +395,6 @@
     }
     return o + '</svg>';
   }
-  // ⟨z_a⟩ y ⟨z_a z_b⟩ en el orden de las matrices (por lugar), y la energía de las dos maneras
-  function energiaJh(sim, psi) {
-    var H0 = window.HAM_TRI, n = sim.n, ez = new Float64Array(n), ezz = [], directa = 0, z = new Array(n), mejor = 0;
-    for (var a = 0; a < n; a++) ezz.push(new Float64Array(n));
-    for (var s = 0; s < sim.dim; s++) {
-      var p = psi[s] * psi[s];
-      if (p > psi[mejor] * psi[mejor]) mejor = s;
-      if (p < 1e-15) continue;
-      for (var q = 0; q < n; q++) z[sim.kDe[q]] = ((s >> q) & 1) ? -1 : 1;
-      for (var a2 = 0; a2 < n; a2++) { ez[a2] += p * z[a2]; for (var b = a2 + 1; b < n; b++) ezz[a2][b] += p * z[a2] * z[b]; }
-      directa += p * sim.E[s];
-    }
-    var hz = 0, jzz = 0;
-    for (var a3 = 0; a3 < n; a3++) { hz += H0.h[a3] * ez[a3]; for (var b2 = a3 + 1; b2 < n; b2++) jzz += H0.J[a3][b2] * ezz[a3][b2]; }
-    return { ez: ez, ezz: ezz, hz: hz, jzz: jzz, cte: H0.cte, E: H0.cte + hz + jzz, directa: directa, mejor: mejor, pMejor: psi[mejor] * psi[mejor] };
-  }
-
   // ── COBYLA (Powell, 1994) sin restricciones: un símplex de n + 1 puntos, un modelo lineal de f
   // ajustado en él, un paso dentro de la región de confianza de radio ρ, pasos de geometría cuando el
   // símplex se deforma y ρ a la mitad cuando un paso no rinde. Cada llamada a paso() hace una evaluación.
@@ -485,7 +450,8 @@
           var xg = xb.map(function (v, k) { return v + (sg > 0 ? -1 : 1) * rho * c[k] / cn; });
           var fg = f(xg); nf++;
           P[malo + 1] = xg; F[malo + 1] = fg;
-          return { tipo: 'geometria', x: xg, f: fg, f0: fb, rho: rho, d: xg.map(function (v, k) { return v - xb[k]; }) };
+          var etaM = norma(D[malo]), sigM = 1 / norma(C[malo]);
+          return { tipo: 'geometria', x: xg, f: fg, f0: fb, rho: rho, g: g.slice(), gn: gn, eta: etaM, sig: sigM, lejos: etaM > 2.1 * rho, d: xg.map(function (v, k) { return v - xb[k]; }) };
         }
         if (gn < 1e-12) { rho *= 0.5; return { tipo: 'reduce', rho: rho, f: fb, x: xb }; }
         // paso de prueba: minimiza el modelo lineal dentro de |d| ≤ ρ
@@ -498,24 +464,10 @@
         P[jr + 1] = xt; F[jr + 1] = ft;
         var rhoAntes = rho, fallo = ratio < 0.1;   // el paso no rindió lo que predijo el modelo: ρ a la mitad
         if (fallo) rho = Math.max(rho * 0.5, rhoend * 0.999);
-        return { tipo: 'paso', x: xt, f: ft, f0: fb, d: d, rho: rhoAntes, rhoNuevo: rho, pred: pred, ratio: ratio, mejora: ft < fb, fallo: fallo };
+        return { tipo: 'paso', x: xt, f: ft, f0: fb, d: d, rho: rhoAntes, rhoNuevo: rho, g: g.slice(), gn: gn, pred: pred, ratio: ratio, mejora: ft < fb, fallo: fallo };
       }
     };
   }
-  // medir: n disparos del estado; devuelve los conteos y los primeros disparos en orden
-  function medirDisparos(psi, n) {
-    var dim = psi.length, cdf = new Float64Array(dim), acc = 0;
-    for (var s = 0; s < dim; s++) { acc += psi[s] * psi[s]; cdf[s] = acc; }
-    var cuenta = {}, primeros = [];
-    for (var k = 0; k < n; k++) {
-      var r = Math.random() * acc, lo = 0, hi = dim - 1;
-      while (lo < hi) { var mid = (lo + hi) >> 1; if (cdf[mid] < r) lo = mid + 1; else hi = mid; }
-      cuenta[lo] = (cuenta[lo] || 0) + 1;
-      if (primeros.length < 16) primeros.push(lo);
-    }
-    return { cuenta: cuenta, primeros: primeros, n: n };
-  }
-
   window.montarVQEMat = function (caja) {
     function pintarTexto() {
       numero = 0;
@@ -524,103 +476,120 @@
         '<div class="dv-pizarra">' + SV.map(seccion).join('') + '</div>';
     }
     var H0 = window.HAM_TRI, DISPAROS = 1024, MAXFUN = 300;
-    function etq(a) { return 'z<sub>' + (Math.floor(a / 3) + 1) + (a % 3 + 1) + '</sub>'; }   // matrices por lugar: a = (i − 1)T + (t − 1)
     caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>' +
       '<div class="az-demo vq-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
-      '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn" data-az="medir">volver a medir</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar con COBYLA</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
-      '<label class="vq-vel">velocidad <select data-az="vel"><option value="200">lenta</option><option value="50" selected>normal</option><option value="0">rápida</option></select></label>' +
-      '<span class="az-estado" data-az="estado"></span></div>' +
-      '<div class="vq-paso"><span>1</span>El ansatz real: 9 qubits con sus ángulos de ahora</div>' +
-      '<div data-az="circ"></div>' +
-      '<p class="dv-nota">Cada qubit q<sub>k</sub> es una variable x<sub>i,t</sub> (orden por tiempo). En dorado, los ángulos que acaba de mover el optimizador. Tras medir, cada disparo da 9 bits; H les asigna su energía y el promedio de los ' + DISPAROS + ' disparos es la E medida, separada en sus partes.</p>' +
-      '<div class="vq-paso"><span>2</span>Ejecutar y medir: ' + DISPAROS + ' disparos</div>' +
-      '<div class="vq-con-lado"><div class="vq-medida" data-az="medida"></div><aside class="vq-explica">' +
-        '<div class="vq-explica-tit">Cómo leer lo que salió</div>' +
-        '<p><b>Los cuadritos de 3 × 3</b> son una configuración x: filas = lugares x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>; columnas = tiempos t<sub>1</sub>, t<sub>2</sub>, t<sub>3</sub>. Un cuadro dorado es x<sub>i,t</sub> = 1 (el camión está en el lugar i en el tiempo t); uno vacío es 0. Una ruta válida tiene exactamente un dorado en cada fila y en cada columna.</p>' +
-        '<p><b>¿Por qué tantas, si son 3 nodos?</b> Cada uno de los 9 qubits sale 0 o 1, así que hay 2<sup>9</sup> = 512 configuraciones. Solo 3! = 6 son rutas: un lugar en cada tiempo y cada lugar una vez. Las otras 506 rompen alguna regla. El circuito reparte probabilidad entre las 512 y cada disparo saca una al azar.</p>' +
-        '<p><b>H por partes.</b> H(b) = distancia + A·(regla de tiempo) + A·(regla de lugar), con A = 100: cada regla rota suma 100. Es la misma cuenta que c + hᵀz + ΣJ<sub>kl</sub>z<sub>k</sub>z<sub>l</sub> (comprobado en los 512 estados).</p>' +
-        '<p><b>Minimizar E</b> es mover la probabilidad hacia las configuraciones de H bajo: primero las 6 válidas, sin castigo, y entre ellas la de menor distancia, 1 → 2 → 3 o 3 → 2 → 1 (5 + 7 = 12).</p></aside></div>' +
-      '<div class="vq-paso"><span>3</span>La misma energía con las matrices J y h (valor exacto)</div>' +
-      '<div class="vq-formula" data-az="formula"></div>' +
-      '<div class="vq-mats"><div class="vq-bloque"><div class="vq-rot">h<sub>k</sub> · ⟨z<sub>k</sub>⟩</div><table class="vq-tabla" data-az="h"></table></div>' +
-      '<div class="vq-bloque"><div class="vq-rot">J<sub>kl</sub> &nbsp;(color: ⟨z<sub>k</sub>z<sub>l</sub>⟩ en vivo)</div><table class="vq-tabla vq-j" data-az="J"></table>' +
-      '<div class="vq-ley"><i class="vq-ley-o"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = +1 <i class="vq-ley-a"></i>⟨z<sub>k</sub>z<sub>l</sub>⟩ = −1 · solo cuenta k &lt; l</div></div>' +
-      '<aside class="vq-explica"><div class="vq-explica-tit">Qué significan los colores</div>' +
-        '<p><b>Cada casilla</b> es un par de variables (k, l) con su J<sub>kl</sub>: 50 si están en el mismo tiempo o en el mismo lugar (la regla no deja que las dos valgan 1) y d/4 (1,25 · 1,75 · 2,25) si son tiempos seguidos en lugares distintos: la distancia.</p>' +
-        '<p><b>El color</b> es ⟨z<sub>k</sub>z<sub>l</sub>⟩ del estado de ahora: dorado = las dos variables salen iguales (las dos 0 o las dos 1), azul = salen distintas (una 1 y la otra 0), blanco = mitad y mitad.</p>' +
-        '<p><b>Con la minimización:</b> cada casilla aporta J<sub>kl</sub>·⟨z<sub>k</sub>z<sub>l</sub>⟩. Con J > 0 ese término baja en azul: en una ruta válida, en cada tiempo y cada lugar hay un solo 1, así que los pares que lo incluyen quedan azules. El balance final lo cierran h y c; por eso lo que se minimiza es la suma completa de abajo.</p></aside></div>' +
-      '<div class="vq-suma" data-az="suma"></div>' +
-      '<div class="vq-paso"><span>4</span>El optimizador: COBYLA, evaluación por evaluación</div>' +
-      '<div class="az-cuerpo"><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg><div class="vq-log" data-az="log"></div></div>' +
-      '<p class="dv-nota">COBYLA arma un símplex de 19 puntos (θ y θ + ρ en cada ángulo), ajusta en él un modelo lineal de E y da un paso de largo ρ hacia donde el modelo baja. Si el paso no rinde, reduce ρ a la mitad; si el símplex se deforma, lo repara con un paso de geometría. Como en el cuaderno (SciPy, maxiter = 300), se detiene a las ' + MAXFUN + ' evaluaciones y minimiza la energía exacta del estado; la medida con ' + DISPAROS + ' disparos se muestra al lado. Desde distintos θ al azar puede quedar en otra ruta válida: vuelve a sortear y a optimizar. Este COBYLA está escrito para el navegador; en el triángulo, desde los mismos 200 arranques, se comporta como el de SciPy: llegan a E = 12 27 contra 22 con 300 evaluaciones y 56 contra 55 con 1000, con la misma mediana (≈ 14).</p></div>';
+      '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar con COBYLA</button><button type="button" class="dv-btn" data-az="paso">una iteración</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
+      '<label class="vq-vel">velocidad <select data-az="vel"><option value="250">lenta</option><option value="60" selected>normal</option><option value="0">rápida</option></select></label></div>' +
+      '<div class="vq-flujo"><span>θ</span>→<span>ansatz</span>→<span>medir</span>→<span>bits b</span>→<span>ruta x</span>→<span>H(b)</span>→<span>promedio: E(θ)</span>→<span>COBYLA cambia θ</span></div>' +
+      // 1 · el ansatz y lo que sale al medir
+      '<div class="vq-paso"><span>1</span>El ansatz da una configuración cada vez que se mide</div>' +
+      '<div class="vq-fila"><div data-az="circ"></div><aside class="vq-lado" data-az="disparo"></aside></div>' +
+      '<p class="vq-fund"><b>Fundamento.</b> Los ángulos θ fijan el estado |ψ(θ)⟩. Medir los 9 qubits lo colapsa en una cadena de bits b con probabilidad P(b) = |⟨b|ψ(θ)⟩|²: cada disparo es una configuración distinta. Los qubits van por tiempo, así que q<sub>1</sub>q<sub>2</sub>q<sub>3</sub> es la columna t<sub>1</sub> de la matriz x, q<sub>4</sub>q<sub>5</sub>q<sub>6</sub> la t<sub>2</sub> y q<sub>7</sub>q<sub>8</sub>q<sub>9</sub> la t<sub>3</sub>.</p>' +
+      // 2 · la energía
+      '<div class="vq-paso"><span>2</span>La energía: el promedio de H(b) en los disparos</div>' +
+      '<div class="vq-energia" data-az="energia"></div>' +
+      '<p class="vq-fund"><b>Fundamento.</b> ¿Por qué se mide antes de aplicar H? Porque H solo tiene términos Z y Z⊗Z: es diagonal en la misma base en que se mide, así que no hace falta aplicarlo como compuerta. Basta medir los bits y calcular H(b) con ellos: ⟨ψ|Ĥ|ψ⟩ = Σ<sub>b</sub> P(b) H(b). Así se hace en un chip real, y es la energía que el optimizador quiere bajar.</p>' +
+      // 3 · COBYLA
+      '<div class="vq-paso"><span>3</span>COBYLA decide cómo cambiar los ángulos</div>' +
+      '<div class="vq-cobyla"><div><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg></div><div class="vq-decision" data-az="decision"></div></div>' +
+      '<div class="vq-log" data-az="log"></div>' +
+      '<p class="vq-fund"><b>Fundamento.</b> COBYLA no usa derivadas. Evalúa E en un símplex de 19 puntos (θ y θ + ρ en cada ángulo) y ajusta un plano: E(θ + d) ≈ E(θ) + g·d. Su pendiente g reemplaza al gradiente. El paso va en contra de g, con largo ρ (la región de confianza): d = −ρ g/|g|. Si la energía baja menos del 10 % de lo que predijo el plano, ρ se reduce a la mitad. Si un vértice del símplex queda muy lejos (η &gt; 2,1ρ) o casi sobre su cara opuesta (σ &lt; 0,25ρ), lo repara con un paso de geometría, también de largo ρ y hacia donde baja el plano. Con 18 ángulos el símplex se deforma seguido: en esta implementación, unas 9 de cada 10 evaluaciones son pasos de geometría. Como en el cuaderno (SciPy), se detiene a las ' + MAXFUN + ' evaluaciones; desde los mismos 200 arranques, sus resultados en el triángulo son equivalentes a los del COBYLA de SciPy (27 contra 22 llegan a E = 12).</p></div>';
     function $(k) { return caja.querySelector('[data-az="' + k + '"]'); }
-    (function listo() {
-      if (!window.katex) { setTimeout(listo, 300); return; }
-      caja.querySelector('.az-texto').innerHTML = pintarTexto();
-      $('formula').innerHTML = tex(String.raw`E(\boldsymbol\theta) = c + \sum_{k} h_k\,\langle z_k\rangle_{\boldsymbol\theta} + \sum_{k<l} J_{kl}\,\langle z_k z_l\rangle_{\boldsymbol\theta}, \qquad \langle z_k\rangle_{\boldsymbol\theta} = \sum_b P_{\boldsymbol\theta}(b)\, z_k(b), \quad \langle z_k z_l\rangle_{\boldsymbol\theta} = \sum_b P_{\boldsymbol\theta}(b)\, z_k(b)\, z_l(b)`, true);
-    })();
+    (function listo() { if (window.katex) caja.querySelector('.az-texto').innerHTML = pintarTexto(); else setTimeout(listo, 300); })();
     var sim = prepararSim();
     if (!sim || !H0) return;
-    var th = [], tim = 0, corriendo = false, activos = [], co = null, evals = [], log = [], ultimaMedida = null;
+    var th = [], tim = 0, timMedir = 0, corriendo = false, activos = [], co = null, evals = [], log = [], medida = null, ultima = null;
     function f2(v) { return n2(v); }
-    function fr(v) { return (+v.toPrecision(2)).toString().replace('.', ','); }   // ρ con dos cifras significativas
-    function color(v) { return v >= 0 ? 'rgba(200,169,110,' + (v * .85).toFixed(3) + ')' : 'rgba(43,108,176,' + (-v * .7).toFixed(3) + ')'; }
-    function bits(s) { var b = ''; for (var q = 0; q < sim.n; q++) b += (s >> q) & 1; return b; }   // q1 … q9
-    function malla(s) { return '<span class="az-malla">' + rutaDe(sim, s).map(function (f) { return f.map(function (v) { return '<i class="' + (v ? 'on' : '') + '"></i>'; }).join(''); }).join('') + '</span>'; }
-    function emedida(m) { var e = 0; for (var s in m.cuenta) e += m.cuenta[s] * sim.E[s]; return e / m.n; }
-    function nuevo() { parar(); co = null; evals = []; log = []; activos = []; }
-    function sortear() { nuevo(); th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); }
-    function construido() { nuevo(); th = []; var b = [1, 0, 0, 0, 1, 0, 0, 0, 1]; for (var j = 0; j < 9; j++) th.push(0); for (var q = 0; q < 9; q++) th.push(Math.PI * b[q]); }
-
-    // H por partes para una configuración: distancia, regla de tiempo y regla de lugar (A = 100)
+    function fr(v) { return (+v.toPrecision(2)).toString().replace('.', ','); }
+    function gr(x) { return (Math.abs(x) < 10 ? x.toFixed(1) : x.toFixed(0)).replace('.', ','); }
+    // H por partes (A = 100) y por las matrices: c + hᵀz + Σ J z z
     function partes(s) {
       var x = rutaDe(sim, s), d = 0, rt = 0, rl = 0;
       for (var t = 0; t < 2; t++) for (var a = 0; a < 3; a++) for (var b = 0; b < 3; b++) if (a !== b) d += DTRI[a][b] * x[a][t] * x[b][t + 1];
       for (var t2 = 0; t2 < 3; t2++) rt += Math.pow(1 - x[0][t2] - x[1][t2] - x[2][t2], 2);
       for (var a2 = 0; a2 < 3; a2++) rl += Math.pow(1 - x[a2][0] - x[a2][1] - x[a2][2], 2);
-      return { x: x, dist: d, rt: rt, rl: rl, ok: rt + rl === 0 };
+      var z = [], hz = 0, jz = 0;
+      for (var q = 0; q < sim.n; q++) z[sim.kDe[q]] = ((s >> q) & 1) ? -1 : 1;
+      for (var k = 0; k < sim.n; k++) { hz += H0.h[k] * z[k]; for (var l = k + 1; l < sim.n; l++) jz += H0.J[k][l] * z[k] * z[l]; }
+      return { x: x, dist: d, rt: rt, rl: rl, ok: rt + rl === 0, hz: hz, jz: jz };
     }
-    function resumen(m) {
-      var orden = Object.keys(m.cuenta).sort(function (a, b) { return m.cuenta[b] - m.cuenta[a]; }), d = 0, rt = 0, rl = 0;
-      orden.forEach(function (s) { var p = partes(+s), c = m.cuenta[s]; d += c * p.dist; rt += c * p.rt; rl += c * p.rl; });
-      return { orden: orden, n: m.n, E: emedida(m), dist: d / m.n, at: 100 * rt / m.n, al: 100 * rl / m.n,
-               top: orden.slice(0, 4).map(function (s) { var p = partes(+s); return { s: +s, veces: m.cuenta[s], H: sim.E[s], x: p.x, ok: p.ok }; }) };
+    function nuevo() { parar(); co = null; evals = []; log = []; activos = []; ultima = null; }
+    function sortear() { nuevo(); th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); }
+    function construido() { nuevo(); th = []; var b = [1, 0, 0, 0, 1, 0, 0, 0, 1]; for (var j = 0; j < 9; j++) th.push(0); for (var q = 0; q < 9; q++) th.push(Math.PI * b[q]); }
+
+    // ── 1 · el disparo de ahora, al costado del circuito ──
+    function pintarDisparo(s, n) {
+      var p = partes(s), b = [];
+      for (var q = 0; q < sim.n; q++) b.push((s >> q) & 1);
+      var lt = lugaresPorTiempo(p.x), mot = motivos(p.x);
+      var h = '<div class="vq-lado-tit">Al medir <small>disparo ' + n + ' de ' + DISPAROS + '</small></div>';
+      h += '<div class="vq-bits">' + [0, 1, 2].map(function (t) { return '<span><i>t<sub>' + (t + 1) + '</sub></i>' + b.slice(3 * t, 3 * t + 3).join('') + '</span>'; }).join('') + '</div>';
+      h += '<div class="vq-conx"><table class="vq-matx"><tr><th></th><th>t<sub>1</sub></th><th>t<sub>2</sub></th><th>t<sub>3</sub></th></tr>' +
+        [0, 1, 2].map(function (i) { return '<tr><th>x<sub>' + (i + 1) + '</sub></th>' + [0, 1, 2].map(function (t) { return '<td class="' + (p.x[i][t] ? 'uno' : '') + '">' + p.x[i][t] + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' + trayectoriaSVG(p.x, false) + '</div>';
+      h += '<div class="vq-ruta ' + (p.ok ? 'ok' : 'mal') + '">' + (p.ok ? '✓ ' + lt.map(function (l) { return 'x' + (l[0] + 1); }).join(' → ') : '✗ ' + mot.join(' · ')) + '</div>';
+      h += '<table class="vq-h"><tr><td>distancia</td><td>' + p.dist + '</td></tr><tr><td>+ A · regla de tiempo</td><td>' + 100 * p.rt + '</td></tr><tr><td>+ A · regla de lugar</td><td>' + 100 * p.rl + '</td></tr>' +
+        '<tr class="tot"><td>H(b)</td><td>' + f2(sim.E[s]) + '</td></tr></table>';
+      h += '<div class="vq-mismo">con las matrices: c + hᵀz + Σ J<sub>kl</sub>z<sub>k</sub>z<sub>l</sub> = ' + f2(H0.cte) + ' ' + (p.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(p.hz)) + ' ' + (p.jz < 0 ? '−' : '+') + ' ' + f2(Math.abs(p.jz)) + ' = ' + f2(sim.E[s]) + '</div>';
+      $('disparo').innerHTML = h;
     }
-    function pintarMedida(psi, m) {
-      var r = resumen(m), em = r.E, ex = energia(sim, th), sd = 0, orden = r.orden;
-      for (var s in m.cuenta) sd += m.cuenta[s] * Math.pow(sim.E[s] - em, 2);
-      sd = Math.sqrt(sd / m.n);
-      var p0 = partes(+orden[0]), mot = motivos(p0.x);
-      var h = '<div class="vq-izq"><div class="vq-grande"><span>E medida</span><b>' + f2(em) + '</b><small>= distancia ' + f2(r.dist) + ' + A·tiempo ' + f2(r.at) + ' + A·lugar ' + f2(r.al) + '</small></div>' +
-        '<div class="vq-tray-caja"><div class="vq-rot">Trayectoria del resultado más frecuente (×' + m.cuenta[orden[0]] + ')</div>' + trayectoriaSVG(p0.x, true) +
-        '<div class="vq-tray-txt ' + (p0.ok ? 'ok' : 'mal') + '">' + (p0.ok ? '✓ ' + lugaresPorTiempo(p0.x).map(function (l) { return 'x' + (l[0] + 1); }).join(' → ') + ' · distancia ' + p0.dist : '✗ ' + mot.join(' · ')) + ' · H = ' + f2(sim.E[orden[0]]) + '</div></div></div>';
-      h += '<div class="vq-conteo"><div class="vq-rot">Resultados más frecuentes y su trayectoria</div><table class="vq-tabla vq-tfrec"><tr><th>x</th><th>trayectoria</th><th>veces</th><th>distancia</th><th>reglas rotas</th><th>H(b)</th></tr>' +
-        orden.slice(0, 5).map(function (s) { var p = partes(+s), mm = motivos(p.x); return '<tr><td>' + malla(+s) + '</td><td>' + trayectoriaSVG(p.x, false) + '</td><td>' + m.cuenta[s] + '</td><td>' + p.dist + '</td><td class="' + (p.ok ? 'ok' : 'mal') + '">' + (p.ok ? '0 ✓' : (p.rt + p.rl) + ' · ' + mm.join(', ')) + '</td><td><b>' + f2(sim.E[s]) + '</b></td></tr>'; }).join('') +
-        '<tr class="vq-otros"><td colspan="6">… ' + Math.max(0, orden.length - 5) + ' configuraciones distintas más</td></tr></table></div>';
-      h += '<div class="vq-disparos"><div class="vq-rot">Los primeros 16 disparos: el resultado b (q<sub>1</sub>…q<sub>9</sub>), su configuración y su H(b)</div><ol>' +
-        m.primeros.map(function (s) { return '<li><code>' + bits(s) + '</code>' + malla(s) + '<b>' + f2(sim.E[s]) + '</b></li>'; }).join('') + '</ol></div>';
-      h += '<div class="vq-linea"><span>Medida:</span> E = Σ veces · H(b) / ' + m.n + ' = <b>' + f2(em) + '</b> &nbsp;·&nbsp; exacta Σ P(b) H(b) = ' + f2(ex) + ' &nbsp;·&nbsp; diferencia ' + f2(em - ex) + ' (ruido de muestreo esperado ≈ ±' + f2(sd / Math.sqrt(m.n)) + ')</div>';
-      $('medida').innerHTML = h;
+    // ── 2 · la energía: promedio acumulado de H(b) ──
+    function pintarEnergia() {
+      var ex = energia(sim, th), m = medida, em = m.suma / Math.max(1, m.n);
+      $('energia').innerHTML = '<div class="vq-e"><span>E medida</span><b>' + f2(em) + '</b><small>promedio de H(b) en ' + m.n + ' disparos</small></div>' +
+        '<div class="vq-e gris"><span>E exacta</span><b>' + f2(ex) + '</b><small>Σ<sub>b</sub> P(b) H(b) sobre los 512 estados</small></div>' +
+        '<div class="vq-e-txt">Con pocos disparos el promedio salta; con ' + DISPAROS + ' se acerca a la exacta (diferencia ' + f2(em - ex) + '). COBYLA usa la exacta, como Statevector en el cuaderno.</div>';
     }
-    function pintarEnergia(psi) {
-      var r = energiaJh(sim, psi), n = sim.n, h = '<tr><th></th><th>h<sub>k</sub></th><th>⟨z<sub>k</sub>⟩</th><th>h<sub>k</sub>⟨z<sub>k</sub>⟩</th></tr>';
-      for (var a = 0; a < n; a++) h += '<tr><th>' + etq(a) + '</th><td>' + f2(H0.h[a]) + '</td><td style="background:' + color(r.ez[a]) + '">' + f2(r.ez[a]) + '</td><td>' + f2(H0.h[a] * r.ez[a]) + '</td></tr>';
-      $('h').innerHTML = h;
-      var J = '<tr><th></th>' + Array.from({ length: n }, function (_, b) { return '<th>' + etq(b) + '</th>'; }).join('') + '</tr>';
-      for (var a2 = 0; a2 < n; a2++) {
-        J += '<tr><th>' + etq(a2) + '</th>';
-        for (var b = 0; b < n; b++) {
-          var v = H0.J[a2][b];
-          if (b <= a2) J += '<td class="vq-bajo">' + (b === a2 ? '' : f2(v)) + '</td>';
-          else J += '<td style="background:' + color(r.ezz[a2][b]) + '" title="⟨zz⟩ = ' + f2(r.ezz[a2][b]) + ' · aporte J·⟨zz⟩ = ' + f2(v * r.ezz[a2][b]) + '">' + (v ? f2(v) : '·') + '</td>';
+    function muestra(psi) {   // un disparo
+      var r = Math.random(), acc = 0;
+      for (var s = 0; s < psi.length; s++) { acc += psi[s] * psi[s]; if (r < acc) return s; }
+      return psi.length - 1;
+    }
+    // mide de a poco: el panel muestra el disparo de ahora y el promedio se va formando
+    function medirEnVivo() {
+      clearTimeout(timMedir);
+      var psi = estado(sim, th);
+      medida = { n: 0, suma: 0 };
+      (function tanda() {
+        var k = medida.n < 40 ? 1 : 24, s = 0;
+        for (var i = 0; i < k && medida.n < DISPAROS; i++) { s = muestra(psi); medida.n++; medida.suma += sim.E[s]; }
+        pintarDisparo(s, medida.n); pintarEnergia();
+        if (medida.n < DISPAROS && !corriendo) timMedir = setTimeout(tanda, quieto ? 0 : (medida.n < 40 ? 110 : 60));
+      })();
+    }
+    function medirDeUna() {   // durante la optimización: los 1024 disparos de golpe
+      var psi = estado(sim, th), s = 0;
+      medida = { n: 0, suma: 0 };
+      for (var i = 0; i < DISPAROS; i++) { s = muestra(psi); medida.n++; medida.suma += sim.E[s]; }
+      pintarDisparo(s, DISPAROS); pintarEnergia();
+    }
+    // ── 3 · COBYLA ──
+    function top(v, n) { return v.map(function (x, j) { return j; }).sort(function (a, b) { return Math.abs(v[b]) - Math.abs(v[a]); }).slice(0, n); }
+    function pintarDecision() {
+      var r = ultima, h;
+      if (!r) h = '<div class="vq-dec-tit">La decisión de cada iteración</div><p>Pulsa «optimizar con COBYLA» o «una iteración». Aquí aparece qué calculó COBYLA y por qué movió los ángulos así.</p>';
+      else if (r.tipo === 'simplex') h = '<div class="vq-dec-tit">Evaluación ' + r.k + ': armando el símplex</div><p>' + (r.i === 0 ? 'Mide E en el punto de partida θ<sub>0</sub>.' : 'Mueve solo ' + nomParam(r.i - 1) + ' en ρ = ' + fr(r.rho) + ' rad y mide E: así conoce cuánto cambia la energía con ese ángulo.') + '</p><div class="vq-dec-num">E = ' + f2(r.f) + '</div><p class="vq-dec-nota">Hacen falta 19 puntos (θ<sub>0</sub> y uno por ángulo) antes del primer paso.</p>';
+      else if (r.tipo === 'reduce') h = '<div class="vq-dec-tit">Iteración ' + r.k + ': ρ a la mitad</div><p>El plano ya no predice bien a esta escala: la región de confianza baja a ρ = ' + fr(r.rho) + ' rad.</p>';
+      else {
+        var g = r.g, ig = top(g, 4), id = top(r.d, 4);
+        h = '<div class="vq-dec-tit">Evaluación ' + r.k + ': ' + (r.tipo === 'geometria' ? 'paso de geometría' : 'paso hacia donde baja el plano') + '</div>';
+        h += '<div class="vq-dec-fila"><span>1 · Pendiente del plano g</span><b>|g| = ' + f2(r.gn) + '</b></div><p class="vq-dec-det">' + ig.map(function (j) { return '∂E/∂' + nomParam(j) + ' ≈ ' + f2(g[j]); }).join(' · ') + ' …</p>';
+        if (r.tipo === 'geometria') {
+          h += r.lejos ? '<div class="vq-dec-fila"><span>2 · Un vértice quedó lejos: η = ' + fr(r.eta) + ' rad</span><b>&gt; 2,1ρ = ' + fr(2.1 * r.rho) + '</b></div>' : '<div class="vq-dec-fila"><span>2 · Un vértice casi toca su cara: σ = ' + fr(r.sig) + ' rad</span><b>&lt; 0,25ρ = ' + fr(0.25 * r.rho) + '</b></div>';
+          h += '<p class="vq-dec-det">Con ese vértice el plano se apoyaría en puntos casi alineados y su pendiente no sería confiable. Se reemplaza por θ<sub>mejor</sub> + ρ·n, con n normal a esa cara y el signo con que el plano baja.</p>';
+          h += '<div class="vq-dec-fila"><span>3 · Cambio de ángulos (|d| = ρ = ' + fr(r.rho) + ' rad)</span></div><p class="vq-dec-det">' + id.map(function (j) { var v = r.d[j] * 180 / Math.PI; return nomParam(j) + ' ' + (v < 0 ? '−' : '+') + gr(Math.abs(v)) + '°'; }).join(', ') + ' …</p>';
+          h += '<div class="vq-dec-fila veredicto ' + (r.f < r.f0 ? 'ok' : 'mal') + '"><span>4 · E: ' + f2(r.f0) + ' → ' + f2(r.f) + '</span><b>' + (r.f < r.f0 ? 'baja ' + f2(r.f0 - r.f) : 'no baja') + '</b></div>';
+        } else {
+          h += '<div class="vq-dec-fila"><span>2 · Paso d = −ρ g/|g|</span><b>ρ = ' + fr(r.rho) + ' rad</b></div><p class="vq-dec-det">' + id.map(function (j) { var v = r.d[j] * 180 / Math.PI; return nomParam(j) + ' ' + (v < 0 ? '−' : '+') + gr(Math.abs(v)) + '°'; }).join(', ') + ' … (los ángulos con más pendiente se mueven más)</p>';
+          h += '<div class="vq-dec-fila"><span>3 · Baja prevista ρ·|g|</span><b>' + f2(r.pred) + '</b></div>';
+          h += '<div class="vq-dec-fila"><span>4 · Baja real ' + f2(r.f0) + ' → ' + f2(r.f) + '</span><b>' + f2(r.f0 - r.f) + '</b></div>';
+          h += '<div class="vq-dec-fila veredicto ' + (r.fallo ? 'mal' : 'ok') + '"><span>5 · Razón real / prevista = ' + f2(r.ratio) + '</span><b>' + (r.fallo ? '< 0,1 → ρ a la mitad' : '≥ 0,1 → sigue con ρ') + '</b></div>';
         }
-        J += '</tr>';
       }
-      $('J').innerHTML = J;
-      var err = Math.abs(r.E - r.directa);
-      $('suma').innerHTML =
-        '<div class="vq-linea"><span>Con J y h:</span> E(θ) = c + Σ h<sub>k</sub>⟨z<sub>k</sub>⟩ + Σ<sub>k&lt;l</sub> J<sub>kl</sub>⟨z<sub>k</sub>z<sub>l</sub>⟩ = ' + f2(r.cte) + ' ' + (r.hz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.hz)) + ' ' + (r.jzz < 0 ? '−' : '+') + ' ' + f2(Math.abs(r.jzz)) + ' = <b>' + f2(r.E) + '</b></div>' +
-        '<div class="vq-linea"><span>Comprobación:</span> Σ<sub>b</sub> P(b) H(b) sobre los 512 estados = <b>' + f2(r.directa) + '</b> &nbsp;·&nbsp; diferencia = <b class="vq-err">' + (err < 1e-9 ? err.toExponential(1).replace('.', ',') : f2(err)) + '</b></div>';
+      $('decision').innerHTML = h;
+    }
+    function pintarLog() {
+      $('log').innerHTML = '<table class="vq-tabla vq-tlog"><tr><th>#</th><th>qué hizo</th><th>ρ</th><th>|g|</th><th>baja prevista</th><th>baja real</th><th>E</th></tr>' +
+        (log.length ? log.slice(-8).reverse().map(function (r) { return '<tr class="' + (r.mejora ? 'vq-mejora' : '') + '"><td>' + r.k + '</td><td>' + r.que + '</td><td>' + r.rho + '</td><td>' + r.gn + '</td><td>' + r.pred + '</td><td>' + r.real + '</td><td>' + f2(r.f) + '</td></tr>'; }).join('') : '<tr><td colspan="7" class="vq-vacio">Las últimas 8 iteraciones aparecerán aquí.</td></tr>') + '</table>';
     }
     function pintarCurva() {
       var svg = caja.querySelector('.az-curva'), NS = 'http://www.w3.org/2000/svg';
@@ -632,70 +601,47 @@
       e('line', { x1: 40, y1: Y(sim.min), x2: 410, y2: Y(sim.min), 'class': 'az-min' });
       e('text', { x: 408, y: Y(sim.min) - 5, 'class': 'az-txt', 'text-anchor': 'end' }).textContent = 'mínimo = ' + n2(sim.min);
       e('text', { x: 40, y: 212, 'class': 'az-txt' }).textContent = 'evaluaciones de COBYLA →';
-      e('text', { x: 36, y: 16, 'class': 'az-txt', 'text-anchor': 'start' }).textContent = 'E';
-      evals.forEach(function (x, i) { e('circle', { cx: X(i), cy: Y(x.f), r: 1.8, 'class': 'vq-pto-eval' }); if (x.m != null) e('circle', { cx: X(i), cy: Y(x.m), r: 1.4, 'class': 'vq-pto-med' }); });
+      e('text', { x: 36, y: 16, 'class': 'az-txt', 'text-anchor': 'start' }).textContent = 'E(θ)';
+      evals.forEach(function (x, i) { e('circle', { cx: X(i), cy: Y(x.f), r: 1.8, 'class': 'vq-pto-eval' }); });
       var mejor = Infinity, d = '';
       evals.forEach(function (x, i) { mejor = Math.min(mejor, x.f); d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(mejor).toFixed(1); });
       if (d) e('path', { d: d, 'class': 'az-linea' });
-      e('text', { x: 408, y: 34, 'class': 'az-txt', 'text-anchor': 'end' }).textContent = '— la mejor hasta ahora · • cada evaluación (exacta) · • medida';
+      e('text', { x: 408, y: 34, 'class': 'az-txt', 'text-anchor': 'end' }).textContent = '— la mejor hasta ahora · • cada evaluación';
     }
-    function pintarLog() {
-      $('log').innerHTML = '<div class="vq-rot">Correcciones de COBYLA (las últimas 12)</div><table class="vq-tabla vq-tlog"><tr><th>#</th><th>qué hizo</th><th>ρ</th><th>cambio de ángulos</th><th>E exacta</th><th>E medida</th></tr>' +
-        (log.length ? log.slice(-12).reverse().map(function (r) { return '<tr class="' + (r.mejora ? 'vq-mejora' : '') + '"><td>' + r.k + '</td><td>' + r.que + '</td><td>' + r.rho + '</td><td>' + r.cambio + '</td><td>' + f2(r.f) + '</td><td>' + f2(r.m) + '</td></tr>'; }).join('') : '<tr><td colspan="6" class="vq-vacio">Pulsa «optimizar con COBYLA».</td></tr>') + '</table>';
+    function pintarCircuito() { $('circ').innerHTML = circuitoValores(th, activos); }
+    function pintarTodo(enVivo) { pintarCircuito(); if (enVivo) medirEnVivo(); else medirDeUna(); pintarDecision(); pintarLog(); pintarCurva(); }
+    function parar() { clearTimeout(tim); clearTimeout(timMedir); corriendo = false; }
+    function asegurarCobyla() {
+      if (!co || co.evaluaciones() >= MAXFUN || co.rho() < 1e-4) { co = crearCobyla(function (x) { return energia(sim, x); }, th.slice(), { rhobeg: 1, rhoend: 1e-4, maxfun: MAXFUN }); evals = []; log = []; }
     }
-    function pintar(m) {
-      var psi = estado(sim, th);
-      ultimaMedida = m || medirDisparos(psi, DISPAROS);
-      $('circ').innerHTML = circuitoValores(th, activos, resumen(ultimaMedida));
-      pintarMedida(psi, ultimaMedida);
-      pintarEnergia(psi);
-      pintarCurva(); pintarLog();
-    }
-    function estadoTxt() {
-      var mejor = co ? co.mejor() : null;
-      $('estado').innerHTML = (co ? 'evaluación ' + co.evaluaciones() + ' de ' + MAXFUN + ' · ρ = ' + fr(co.rho()) + ' rad · mejor E = ' + f2(mejor.f) : 'E exacta = ' + f2(energia(sim, th)) + ' · E medida = ' + f2(emedida(ultimaMedida)));
-    }
-    // describe la corrección: los ángulos que más cambiaron
-    function cambio(d) {
-      var idx = d.map(function (v, j) { return j; }).filter(function (j) { return Math.abs(d[j]) > 1e-9; }).sort(function (a, b) { return Math.abs(d[b]) - Math.abs(d[a]); });
-      activos = idx.slice(0, 3);
-      var nrm = Math.sqrt(d.reduce(function (s, v) { return s + v * v; }, 0)) * 180 / Math.PI;
-      function gr(x) { return (Math.abs(x) < 10 ? x.toFixed(1) : x.toFixed(0)).replace('.', ','); }
-      return '|Δθ| = ' + gr(nrm) + '° · ' + idx.slice(0, 3).map(function (j) { var g = d[j] * 180 / Math.PI; return nomParam(j) + ' ' + (g < 0 ? '−' : '+') + gr(Math.abs(g)) + '°'; }).join(', ') + (idx.length > 3 ? ', …' : '');
-    }
-    function parar() { clearTimeout(tim); corriendo = false; }
-    function evaluar() {
+    function iterar() {   // una llamada a COBYLA: una evaluación (o ρ a la mitad, que no evalúa)
       var info = co.paso();
       if (!info) return false;
       var d = info.d || info.x.map(function (v, k) { return v - th[k]; });
       th = info.x.slice();
-      var psi = estado(sim, th), m = medirDisparos(psi, DISPAROS), em = emedida(m), que;
-      if (info.tipo === 'simplex') que = info.i === 0 ? 'símplex: punto inicial θ₀' : 'símplex: θ₀ + ρ en ' + nomParam(info.i - 1);
-      else if (info.tipo === 'geometria') que = 'paso de geometría';
-      else if (info.tipo === 'reduce') que = 'ρ a la mitad';
-      else que = 'paso de largo ρ' + (info.mejora ? ' · baja E' : ' · no mejora') + (info.fallo ? ' → ρ a la mitad' : '');
-      if (info.tipo !== 'reduce') evals.push({ f: info.f, m: em });   // ρ a la mitad no evalúa
-      log.push({ k: co.evaluaciones(), que: que, rho: fr(info.rho), cambio: info.tipo === 'reduce' ? '—' : cambio(d), f: info.f, m: em, mejora: info.tipo === 'paso' && info.mejora });
-      ultimaMedida = m;
-      return m;
+      activos = info.tipo === 'reduce' ? [] : top(d, 3).filter(function (j) { return Math.abs(d[j]) > 1e-9; });
+      info.k = co.evaluaciones(); info.d = d;
+      ultima = info;
+      if (info.tipo !== 'reduce') evals.push({ f: info.f });
+      var que = info.tipo === 'simplex' ? (info.i === 0 ? 'símplex: θ₀' : 'símplex: θ₀ + ρ en ' + nomParam(info.i - 1)) : info.tipo === 'geometria' ? 'geometría' : info.tipo === 'reduce' ? 'ρ a la mitad' : (info.fallo ? 'paso · no rinde' : 'paso · baja E');
+      log.push({ k: info.k, que: que, rho: fr(info.rho), gn: info.gn != null ? f2(info.gn) : '—', pred: info.pred != null ? f2(info.pred) : '—', real: info.f0 != null ? f2(info.f0 - info.f) : '—', f: info.f, mejora: info.tipo === 'paso' && info.mejora });
+      return true;
     }
     function correr() {
       if (corriendo) return;
-      if (!co || !co.paso) co = null;
-      if (!co || co.evaluaciones() >= MAXFUN || co.rho() < 1e-4) { co = crearCobyla(function (x) { return energia(sim, x); }, th.slice(), { rhobeg: 1, rhoend: 1e-4, maxfun: MAXFUN }); evals = []; log = []; }
-      corriendo = true;
+      clearTimeout(timMedir); asegurarCobyla(); corriendo = true;
       (function paso() {
-        var vel = +$('vel').value, m = null, sigue = true;
-        for (var r = 0; r < (vel === 0 ? 10 : 1) && sigue; r++) { m = evaluar(); sigue = !!m; }
-        if (m) { pintar(m); estadoTxt(); }
+        var vel = +$('vel').value, sigue = true;
+        for (var r = 0; r < (vel === 0 ? 8 : 1) && sigue; r++) sigue = iterar();
+        pintarTodo(false);
         if (sigue && co.evaluaciones() < MAXFUN) tim = setTimeout(paso, quieto ? 0 : Math.max(vel, 16));
-        else { corriendo = false; th = co.mejor().x.slice(); activos = []; pintar(); estadoTxt(); $('estado').innerHTML += ' · terminó: queda el mejor θ'; }
+        else { corriendo = false; th = co.mejor().x.slice(); activos = []; pintarTodo(true); }
       })();
     }
-    $('azar').addEventListener('click', function () { sortear(); pintar(); estadoTxt(); });
-    $('medir').addEventListener('click', function () { if (corriendo) return; pintar(); estadoTxt(); });
+    $('azar').addEventListener('click', function () { sortear(); pintarTodo(true); });
     $('opt').addEventListener('click', correr);
-    $('construido').addEventListener('click', function () { construido(); pintar(); estadoTxt(); });
-    sortear(); pintar(); estadoTxt();
+    $('paso').addEventListener('click', function () { if (corriendo) return; clearTimeout(timMedir); asegurarCobyla(); if (iterar()) pintarTodo(true); });
+    $('construido').addEventListener('click', function () { construido(); pintarTodo(true); });
+    sortear(); pintarTodo(true);
   };
 })();
