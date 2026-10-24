@@ -1905,6 +1905,42 @@
     .dv-cierre { color: #C8A96E; font-size: 13.5px; margin-top: 12px; }
     .dv-caso-tit { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: #F2EEE6; margin: 2px 0 2px; }
     .dv-caso-tit, .dv-paso-tit, .dv-tit { font-variant-numeric: lining-nums; }
+    /* ── la demostración como texto teórico, en fondo blanco ── */
+    .dv-pizarra { background: #fff; color: #1a1a1a; box-shadow: none; border-top: 2px solid #1B2A4A; border-bottom: 1px solid #1B2A4A; border-radius: 0; padding: 18px 8px 22px; max-width: 980px; margin: 0 auto; }
+    .dv-cab { max-width: 980px; margin: 0 auto; }
+    .dv-resumen { font-family: 'Cormorant Garamond', serif; font-size: 18px; line-height: 1.55; color: #2b2b2b; text-align: justify; margin: 6px 0 14px; font-variant-numeric: lining-nums; }
+    .dv-resumen b { font-variant: small-caps; letter-spacing: .04em; }
+    .dv-seccion { border-bottom: none; padding: 12px 0 6px; }
+    .dv-paso-tit { font-family: 'Cormorant Garamond', serif; font-style: normal; font-weight: 700; font-size: 22px; color: #1a1a1a; font-variant: small-caps; letter-spacing: .03em; }
+    .dv-num { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #1a1a1a; font-weight: 700; }
+    .dv-linea { border-left: none; padding: 0; margin: 2px 0; }
+    .dv-linea .katex { color: #1a1a1a; font-size: 1.16em; }
+    .dv-linea .katex-display { text-align: center; }
+    .dv-nota { font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.5; color: #333; text-align: justify; margin: 0 0 6px; font-variant-numeric: lining-nums; }
+    .dv-qed { text-align: right; margin: 0; font-size: 18px; color: #1a1a1a; }
+    .dv-caso { border: 1px solid #D9D3C7; background: #FCFBF8; }
+    .dv-caso-tit { color: #1a1a1a; }
+    .dv-cierre { color: #8C6D33; font-family: 'Cormorant Garamond', serif; font-size: 17px; }
+    /* comprobador: trayectoria → z → H */
+    .nb-comprueba { margin-top: 30px; }
+    .cp-cuerpo { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 30px; align-items: start; max-width: 1100px; margin: 0 auto; border: 1px solid #1B2A4A; background: #fff; padding: 18px 22px; }
+    .cp-rutas { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .cp-malla { border-collapse: collapse; font-family: 'Cormorant Garamond', serif; font-size: 16px; color: #1B2A4A; margin-bottom: 10px; font-variant-numeric: lining-nums; }
+    .cp-malla th { font-weight: 500; font-style: italic; padding: 2px 8px; }
+    .cp-malla tr th:first-child { text-align: left; font-style: normal; font-family: 'Inter', sans-serif; font-size: 12px; color: #6b665e; }
+    .cp-x { width: 44px; height: 36px; border: 1px solid #C9C4BB; background: #fff; font-family: 'Space Mono', monospace; font-size: 14px; color: #B0AAA0; cursor: pointer; transition: background .2s, color .2s; }
+    .cp-x.on { background: rgba(200,169,110,.45); border-color: #8C6D33; color: #1a1a1a; font-weight: 700; }
+    .cp-x:hover { border-color: #1B2A4A; }
+    .cp-tri { width: 100%; max-width: 260px; display: block; }
+    .cp-arista { stroke: #1B2A4A; stroke-width: 1.4; }
+    .cp-peso { font-family: 'Cormorant Garamond', serif; font-size: 15px; fill: #1B2A4A; text-anchor: middle; }
+    .cp-ruta { stroke: #8C6D33; stroke-width: 2.4; }
+    .cp-nodo { fill: #fff; stroke: #1B2A4A; stroke-width: 1.6; }
+    .cp-nodo.on { fill: #FBF7EE; stroke: #8C6D33; }
+    .cp-nodo-t { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 15px; fill: #1B2A4A; text-anchor: middle; }
+    .cp-der .katex { color: #1a1a1a; font-size: 1.08em; }
+    .cp-der .katex-display { margin: 6px 0; overflow-x: auto; overflow-y: hidden; }
+    @media (max-width: 900px) { .cp-cuerpo { grid-template-columns: 1fr; } }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -2042,7 +2078,7 @@
   </footer>
   <script src="js/solucion-celdas.js?v=2"></script>
   <script src="js/solucion.js?v=21"></script>
-  <script src="js/solucion-derivacion.js?v=3"></script>
-  <script src="js/solucion-cuaderno.js?v=5"></script>
+  <script src="js/solucion-derivacion.js?v=5"></script>
+  <script src="js/solucion-cuaderno.js?v=6"></script>
 </body>
 </html>

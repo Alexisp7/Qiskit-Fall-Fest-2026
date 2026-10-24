@@ -54,9 +54,9 @@
     var filas = MAT.J.map(function (f, a) {
       return f.map(function (v, b) {
         var s = n(v);
-        if ((a === 0 && b === 1) || (a === 1 && b === 0)) return '\\colorbox{#5b4a26}{$' + s + '$}';
-        if ((a === 0 && b === 4) || (a === 4 && b === 0)) return '\\colorbox{#24406b}{$' + s + '$}';
-        return v ? s : '\\color{#6f7891}{0}';
+        if ((a === 0 && b === 1) || (a === 1 && b === 0)) return '\\colorbox{#F1E4C6}{$' + s + '$}';
+        if ((a === 0 && b === 4) || (a === 4 && b === 0)) return '\\colorbox{#DCE7F5}{$' + s + '$}';
+        return v ? s : '\\color{#B0AAA0}{0}';
       }).join(' & ');
     }).join(' \\\\ ');
     var zs = []; for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) zs.push('z_{' + i + t + '}');
@@ -73,7 +73,7 @@
     ];
   }
 
-  var C = '\\color{#C8A96E}';
+  var C = '\\color{#8C6D33}';
   var S = [
     { t: 'La función de coste en x', l: [
       ['Q(x) = B\\sum_{i,j}^{N} d_{ij}\\sum_{t=1}^{T-1} x_{i,t}\\,x_{j,t+1} \\;+\\; \\underbrace{A\\sum_{t=1}^{T}\\Big(1-\\sum_{i=1}^{N}x_{i,t}\\Big)^{2}}_{Q_{\\text{temporal}}} \\;+\\; \\underbrace{A\\sum_{i=1}^{N}\\Big(1-\\sum_{t=1}^{T}x_{i,t}\\Big)^{2}}_{Q_{\\text{espacial}}}', 'Distancia más dos restricciones: un lugar por tiempo (temporal) y cada lugar una vez (espacial).'],
@@ -93,7 +93,7 @@
       ['\\Big(1-\\sum_{i} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{i} x_{i,t} + \\Big(\\sum_{i} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{i} x_{i,t} + \\sum_{i}\\sum_{j} x_{i,t}\\,x_{j,t}'],
       ['\\Big(1-\\sum_{t} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{t} x_{i,t} + \\sum_{t}\\sum_{t\'} x_{i,t}\\,x_{i,t\'}']
     ] },
-    { t: 'Q_C: la distancia, término a término', l: [
+    { t: 'Q_C: la distancia, término a término', qed: true, l: [
       ['B\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}x_{i,t}x_{j,t+1} = \\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}\\big(1 - z_{i,t} - z_{j,t+1} + z_{i,t}z_{j,t+1}\\big)', 'Se reemplaza el producto por su forma en z.'],
       ['\\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1} 1 = B\\,\\tfrac{T-1}{4}\\sum_{i,j}d_{ij}', 'El 1: la suma en t tiene T − 1 términos.'],
       ['-\\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1} z_{i,t} = -\\tfrac{B}{4}\\sum_{i}\\sum_{t=1}^{T-1}\\Big(\\sum_{j}d_{ij}\\Big) z_{i,t} = -\\tfrac{B}{4}\\sum_{i}\\sum_{t=1}^{T-1} ' + C + '{a_i}\\,z_{i,t}, \\qquad ' + C + '{a_i = \\sum_j d_{ij}}', 'El −z del lugar de salida.'],
@@ -101,7 +101,7 @@
       ['\\sum_{t=1}^{T-1} a_i z_{i,t} + \\sum_{t=2}^{T} b_i z_{i,t} = a_i\\,z_{i,1} + b_i\\,z_{i,T} + \\sum_{t=2}^{T-1}(a_i + b_i)\\,z_{i,t}', 'Se separan t = 1 (solo sale), t = T (solo llega) y los tiempos del medio.'],
       ['Q_C = B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} - \\tfrac14\\sum_{i=1}^{N}\\Big[a_i z_{i,1} + b_i z_{i,T} + \\sum_{t=2}^{T-1}(a_i+b_i)\\,z_{i,t}\\Big] + \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}\\,z_{i,t}z_{j,t+1}\\Big\\}', 'El último término es el + zz que no cambió.']
     ] },
-    { t: 'Q temporal: un lugar por tiempo', l: [
+    { t: 'Q temporal: un lugar por tiempo', qed: true, l: [
       ['\\sum_{t}\\Big(1-\\sum_{i}x_{i,t}\\Big)^{2} = \\sum_{t}\\Big(1 - 2\\sum_{i}x_{i,t} + \\sum_{i,j}x_{i,t}x_{j,t}\\Big)'],
       ['-2\\sum_{i}x_{i,t} = -\\sum_{i}(1 - z_{i,t}) = -N + \\sum_{i} z_{i,t}'],
       ['\\sum_{i,j}x_{i,t}x_{j,t} = \\Big(\\sum_i x_{i,t}\\Big)^{2} = \\tfrac14\\Big(N - \\sum_i z_{i,t}\\Big)^{2} = \\tfrac14\\Big(N^{2} - 2N\\sum_i z_{i,t} + \\big(\\textstyle\\sum_i z_{i,t}\\big)^{2}\\Big)'],
@@ -109,7 +109,7 @@
       ['1 - N + \\sum_i z_{i,t} + \\tfrac{N^{2}}{4} - \\tfrac{N}{2}\\sum_i z_{i,t} + \\tfrac{N}{4} + \\tfrac12\\sum_{i<j} z_{i,t}z_{j,t} = \\tfrac{4 - 3N + N^{2}}{4} + \\big(1 - \\tfrac N2\\big)\\sum_i z_{i,t} + \\tfrac12\\sum_{i<j} z_{i,t}z_{j,t}', 'Se juntan los términos de un mismo t.'],
       ['Q_{\\text{tem}} = A\\Big[\\tfrac{T}{4}\\big(4 - 3N + N^{2}\\big) + \\big(1 - \\tfrac{N}{2}\\big)\\sum_{i}\\sum_{t} z_{i,t} + \\tfrac12\\sum_{t}\\sum_{i<j} z_{i,t}z_{j,t}\\Big]', 'Y se suma sobre los T tiempos.']
     ] },
-    { t: 'Q espacial: cada lugar una vez', l: [
+    { t: 'Q espacial: cada lugar una vez', qed: true, l: [
       ['\\sum_{i}\\Big(1-\\sum_{t}x_{i,t}\\Big)^{2} = \\sum_{i}\\Big(1 - 2\\sum_{t}x_{i,t} + \\sum_{t,t\'}x_{i,t}x_{i,t\'}\\Big)'],
       ['-2\\sum_{t}x_{i,t} = -\\sum_{t}(1 - z_{i,t}) = -T + \\sum_{t} z_{i,t}'],
       ['\\sum_{t,t\'}x_{i,t}x_{i,t\'} = \\tfrac14\\Big(T - \\sum_t z_{i,t}\\Big)^{2} = \\tfrac14\\Big(T^{2} - 2T\\sum_t z_{i,t} + T + 2\\sum_{t<t\'} z_{i,t}z_{i,t\'}\\Big)', 'Con (Σₜ z)² = T + 2 Σ_{t<t′} z z.'],
@@ -146,8 +146,10 @@
     { t: 'Comprobación: H(z) da lo mismo que Q(x)', casos: true }
   ];
 
-  function tex(s) {
+  var numero = 0;
+  function tex(s, sinNumero) {
     var src = typeof s === 'function' ? s() : s;
+    if (!sinNumero) src += ' \\tag{' + (++numero) + '}';
     if (window.katex) { try { return katex.renderToString(src, { displayMode: true, throwOnError: false }); } catch (e) {} }
     return '<code>' + src.replace(/</g, '&lt;') + '</code>';
   }
@@ -159,17 +161,81 @@
         texCaso('Rompe la regla temporal: dos lugares en t = 1', [[1, 1], [2, 1], [3, 2]], 'En t = 1 hay dos lugares y en t = 3 ninguno: (1 − 2)² + (1 − 0)² = 2 en la regla temporal. La distancia cuenta 1 → 3 y 2 → 3 (9 + 7). En z se activa J₁₄ = 50, el par (z₁₁, z₂₁) del mismo tiempo.')
       ];
       var out = '';
-      casos.forEach(function (c) { out += '<div class="dv-caso"><div class="dv-caso-tit">' + c[0] + '</div>' + c.slice(1, 4).map(function (l) { return '<div class="dv-linea">' + tex(l) + '</div>'; }).join('') + '<p class="dv-nota">' + c[4] + '</p></div>'; });
+      casos.forEach(function (c) { out += '<div class="dv-caso"><div class="dv-caso-tit">' + c[0] + '</div>' + c.slice(1, 4).map(function (l) { return '<div class="dv-linea">' + tex(l, true) + '</div>'; }).join('') + '<p class="dv-nota">' + c[4] + '</p></div>'; });
       return out + '<p class="dv-nota dv-cierre">Las tres coinciden: las matrices J y h son la misma función de coste. Abajo, la misma construcción para la red minera.</p>';
     }
-    return p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('');
+    return p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + (p.qed ? '<p class="dv-qed">∎</p>' : '');
   }
+
+  window.montarComprobador = function (caja) {
+    var x = unos([[1, 1], [2, 2], [3, 3]]);
+    var RUTAS = [['1 → 2 → 3', [1, 2, 3]], ['1 → 3 → 2', [1, 3, 2]], ['2 → 1 → 3', [2, 1, 3]], ['2 → 3 → 1', [2, 3, 1]], ['3 → 1 → 2', [3, 1, 2]], ['3 → 2 → 1', [3, 2, 1]]];
+    caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Comprobación con la matriz</div><h3 class="dv-tit">Tu trayectoria en z</h3>' +
+      '<p class="dv-resumen">Elige los x<sub>i,t</sub> (o una ruta). El estado se convierte en z = 1 − 2x y se evalúa con las matrices de arriba: H(z) = cte + h<sup>T</sup>z + ½ z<sup>T</sup>J z, con J simétrica. Debe dar lo mismo que Q(x) calculada directamente.</p></div>' +
+      '<div class="cp-cuerpo"><div class="cp-izq">' +
+      '<div class="cp-rutas">' + RUTAS.map(function (r, n) { return '<button type="button" class="nb-copiar" data-r="' + n + '">' + r[0] + '</button>'; }).join('') + '<button type="button" class="nb-copiar" data-r="vacia">vacía</button></div>' +
+      '<table class="cp-malla"><tr><th></th><th>t<sub>1</sub></th><th>t<sub>2</sub></th><th>t<sub>3</sub></th></tr>' +
+      [1, 2, 3].map(function (i) { return '<tr><th>lugar ' + i + '</th>' + [1, 2, 3].map(function (t) { return '<td><button type="button" class="cp-x" data-i="' + i + '" data-t="' + t + '" aria-label="x' + i + ',' + t + '"></button></td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
+      '<svg class="cp-tri" viewBox="0 0 220 150" aria-hidden="true"></svg></div>' +
+      '<div class="cp-der" aria-live="polite"></div></div>';
+    var der = caja.querySelector('.cp-der'), tri = caja.querySelector('.cp-tri');
+    var P = { 1: [40, 36], 2: [180, 36], 3: [110, 124] }, NS = 'http://www.w3.org/2000/svg';
+    function e(tag, at, padre) { var nn = document.createElementNS(NS, tag); for (var kk in at) nn.setAttribute(kk, at[kk]); padre.appendChild(nn); return nn; }
+    function dibujarTri() {
+      while (tri.firstChild) tri.removeChild(tri.firstChild);
+      var defs = e('defs', {}, tri), mk = e('marker', { id: 'cp-fl', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' }, defs);
+      e('path', { d: 'M0 0 L10 5 L0 10 z', fill: '#8C6D33' }, mk);
+      [[1, 2, 5], [2, 3, 7], [1, 3, 9]].forEach(function (a) {
+        e('line', { x1: P[a[0]][0], y1: P[a[0]][1], x2: P[a[1]][0], y2: P[a[1]][1], 'class': 'cp-arista' }, tri);
+        e('text', { x: (P[a[0]][0] + P[a[1]][0]) / 2 + (a[2] === 9 ? -12 : a[2] === 7 ? 12 : 0), y: (P[a[0]][1] + P[a[1]][1]) / 2 + (a[2] === 5 ? -6 : 4), 'class': 'cp-peso' }, tri).textContent = a[2];
+      });
+      // flechas t → t+1 cuando cada tiempo tiene un solo lugar
+      var lugar = [1, 2, 3].map(function (t) { var en = [1, 2, 3].filter(function (i) { return x[i][t]; }); return en.length === 1 ? en[0] : 0; });
+      for (var t = 0; t < 2; t++) if (lugar[t] && lugar[t + 1] && lugar[t] !== lugar[t + 1]) {
+        var a = P[lugar[t]], b = P[lugar[t + 1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey);
+        e('line', { x1: a[0] + ex / l * 15 - ey / l * 5, y1: a[1] + ey / l * 15 + ex / l * 5, x2: b[0] - ex / l * 17 - ey / l * 5, y2: b[1] - ey / l * 17 + ex / l * 5, 'class': 'cp-ruta', 'marker-end': 'url(#cp-fl)' }, tri);
+      }
+      [1, 2, 3].forEach(function (i) {
+        var veces = [1, 2, 3].filter(function (t) { return x[i][t]; }).length;
+        e('circle', { cx: P[i][0], cy: P[i][1], r: 13, 'class': 'cp-nodo' + (veces ? ' on' : '') }, tri);
+        e('text', { x: P[i][0], y: P[i][1] + 5, 'class': 'cp-nodo-t' }, tri).textContent = i;
+      });
+    }
+    function calcular() {
+      Array.prototype.forEach.call(caja.querySelectorAll('.cp-x'), function (b) { var v = x[+b.getAttribute('data-i')][+b.getAttribute('data-t')]; b.classList.toggle('on', !!v); b.textContent = v; });
+      dibujarTri();
+      var q = Qx(x), z = [], M = N * T;
+      for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) z.push(1 - 2 * x[i][t]);
+      var hz = 0, Jz = [], zJz = 0;
+      for (var a = 0; a < M; a++) { hz += MAT.h[a] * z[a]; var s2 = 0; for (var b2 = 0; b2 < M; b2++) s2 += MAT.J[a][b2] * z[b2]; Jz.push(s2); zJz += z[a] * s2; }
+      var H = CTE + hz + zJz / 2, ok = Math.abs(H - q.total) < 1e-9;
+      // vectores en fila (transpuestos) para que todo quepa a lo ancho
+      var col = function (v) { return '(' + v.join(',\\;') + ')^{\\mathsf T}'; };
+      der.innerHTML =
+        tex('z = 1 - 2x = ' + col(z.map(String)) + '^{\\!\\mathsf T}\\ \\text{(transpuesta, en fila)}'.replace('^{\\!\\mathsf T}\\ \\text{(transpuesta, en fila)}', ''), true).replace('<span class="katex-display">', '<span class="katex-display cp-z">') +
+        tex('h^{\\mathsf T}z = \\sum_{k=1}^{9} h_k z_k = ' + C + '{' + n(hz) + '}', true) +
+        tex('J z = ' + col(Jz.map(n)) + ' \\qquad \\tfrac12\\, z^{\\mathsf T}(Jz) = \\tfrac12(' + n(zJz) + ') = ' + C + '{' + n(zJz / 2) + '}', true) +
+        tex('H(z) = \\underbrace{' + n(CTE) + '}_{\\text{cte}} + \\underbrace{(' + n(hz) + ')}_{h^{\\mathsf T}z} + \\underbrace{(' + n(zJz / 2) + ')}_{\\frac12 z^{\\mathsf T}Jz} = ' + C + '{\\mathbf{' + n(H) + '}}', true) +
+        tex('Q(x) = \\underbrace{' + n(q.c) + '}_{Q_C} + 100\\cdot\\underbrace{' + q.tem + '}_{Q_{\\text{tem}}} + 100\\cdot\\underbrace{' + q.esp + '}_{Q_{\\text{esp}}} = \\mathbf{' + n(q.total) + '} \\quad ' + (ok ? '\\checkmark' : '\\times'), true) +
+        '<p class="dv-nota">' + (q.tem || q.esp ? 'Rompe ' + [q.tem ? 'la regla temporal (' + q.tem + ')' : '', q.esp ? 'la espacial (' + q.esp + ')' : ''].filter(Boolean).join(' y ') + ': cada unidad suma A = 100.' : 'Cumple las dos restricciones: H(z) es solo la distancia recorrida.') + '</p>';
+    }
+    Array.prototype.forEach.call(caja.querySelectorAll('.cp-x'), function (b) {
+      b.addEventListener('click', function () { var i = +b.getAttribute('data-i'), t = +b.getAttribute('data-t'); x[i][t] = 1 - x[i][t]; calcular(); });
+    });
+    Array.prototype.forEach.call(caja.querySelectorAll('[data-r]'), function (b) {
+      b.addEventListener('click', function () { var r = b.getAttribute('data-r'); x = r === 'vacia' ? unos([]) : unos(RUTAS[+r][1].map(function (i, t) { return [i, t + 1]; })); calcular(); });
+    });
+    calcular();
+    (function listo() { if (window.katex) calcular(); else setTimeout(listo, 300); })();
+  };
 
   window.montarDerivacion = function (caja) {
     function pintar() {
-      caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Del QUBO al Ising · de corrido</div><h3 class="dv-tit">Demostración para 3 nodos y 2 restricciones</h3></div>' +
+      numero = 0;
+      caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Del QUBO al Hamiltoniano de Ising</div><h3 class="dv-tit">La función de coste como un Hamiltoniano</h3>' +
+        '<p class="dv-resumen"><b>Resumen.</b> Para el caso de tres lugares y dos restricciones (un lugar por tiempo y cada lugar una vez) se muestra que la función de coste Q(x), escrita en variables binarias, coincide término a término con un Hamiltoniano de Ising H(z) = cte + Σ h<sub>k</sub> z<sub>k</sub> + Σ<sub>k&lt;l</sub> J<sub>kl</sub> z<sub>k</sub> z<sub>l</sub>. Se obtienen en forma cerrada la constante, los campos locales h y los acoplamientos J, y se comprueba el resultado con números.</p></div>' +
         '<div class="dv-pizarra">' + S.map(function (p, i) {
-          return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + String(i + 1).padStart(2, '0') + '</span>' + p.t + '</div>' + lineas(p) + '</section>';
+          return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' + lineas(p) + '</section>';
         }).join('') + '</div>';
     }
     pintar();

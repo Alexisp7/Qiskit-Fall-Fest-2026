@@ -406,6 +406,10 @@
       var dv = document.createElement('section'); dv.className = 'nb-deriva'; dv.id = 'celda-derivacion';
       nb.appendChild(dv); window.montarDerivacion(dv);
     }
+    if (etapa === 'inicializar' && window.montarComprobador) {
+      var cp = document.createElement('section'); cp.className = 'nb-comprueba'; cp.id = 'celda-comprueba';
+      nb.appendChild(cp); window.montarComprobador(cp);
+    }
     if (etapa === 'inicializar' && window.montarMatrices) {
       var mat = document.createElement('section'); mat.className = 'nb-matrices'; mat.id = 'celda-matrices';
       nb.appendChild(mat); window.montarMatrices(mat);
@@ -505,7 +509,7 @@
       '<div class="mx-formula">H = Σ<sub>k&lt;l</sub> J<sub>kl</sub> z<sub>k</sub> z<sub>l</sub> + Σ<sub>k</sub> h<sub>k</sub> z<sub>k</sub> + c &nbsp;·&nbsp; z<sub>k</sub> → z<sub>i,t</sub></div>' +
       '<p class="mx-nota">Se arma con las mismas piezas del cuaderno y el cambio x = (1 − z)/2. J es simétrica: cada par aparece dos veces en la matriz y se cuenta una vez en la suma.</p></div>' +
       '<div class="mx-controles">' +
-      '<label>Caso <select data-mx="caso"><option value="red">Red minera · 8 lugares</option><option value="tri">Triángulo · 3 lugares (control)</option></select></label>' +
+      '<label>Caso <select data-mx="caso"><option value="tri">Triángulo · 3 lugares</option><option value="red">Red minera · 8 lugares</option></select></label>' +
       '<label>T <select data-mx="T"></select></label>' +
       '<label>A <input type="number" data-mx="A" value="100" min="0" step="10"></label>' +
       '<label>B <input type="number" data-mx="B" value="1" min="0" step="0.5"></label>' +
@@ -595,7 +599,14 @@
       var a2 = document.createElement('a'); a2.href = url; a2.download = 'hamiltoniano_' + $('caso').value + '_T' + R.T + '.csv'; a2.click();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     });
+    // cada caso empieza con sus piezas: el triángulo con las dos restricciones, la red con todas
+    function piezasDelCaso() {
+      var tri = $('caso').value === 'tri', on = tri ? ['coste', 'lugar', 'visita'] : ['coste', 'lugar', 'visita', 'saltos', 'inicio', 'fin'];
+      Array.prototype.forEach.call(caja.querySelectorAll('[data-pieza]'), function (c) { c.checked = on.indexOf(c.getAttribute('data-pieza')) >= 0; });
+    }
+    $('caso').addEventListener('change', piezasDelCaso);
     Array.prototype.forEach.call(caja.querySelectorAll('select, input'), function (c) { c.addEventListener('change', calcular); });
+    piezasDelCaso();
     calcular();
   };
 })();
