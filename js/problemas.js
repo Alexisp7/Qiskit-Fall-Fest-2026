@@ -1,8 +1,9 @@
 // Ejemplo rápido: trayectoria mínima con 3 ubicaciones (A=1, B=2, C=3).
-// Un camión recorre las tres en T = 3 pasos (sin volver al inicio). Para cada
-// orden posible se calcula
+// Un camión recorre las tres en T = 3 pasos (sin volver al inicio):
 //   Q_C = B Σ_ij d_ij Σ_{t=1}^{T−1} x_{i,t} x_{j,t+1}
-// con la expansión completa de los 9 pares y sus 2 términos, y la tabla x_{i,t}.
+// Modo manual: cada toque en un nodo es el siguiente paso t; se anota en la
+// matriz x_{i,t} y la suma se recalcula. También se puede elegir una ruta
+// completa en la lista del costado.
 (function () {
   var svg = document.getElementById('tm-grafo');
   if (!svg) return;
@@ -22,51 +23,90 @@
     return n;
   }
 
-  // ── las 6 rutas posibles ──
+  // ── rutas ──
   var RUTAS = [['A', 'B', 'C'], ['A', 'C', 'B'], ['B', 'A', 'C'], ['B', 'C', 'A'], ['C', 'A', 'B'], ['C', 'B', 'A']];
-  function coste(r) { return d(r[0], r[1]) + d(r[1], r[2]); }
-  var elegida = 0;
+  function coste(r) { var c = 0; for (var i = 1; i < r.length; i++) c += d(r[i - 1], r[i]); return c; }
+  var ruta = RUTAS[0].slice();   // la ruta actual: puede estar a medias en modo manual
+  var nuevo = null;              // la última x_{i,t} anotada, para resaltarla
+  function indiceRuta() {
+    if (ruta.length < T) return -1;
+    for (var n = 0; n < RUTAS.length; n++) if (RUTAS[n].join() === ruta.join()) return n;
+    return -1;
+  }
 
-  // ── triángulo dirigido: la ruta elegida lleva flechas en el sentido del
-  // recorrido (A→B→C y C→B→A cuestan lo mismo, pero van al revés). Cada nodo
-  // muestra su x_{i,t} (ubicación i visitada en el paso t) y, en gris, su letra
+  // ── modo manual: tocar un nodo es avanzar un paso ──
+  function tocar(k) {
+    var ult = ruta[ruta.length - 1];
+    if (ruta.length === T) { ruta = [k]; }                 // ruta completa: empieza otra
+    else if (k === ult) { ruta.pop(); nuevo = null; pintar(); return; }   // deshacer el último paso
+    else if (ruta.indexOf(k) >= 0) { aviso('Ya pasaste por ' + k + ' en t = ' + (ruta.indexOf(k) + 1) + '.'); return; }
+    else ruta.push(k);
+    nuevo = [IDX[k], ruta.length];
+    pintar();
+  }
+
+  // ── grafo dirigido ──
   function grafo() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var r = RUTAS[elegida];
+    var r = ruta;
     var defs = el('defs', {});
     var m = el('marker', { id: 'tm-flecha', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, defs);
     el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'tm-punta' }, m);
+    var tramos = [];
+    for (var i = 1; i < r.length; i++) tramos.push([r[i - 1], r[i]]);
     var enRuta = {};
-    enRuta[[r[0], r[1]].sort().join('')] = 1; enRuta[[r[1], r[2]].sort().join('')] = 2;
+    tramos.forEach(function (tr) { enRuta[tr.slice().sort().join('')] = true; });
     [['A', 'B'], ['B', 'C'], ['A', 'C']].forEach(function (p) {
       var a = POS[p[0]], b = POS[p[1]], k = p.join('');
-      // las aristas de la ruta se dibujan solo con su resalte y su flecha
       if (enRuta[k]) el('line', { 'class': 'tm-resalte', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
       else el('line', { 'class': 'tm-arista', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
       var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey);
       var lado = k === 'AC' ? -1 : 1; // cada peso por fuera del triángulo
       el('text', { 'class': 'tm-peso', x: mx + lado * ey / l * 16, y: my - lado * ex / l * 16 + 6 }).textContent = d(p[0], p[1]);
     });
-    // flechas del recorrido: de cada nodo al siguiente, cortadas en el borde del círculo
-    [[r[0], r[1]], [r[1], r[2]]].forEach(function (tr) {
+    tramos.forEach(function (tr) {
       var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 27;
       el('line', { 'class': 'tm-dir', x1: a[0] + ex / l * R0, y1: a[1] + ey / l * R0, x2: b[0] - ex / l * (R0 + 2), y2: b[1] - ey / l * (R0 + 2), 'marker-end': 'url(#tm-flecha)' });
     });
+    var aqui = r.length < T ? r[r.length - 1] : null;
     L.forEach(function (k, n) {
       var p = POS[k], paso = r.indexOf(k) + 1;
-      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 24 });
-      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 15 }).textContent = k;
-      var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 });
-      t.appendChild(document.createTextNode('x'));
-      var sb = el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t);
-      sb.textContent = (n + 1) + ',' + paso;
+      var g = el('g', { 'class': 'tm-nodo-g' + (paso ? ' visitado' : ''), tabindex: '0', role: 'button', 'aria-label': 'Ir a ' + k });
+      // "estás aquí": el último nodo de una ruta a medias lleva un anillo que late
+      if (k === aqui) el('circle', { 'class': 'tm-aqui', cx: p[0], cy: p[1], r: 24 }, g);
+      el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 24 }, g);
+      el('text', { 'class': 'tm-letra-fondo', x: p[0], y: p[1] + 15 }, g).textContent = k;
+      if (paso) {
+        var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 }, g);
+        t.appendChild(document.createTextNode('x'));
+        el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t).textContent = (n + 1) + ',' + paso;
+      }
+      g.addEventListener('click', function () { tocar(k); });
+      g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
     });
+  }
+
+  // ── contador de t ──
+  var cont = document.getElementById('tm-contador');
+  var avisoT = 0;
+  function contador() {
+    var n = ruta.length, puntos = '';
+    for (var t = 1; t <= T; t++) puntos += '<span class="tm-c-punto' + (t <= n ? ' lleno' : '') + (t === n ? ' actual' : '') + '"></span>';
+    var txt = n === 0 ? 'Toca el nodo donde empieza el camión'
+      : n < T ? 'En t = ' + n + ' estás en <b>' + ruta[n - 1] + '</b> · toca la siguiente ubicación'
+      : 'Ruta completa en t = ' + T + ' · toca un nodo para empezar otra';
+    cont.innerHTML = '<span class="tm-c-t">t = ' + Math.max(n, 0) + '<span class="tm-c-de"> / ' + T + '</span></span><span class="tm-c-puntos">' + puntos + '</span><span class="tm-c-txt">' + txt + '</span>';
+  }
+  function aviso(txt) {
+    var e = cont.querySelector('.tm-c-txt');
+    e.textContent = txt; e.classList.add('error');
+    clearTimeout(avisoT); avisoT = setTimeout(contador, 1600);
   }
 
   // ── tarjetas de rutas ──
   var lista = document.getElementById('tm-rutas');
   function rutas() {
-    var min = Math.min.apply(null, RUTAS.map(coste));
+    var min = Math.min.apply(null, RUTAS.map(coste)), elegida = indiceRuta();
     lista.innerHTML = '';
     RUTAS.forEach(function (r, n) {
       var li = document.createElement('li');
@@ -75,29 +115,30 @@
       li.innerHTML = '<button type="button"><span class="tm-r-n">Q' + sub('C') + '<sup>' + (n + 1) + '</sup></span>' +
         '<span class="tm-r-camino">' + r.join(' → ') + '</span>' +
         '<span class="tm-r-coste">' + c + '</span>' + (c === min ? '<span class="tm-r-min">mínima</span>' : '') + '</button>';
-      li.querySelector('button').addEventListener('click', function () { elegida = n; pintar(); });
+      li.querySelector('button').addEventListener('click', function () { ruta = r.slice(); nuevo = null; pintar(); });
       lista.appendChild(li);
     });
   }
 
-  // ── Q_C expandida, término a término ──
+  // ── Q_C expandida y matriz x_{i,t} ──
   var outQ = document.getElementById('tm-q');
   var outT = document.getElementById('tm-terminos');
   var tabla = document.getElementById('tm-tabla');
   function detalle() {
-    var r = RUTAS[elegida], B = Number(document.getElementById('tm-b').value) || 0;
+    var r = ruta, B = Number(document.getElementById('tm-b').value) || 0, n = indiceRuta();
     function x(i, t) { return r[t - 1] === L[i - 1] ? 1 : 0; }
     function xs(i, t) { return 'x' + sub(i + ',' + t); }
-    // x_{i,t} con su valor (0 o 1) escrito encima, en gris
     function xv(i, t) { var v = x(i, t); return '<span class="tm-x' + (v ? '' : ' cero') + '"><span class="tm-x-val' + (v ? ' uno' : '') + '">' + v + '</span><span class="tm-x-glifo">' + xs(i, t) + '</span></span>'; }
-    var a = IDX[r[0]], b = IDX[r[1]], c = IDX[r[2]];
-    var v1 = d(r[0], r[1]), v2 = d(r[1], r[2]), total = B * (v1 + v2);
+    var pares = [], vals = [];
+    for (var k = 1; k < r.length; k++) { pares.push('d' + sub('' + IDX[r[k - 1]] + IDX[r[k]])); vals.push(d(r[k - 1], r[k])); }
+    var total = B * vals.reduce(function (s, v) { return s + v; }, 0);
     var abre = B === 1 ? '' : B + ' (', cierra = B === 1 ? '' : ')';
-    outQ.innerHTML = '<span class="tm-q-nom">Q' + sub('C') + '<sup>' + (elegida + 1) + '</sup></span> = B <span class="tm-sigma chica"><sup>3</sup>Σ<sub>i,j</sub></span> d' + sub('ij') +
+    var nombre = 'Q' + sub('C') + (n >= 0 ? '<sup>' + (n + 1) + '</sup>' : '');
+    outQ.innerHTML = '<span class="tm-q-nom">' + nombre + '</span> = B <span class="tm-sigma chica"><sup>3</sup>Σ<sub>i,j</sub></span> d' + sub('ij') +
       ' <span class="tm-sigma chica"><sup>2</sup>Σ<sub>t=1</sub></span> x' + sub('i,t') + ' x' + sub('j,t+1') +
-      ' = ' + abre + 'd' + sub('' + a + b) + ' + d' + sub('' + b + c) + cierra +
-      ' = ' + abre + v1 + ' + ' + v2 + cierra + ' = <span class="tm-circulo">' + Math.round(total * 100) / 100 + '</span>';
-    // los 9 pares d_ij, cada uno con sus dos términos (t = 1 y t = 2)
+      (pares.length ? ' = ' + abre + pares.join(' + ') + cierra : '') +
+      (pares.length > 1 || (pares.length && B !== 1) ? ' = ' + abre + vals.join(' + ') + cierra : '') +
+      ' = <span class="tm-circulo">' + Math.round(total * 100) / 100 + '</span>' + (r.length < T ? ' <span class="tm-parcial">parcial</span>' : '');
     var html = '';
     for (var j = 1; j <= 3; j++) for (var i = 1; i <= 3; i++) {
       var terms = [], vivo = false;
@@ -109,23 +150,23 @@
       html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span><span class="tm-par-p">(</span>' + terms.join('<span class="tm-mas">+</span>') + '<span class="tm-par-p">)</span></div>';
     }
     outT.innerHTML = html;
-    // la ruta como matriz x_{i,t}: de aquí sale la sumatoria de la derecha
-    var h = '<tr><th></th>' + [1, 2, 3].map(function (t) { return '<th>t' + sub(t) + '</th>'; }).join('') + '</tr>';
-    L.forEach(function (k, n) {
-      h += '<tr><th>' + k + ' (x' + sub(n + 1) + ')</th>' + [1, 2, 3].map(function (t) {
-        var v = x(n + 1, t);
-        // cada celda dice qué variable es; las que valen 1 van sombreadas
-        return '<td class="' + (v ? 'uno' : '') + '"><span class="tm-celda-x">x' + sub((n + 1) + ',' + t) + (v ? ' = 1' : '') + '</span><span class="tm-celda-v">' + v + '</span></td>';
+    var h = '<tr><th></th>' + [1, 2, 3].map(function (t) { return '<th class="' + (t === r.length && r.length < T ? 'ahora' : '') + '">t' + sub(t) + '</th>'; }).join('') + '</tr>';
+    L.forEach(function (k, n2) {
+      h += '<tr><th>' + k + ' (x' + sub(n2 + 1) + ')</th>' + [1, 2, 3].map(function (t) {
+        var v = x(n2 + 1, t), es = nuevo && nuevo[0] === n2 + 1 && nuevo[1] === t;
+        var vacio = t > r.length;
+        return '<td class="' + (v ? 'uno' : '') + (es ? ' nuevo' : '') + (vacio ? ' vacio' : '') + '"><span class="tm-celda-x">x' + sub((n2 + 1) + ',' + t) + (v ? ' = 1' : '') + '</span><span class="tm-celda-v">' + (vacio ? '·' : v) + '</span></td>';
       }).join('') + '</tr>';
     });
     tabla.innerHTML = h;
   }
 
-  function pintar() { grafo(); rutas(); detalle(); }
+  function pintar() { grafo(); contador(); rutas(); detalle(); }
   Array.prototype.forEach.call(document.querySelectorAll('.tm-distancias input[data-par]'), function (inp) {
-    inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); pintar(); });
+    inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); nuevo = null; pintar(); });
   });
   document.getElementById('tm-b').addEventListener('input', detalle);
+  document.getElementById('tm-reiniciar').addEventListener('click', function () { ruta = []; nuevo = null; pintar(); });
   // el ejemplo completo se contrae y se despliega desde su título
   var caja = svg.closest('.tm'), boton = document.getElementById('tm-toggle');
   boton.addEventListener('click', function () {
