@@ -346,24 +346,28 @@
   function circuitoValores(th, activos) {   // activos: los parámetros que se acaban de mover
     var N = 3, n = 9, dy = 30, y0 = 40, W = 900;
     var o = '<svg class="az-circ vq-circ" viewBox="0 0 ' + W + ' ' + (y0 + (n - 1) * dy + 28) + '" role="img" aria-label="Ansatz de 9 qubits con sus ángulos actuales, la medida, el Hamiltoniano y la energía">';
-    o += '<text class="azc-col" x="170" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text><text class="azc-col" x="420" y="16">cascada de CZ</text><text class="azc-col" x="670" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text><text class="azc-col" x="790" y="16">medir</text>';
+    o += '<text class="azc-col" x="170" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(θ)</tspan></text><text class="azc-col" x="420" y="16">cascada de CZ</text><text class="azc-col" x="670" y="16">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(φ)</tspan></text><text class="azc-col" x="795" y="16">medir Ĥ</text>';
     for (var k = 0; k < n; k++) {
       var y = y0 + k * dy, i = k % N + 1, t = Math.floor(k / N) + 1;
       o += '<text class="azc-q" x="6" y="' + (y + 5) + '">q<tspan class="azc-sub" dy="3">' + (k + 1) + '</tspan><tspan dy="-3"> · x</tspan><tspan class="azc-sub" dy="3">' + i + t + '</tspan></text>';
-      o += '<text class="azc-ket" x="90" y="' + (y + 5) + '">|0⟩</text><line class="azc-cable" x1="114" y1="' + y + '" x2="776" y2="' + y + '"/>';
+      o += '<text class="azc-ket" x="90" y="' + (y + 5) + '">|0⟩</text><line class="azc-cable" x1="114" y1="' + y + '" x2="750" y2="' + y + '"/>';
       [[k, 132, th[k]], [n + k, 632, th[n + k]]].forEach(function (g) {
         o += '<rect class="azc-ry' + (activos.indexOf(g[0]) >= 0 ? ' vq-activo' : '') + '" x="' + g[1] + '" y="' + (y - 11) + '" width="76" height="22"/><text class="azc-g vq-g" x="' + (g[1] + 38) + '" y="' + (y + 5) + '">R<tspan class="azc-sub" dy="3">Y</tspan><tspan dy="-3">(' + grados(g[2]) + '°)</tspan></text>';
       });
-      o += '<rect class="azc-ry" x="776" y="' + (y - 11) + '" width="28" height="22"/><path class="azc-aguja" d="M781 ' + (y + 6) + ' A9 9 0 0 1 799 ' + (y + 6) + ' M790 ' + (y + 6) + ' L797 ' + (y - 6) + '"/>';
     }
-    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="114" y1="' + yy + '" x2="776" y2="' + yy + '"/>'; });
+    [3, 6].forEach(function (m) { var yy = y0 + (m - .5) * dy; o += '<line class="azc-t" x1="114" y1="' + yy + '" x2="750" y2="' + yy + '"/>'; });
     for (var c = 0; c < n - 1; c++) {
       var xc = 250 + c * 44, ya = y0 + c * dy, yb = ya + dy, cruza = (c + 1) % N === 0;
       o += '<line class="azc-cz' + (cruza ? ' cruza' : '') + '" x1="' + xc + '" y1="' + ya + '" x2="' + xc + '" y2="' + yb + '"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + ya + '" r="4"/><circle class="azc-p' + (cruza ? ' cruza' : '') + '" cx="' + xc + '" cy="' + yb + '" r="4"/>';
     }
-    // tras medir salen los 9 bits b (cables dobles: información clásica)
-    for (var k2 = 0; k2 < n; k2++) { var y2 = y0 + k2 * dy; o += '<line class="vq-clasico" x1="804" y1="' + (y2 - 1.5) + '" x2="846" y2="' + (y2 - 1.5) + '"/><line class="vq-clasico" x1="804" y1="' + (y2 + 1.5) + '" x2="846" y2="' + (y2 + 1.5) + '"/><text class="vq-bit-q" x="852" y="' + (y2 + 4) + '">b<tspan class="azc-sub" dy="3">' + (k2 + 1) + '</tspan></text>'; }
-    o += '<text class="azc-col" x="862" y="16">bits</text>';
+    // el Hamiltoniano es lo que se mide: un observable sobre los 9 qubits, no una compuerta
+    var yt = y0 - 14, yf = y0 + (n - 1) * dy + 14, ym = (yt + yf) / 2;
+    o += '<rect class="vq-obs" x="750" y="' + yt + '" width="90" height="' + (yf - yt) + '"/>';
+    o += '<path class="vq-obs-aguja" d="M778 ' + (yt + 34) + ' A17 17 0 0 1 812 ' + (yt + 34) + ' M795 ' + (yt + 34) + ' L807 ' + (yt + 14) + '"/>';
+    o += '<text class="vq-obs-h" x="795" y="' + (ym + 14) + '">Ĥ</text>';
+    o += '<text class="vq-obs-f" x="795" y="' + (ym + 40) + '">Σ h<tspan class="azc-sub" dy="2">k</tspan><tspan dy="-2">Z</tspan><tspan class="azc-sub" dy="2">k</tspan></text><text class="vq-obs-f" x="795" y="' + (ym + 54) + '">+ Σ J<tspan class="azc-sub" dy="2">kl</tspan><tspan dy="-2">Z</tspan><tspan class="azc-sub" dy="2">k</tspan><tspan dy="-2">Z</tspan><tspan class="azc-sub" dy="2">l</tspan></text>';
+    // sale un número por disparo: H(b) (cable doble = información clásica)
+    o += '<line class="vq-clasico" x1="840" y1="' + (ym - 1.5) + '" x2="862" y2="' + (ym - 1.5) + '"/><line class="vq-clasico" x1="840" y1="' + (ym + 1.5) + '" x2="862" y2="' + (ym + 1.5) + '"/><text class="vq-bit-q" x="866" y="' + (ym + 5) + '">H(b)</text>';
     return o + '</svg>';
   }
   // la trayectoria de una configuración x (filas = lugares, columnas = tiempos) sobre el triángulo
@@ -480,15 +484,15 @@
       '<div class="az-demo vq-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
       '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar con COBYLA</button><button type="button" class="dv-btn" data-az="paso">una iteración</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
       '<label class="vq-vel">velocidad <select data-az="vel"><option value="250">lenta</option><option value="60" selected>normal</option><option value="0">rápida</option></select></label></div>' +
-      '<div class="vq-flujo"><span>θ</span>→<span>ansatz</span>→<span>medir</span>→<span>bits b</span>→<span>ruta x</span>→<span>H(b)</span>→<span>promedio: E(θ)</span>→<span>COBYLA cambia θ</span></div>' +
+      '<div class="vq-flujo"><span>θ</span>→<span>ansatz U(θ)</span>→<span>medir Ĥ</span>→<span>cada disparo: bits b, ruta x y H(b)</span>→<span>promedio: E(θ) = ⟨Ĥ⟩</span>→<span>COBYLA cambia θ</span></div>' +
       // 1 · el ansatz y lo que sale al medir
-      '<div class="vq-paso"><span>1</span>El ansatz da una configuración cada vez que se mide</div>' +
+      '<div class="vq-paso"><span>1</span>El ansatz prepara el estado y se mide el Hamiltoniano</div>' +
       '<div class="vq-fila"><div data-az="circ"></div><aside class="vq-lado" data-az="disparo"></aside></div>' +
-      '<p class="vq-fund"><b>Fundamento.</b> Los ángulos θ fijan el estado |ψ(θ)⟩. Medir los 9 qubits lo colapsa en una cadena de bits b con probabilidad P(b) = |⟨b|ψ(θ)⟩|²: cada disparo es una configuración distinta. Los qubits van por tiempo, así que q<sub>1</sub>q<sub>2</sub>q<sub>3</sub> es la columna t<sub>1</sub> de la matriz x, q<sub>4</sub>q<sub>5</sub>q<sub>6</sub> la t<sub>2</sub> y q<sub>7</sub>q<sub>8</sub>q<sub>9</sub> la t<sub>3</sub>.</p>' +
+      '<p class="vq-fund"><b>Fundamento.</b> El ansatz U(θ) prepara |ψ(θ)⟩ = U(θ)|0⟩<sup>⊗9</sup>, y lo que se mide es el Hamiltoniano Ĥ. Ĥ no es una compuerta (no es unitario): es el observable, la cantidad que se quiere conocer. Como solo tiene Z y Z⊗Z, medir Ĥ es medir los 9 qubits en la base Z: cada disparo da una cadena b, con probabilidad P(b) = |⟨b|ψ(θ)⟩|², y Ĥ vale H(b) en ella. Los qubits van por tiempo, así que q<sub>1</sub>q<sub>2</sub>q<sub>3</sub> es la columna t<sub>1</sub> de la matriz x, q<sub>4</sub>q<sub>5</sub>q<sub>6</sub> la t<sub>2</sub> y q<sub>7</sub>q<sub>8</sub>q<sub>9</sub> la t<sub>3</sub>.</p>' +
       // 2 · la energía
       '<div class="vq-paso"><span>2</span>La energía: el promedio de H(b) en los disparos</div>' +
       '<div class="vq-energia" data-az="energia"></div>' +
-      '<p class="vq-fund"><b>Fundamento.</b> ¿Por qué se mide antes de aplicar H? Porque H solo tiene términos Z y Z⊗Z: es diagonal en la misma base en que se mide, así que no hace falta aplicarlo como compuerta. Basta medir los bits y calcular H(b) con ellos: ⟨ψ|Ĥ|ψ⟩ = Σ<sub>b</sub> P(b) H(b). Así se hace en un chip real, y es la energía que el optimizador quiere bajar.</p>' +
+      '<p class="vq-fund"><b>Fundamento.</b> El valor esperado de Ĥ en el estado es la energía: E(θ) = ⟨ψ(θ)|Ĥ|ψ(θ)⟩ = Σ<sub>b</sub> P(b) H(b). Un chip no la da de una vez: se repite el circuito y se promedia H(b) sobre los disparos. Es el número que el optimizador quiere bajar. (En otros ansatz, como QAOA, Ĥ también entra dentro del circuito como compuertas e<sup>−iγĤ</sup>; en este ansatz solo se mide.)</p>' +
       // 3 · COBYLA
       '<div class="vq-paso"><span>3</span>COBYLA decide cómo cambiar los ángulos</div>' +
       '<div class="vq-cobyla"><div><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada evaluación"></svg></div><div class="vq-decision" data-az="decision"></div></div>' +
@@ -522,7 +526,7 @@
       var p = partes(s), b = [];
       for (var q = 0; q < sim.n; q++) b.push((s >> q) & 1);
       var lt = lugaresPorTiempo(p.x), mot = motivos(p.x);
-      var h = '<div class="vq-lado-tit">Al medir <small>disparo ' + n + ' de ' + DISPAROS + '</small></div>';
+      var h = '<div class="vq-lado-tit">Al medir Ĥ <small>disparo ' + n + ' de ' + DISPAROS + '</small></div>';
       h += '<div class="vq-bits">' + [0, 1, 2].map(function (t) { return '<span><i>t<sub>' + (t + 1) + '</sub></i>' + b.slice(3 * t, 3 * t + 3).join('') + '</span>'; }).join('') + '</div>';
       h += '<div class="vq-conx"><table class="vq-matx"><tr><th></th><th>t<sub>1</sub></th><th>t<sub>2</sub></th><th>t<sub>3</sub></th></tr>' +
         [0, 1, 2].map(function (i) { return '<tr><th>x<sub>' + (i + 1) + '</sub></th>' + [0, 1, 2].map(function (t) { return '<td class="' + (p.x[i][t] ? 'uno' : '') + '">' + p.x[i][t] + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' + trayectoriaSVG(p.x, false) + '</div>';
