@@ -1858,6 +1858,81 @@
       .tm-contador-fila { margin: 0; }
       .tm-c-t { font-size: 23px; }
     }
+    /* ── el ejemplo por partes: 1 distancias · 2 ruta · 3 coste · 4 resumen ── */
+    .tm-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 0 0 14px; }
+    .tm-nav-btn { width: 34px; height: 34px; border: 1.5px solid #1B2A4A; border-radius: 50%; background: #fff; color: #1B2A4A; font-family: 'Cormorant Garamond', serif; font-size: 26px; line-height: 1; padding: 0 0 3px; cursor: pointer; transition: background .2s, color .2s, opacity .2s; }
+    .tm-nav-btn:hover:not(:disabled) { background: #1B2A4A; color: #fff; }
+    .tm-nav-btn:disabled { opacity: .25; cursor: default; }
+    #tm-adelante:not(:disabled) { border-color: var(--gold); background: var(--gold); color: #fff; animation: tmLlama 1.6s ease-in-out infinite; }
+    @keyframes tmLlama { 50% { box-shadow: 0 0 0 6px rgba(200,169,110,.22); } }
+    .tm-pasos { list-style: none; display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; }
+    .tm-pasos li { display: flex; align-items: center; gap: 7px; font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: #B0AAA0; }
+    .tm-pasos li + li::before { content: ''; width: 26px; height: 1px; background: #D9D3C7; margin-right: 3px; }
+    .tm-pasos li span { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #D9D3C7; display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; letter-spacing: 0; }
+    .tm-pasos li sub { font-size: 7px; }
+    .tm-pasos li.hecho { color: #1B2A4A; }
+    .tm-pasos li.hecho span { border-color: #1B2A4A; }
+    .tm-pasos li.actual { color: #8C6D33; font-weight: 700; }
+    .tm-pasos li.actual span { background: var(--gold); border-color: var(--gold); color: #fff; }
+
+    .tm-cuerpo-in:not([data-paso="4"]) > .tm-arriba, .tm-cuerpo-in:not([data-paso="4"]) > .tm-abajo { display: none; }
+    .tm-cuerpo-in[data-paso="4"] > .tm-escena { display: none; }
+    .tm-cuerpo-in[data-paso="4"] > .tm-arriba, .tm-cuerpo-in[data-paso="4"] > .tm-abajo { animation: tmEscena .5s cubic-bezier(.16,1,.3,1) both; }
+    .tm-e { display: none; text-align: center; }
+    .tm-cuerpo-in[data-paso="1"] .tm-e[data-e="1"], .tm-cuerpo-in[data-paso="2"] .tm-e[data-e="2"], .tm-cuerpo-in[data-paso="3"] .tm-e[data-e="3"] { display: block; }
+    .tm-e > * { animation: tmEscena .55s cubic-bezier(.16,1,.3,1) both; }
+    .tm-e > :nth-child(2) { animation-delay: .08s; } .tm-e > :nth-child(3) { animation-delay: .16s; } .tm-e > :nth-child(4) { animation-delay: .24s; } .tm-e > :nth-child(5) { animation-delay: .32s; }
+    @keyframes tmEscena { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .tm-e-rot { font-size: 26px; font-style: italic; color: #1B2A4A; margin-bottom: 10px; }
+    .tm-e-nota { font-family: 'Inter', sans-serif; font-size: 12.5px; color: #8C6D33; margin: 8px 0 0; }
+    .tm-slot .tm-distancias { border-right: none; padding-right: 0; text-align: left; }
+    .tm-slot-grafo .tm-grafo { width: 460px; max-width: 100%; max-height: 300px; margin: 0 auto; }
+    .tm-grafo.quieto .tm-nodo-g { cursor: default; }
+    .tm-grafo.quieto .tm-nodo-g .tm-letra-fondo { opacity: .85; font-size: 28px; transform: translateY(-6px); }
+    .tm-grafo.quieto .tm-nodo-g:hover .tm-nodo { stroke: #1B2A4A; stroke-width: 2; }
+    .tm-e1-fila { display: flex; align-items: center; justify-content: center; gap: 48px; }
+    .tm-e1-fila .tm-distancias { font-size: 25px; gap: 8px; }
+    .tm-e1-fila .tm-distancias input { font-size: 25px; width: 54px; }
+    .tm-e2-fila { display: flex; align-items: flex-start; justify-content: center; gap: 56px; text-align: left; }
+    .tm-e2-fila .tm-slot-grafo .tm-grafo { width: 400px; max-height: 262px; }
+    .tm-e2-mat { padding-top: 6px; }
+    .tm-e2-mat .tm-sub { margin-bottom: 4px; }
+    .tm-nocero { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 40px; margin-top: 12px; font-size: 21px; font-style: italic; }
+    .tm-nc-rot { font-size: 19px; color: #9a958c; }
+    .tm-nc { padding: 2px 12px; border: 1px solid rgba(140,109,51,.45); background: #FBF7EE; color: #8C6D33; font-weight: 600; white-space: nowrap; animation: tmEscena .45s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--k) * .14s); }
+    .tm-nc-pista { font-family: 'Inter', sans-serif; font-style: normal; font-size: 12.5px; color: #9a958c; max-width: 300px; line-height: 1.5; }
+    .tm-e[data-e="3"] .tm-nocero { justify-content: center; margin: 0 0 6px; min-height: 0; }
+    .tm-e[data-e="3"] .tm-q { font-size: 30px; margin-bottom: 14px; }
+    .tm-e[data-e="3"] .tm-terminos { font-size: 22px; justify-content: center; column-gap: 46px; row-gap: 14px; text-align: left; }
+    .tm-e[data-e="3"] .tm-x-val { font-size: 11px; }
+    .tm-acum { margin-top: 14px; font-size: 26px; font-style: italic; min-height: 40px; }
+    .tm-acum-rot { font-family: 'Space Mono', monospace; font-style: normal; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: #9a958c; margin-right: 8px; }
+    .tm-acum-v { display: inline-block; animation: tmEscena .4s cubic-bezier(.16,1,.3,1) both; }
+    .tm-repetir { margin-top: 6px; }
+    /* mientras se calcula: los valores y las tachas aparecen término a término */
+    .tm-escena.animando .tm-q-res { visibility: hidden; }
+    .tm-escena.animando .tm-term:not(.hecho) .tm-x-val { visibility: hidden; }
+    .tm-escena.animando .tm-term:not(.hecho) .tm-x.cero .tm-x-glifo::after { content: none; }
+    .tm-escena.animando .tm-term:not(.hecho) { font-weight: 400; }
+    .tm-escena.animando .tm-par:not(.hecho) { opacity: 1; }
+    .tm-escena.animando .tm-par:not(.hecho) .tm-d.on { color: var(--black); font-weight: 400; }
+    .tm-escena .tm-par { transition: opacity .45s; }
+    .tm-term.ahora { background: rgba(200,169,110,.28); border-radius: 4px; box-shadow: 0 0 0 3px rgba(200,169,110,.28); }
+    .tm-term.hecho .tm-x.cero .tm-x-glifo::after { animation: tmTacha .28s ease-out both; transform-origin: left center; }
+    @keyframes tmTacha { from { transform: rotate(-14deg) scaleX(0); } to { transform: rotate(-14deg) scaleX(1); } }
+    .tm-term.hecho .tm-x-val { animation: tmEscena .3s ease-out both; }
+    @media (prefers-reduced-motion: reduce) { .tm-e > *, .tm-nc, .tm-acum-v, #tm-adelante, .tm-term.hecho .tm-x-val, .tm-term.hecho .tm-x.cero .tm-x-glifo::after { animation: none !important; } }
+    @media (max-width: 900px) {
+      .tm-e1-fila, .tm-e2-fila { flex-direction: column; align-items: center; gap: 18px; }
+      .tm-pasos li { font-size: 0; gap: 0; }
+      .tm-pasos li + li::before { width: 14px; }
+    }
+    @media (min-width: 1000px) and (max-height: 840px) {
+      .tm-nav { margin-bottom: 8px; }
+      .tm-cuerpo-in[data-paso="4"] .tm-grafo-caja > .tm-sub { display: none; }
+      .tm-cuerpo-in[data-paso="4"] .tm-lado .tm-castigo { display: none; }
+      .tm-cuerpo-in[data-paso="4"] .tm-posibles { margin-top: 10px; }
+    }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1894,7 +1969,46 @@
       <button type="button" class="tm-titulo" id="tm-toggle" aria-expanded="true" aria-controls="tm-cuerpo"><span></span>Ejemplo rápido: trayectoria mínima <i class="tm-chevron" aria-hidden="true"></i><span></span></button>
 
       <div class="tm-cuerpo" id="tm-cuerpo">
-        <div class="tm-cuerpo-in">
+        <div class="tm-cuerpo-in" id="tm-cuerpo-in" data-paso="1">
+          <!-- el ejemplo se recorre por partes, como si lo calculáramos desde cero -->
+          <div class="tm-nav">
+            <button type="button" class="tm-nav-btn" id="tm-atras" aria-label="Paso anterior">‹</button>
+            <ol class="tm-pasos" id="tm-pasos">
+              <li><span>1</span>Distancias</li>
+              <li><span>2</span>Ruta</li>
+              <li><span>3</span>Coste Q<sub>C</sub></li>
+              <li><span>4</span>Resumen</li>
+            </ol>
+            <button type="button" class="tm-nav-btn" id="tm-adelante" aria-label="Paso siguiente">›</button>
+          </div>
+
+          <div class="tm-escena" id="tm-escena" aria-live="polite">
+            <section class="tm-e" data-e="1">
+              <div class="tm-e-rot">Las distancias entre las ubicaciones</div>
+              <div class="tm-e1-fila"><div class="tm-slot" data-slot="dist"></div><div class="tm-slot tm-slot-grafo" data-slot="grafo-1"></div></div>
+              <p class="tm-e-nota">Ya vienen con valores; puedes cambiarlos y luego pasar a la ruta con <b>›</b></p>
+            </section>
+            <section class="tm-e" data-e="2">
+              <div class="tm-e-rot">Elige la ruta: toca los nodos en orden</div>
+              <div class="tm-e2-fila">
+                <div><div class="tm-slot" data-slot="contador"></div><div class="tm-slot tm-slot-grafo" data-slot="grafo-2"></div></div>
+                <div class="tm-e2-mat">
+                  <div class="tm-sub">Matriz x<sub>i,t</sub></div>
+                  <div class="tm-slot" data-slot="tabla"></div>
+                  <div class="tm-nocero" id="tm-nocero-2"></div>
+                </div>
+              </div>
+            </section>
+            <section class="tm-e" data-e="3">
+              <div class="tm-e-rot">Calculamos Q<sub>C</sub> término por término</div>
+              <div class="tm-nocero" id="tm-nocero-3"></div>
+              <div class="tm-slot" data-slot="q"></div>
+              <div class="tm-slot" data-slot="terminos"></div>
+              <div class="tm-acum" id="tm-acum"></div>
+              <button type="button" class="tm-reiniciar tm-repetir" id="tm-repetir">↻ Repetir</button>
+            </section>
+          </div>
+
           <!-- arriba: distancias y grafo grande; a la derecha, coste, x_{i,t} y rutas -->
           <div class="tm-arriba">
             <div class="tm-grafo-caja">
@@ -1973,6 +2087,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=20"></script>
+  <script src="js/problemas.js?v=22"></script>
 </body>
 </html>

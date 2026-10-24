@@ -26,7 +26,8 @@
   // ── rutas ──
   var RUTAS = [['A', 'B', 'C'], ['A', 'C', 'B'], ['B', 'A', 'C'], ['B', 'C', 'A'], ['C', 'A', 'B'], ['C', 'B', 'A']];
   function coste(r) { var c = 0; for (var i = 1; i < r.length; i++) c += d(r[i - 1], r[i]); return c; }
-  var ruta = RUTAS[0].slice();   // la ruta actual: puede estar a medias en modo manual
+  var ruta = [];                 // la ruta actual: puede estar a medias en modo manual
+  var paso = 1;                  // 1 distancias · 2 ruta · 3 coste · 4 resumen
   var nuevo = null;              // la última x_{i,t} anotada, para resaltarla
   function indiceRuta() {
     if (ruta.length < T) return -1;
@@ -48,7 +49,8 @@
   // ── grafo dirigido ──
   function grafo() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var r = ruta;
+    var r = paso === 1 ? [] : ruta;   // en el paso 1 solo se ven las distancias
+    svg.classList.toggle('quieto', paso === 1);
     var defs = el('defs', {});
     var m = el('marker', { id: 'tm-flecha', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, defs);
     el('path', { d: 'M0 0 L10 5 L0 10 z', 'class': 'tm-punta' }, m);
@@ -81,6 +83,7 @@
         t.appendChild(document.createTextNode('x'));
         el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t).textContent = (n + 1) + ',' + paso;
       }
+      if (paso === 1) return;
       g.addEventListener('click', function () { tocar(k); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
     });
@@ -135,10 +138,10 @@
     var abre = B === 1 ? '' : B + ' (', cierra = B === 1 ? '' : ')';
     var nombre = 'Q' + sub('C') + (n >= 0 ? '<sup>' + (n + 1) + '</sup>' : '');
     outQ.innerHTML = '<span class="tm-q-nom">' + nombre + '</span> = B <span class="tm-sigma chica"><sup>3</sup>Σ<sub>i,j</sub></span> d' + sub('ij') +
-      ' <span class="tm-sigma chica"><sup>2</sup>Σ<sub>t=1</sub></span> x' + sub('i,t') + ' x' + sub('j,t+1') +
+      ' <span class="tm-sigma chica"><sup>2</sup>Σ<sub>t=1</sub></span> x' + sub('i,t') + ' x' + sub('j,t+1') + '<span class="tm-q-res">' +
       (pares.length ? ' = ' + abre + pares.join(' + ') + cierra : '') +
       (pares.length > 1 || (pares.length && B !== 1) ? ' = ' + abre + vals.join(' + ') + cierra : '') +
-      ' = <span class="tm-circulo">' + Math.round(total * 100) / 100 + '</span>' + (r.length < T ? ' <span class="tm-parcial">parcial</span>' : '');
+      ' = <span class="tm-circulo">' + Math.round(total * 100) / 100 + '</span>' + (r.length < T ? ' <span class="tm-parcial">parcial</span>' : '') + '</span>';
     var html = '';
     for (var j = 1; j <= 3; j++) for (var i = 1; i <= 3; i++) {
       var terms = [], vivo = false;
@@ -147,7 +150,7 @@
         if (on) vivo = true;
         terms.push('<span class="tm-term' + (on ? ' on' : '') + '">' + xv(i, t) + xv(j, t + 1) + '</span>');
       }
-      html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span><span class="tm-par-p">(</span>' + terms.join('<span class="tm-mas">+</span>') + '<span class="tm-par-p">)</span></div>';
+      html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '" data-v="' + d(L[i - 1], L[j - 1]) + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span><span class="tm-par-p">(</span>' + terms.join('<span class="tm-mas">+</span>') + '<span class="tm-par-p">)</span></div>';
     }
     outT.innerHTML = html;
     var h = '<tr><th></th>' + [1, 2, 3].map(function (t) { return '<th class="' + (t === r.length && r.length < T ? 'ahora' : '') + '">t' + sub(t) + '</th>'; }).join('') + '</tr>';
@@ -161,7 +164,89 @@
     tabla.innerHTML = h;
   }
 
-  function pintar() { grafo(); contador(); rutas(); detalle(); }
+  // ── los x_{i,t} que valen 1 (los demás son 0) ──
+  function nocero() {
+    var html = ruta.length === T
+      ? '<span class="tm-nc-rot">x' + sub('i,t') + ' ≠ 0</span>' + ruta.map(function (k, t) {
+          return '<span class="tm-nc" style="--k:' + t + '">x' + sub(IDX[k] + ',' + (t + 1)) + ' = 1</span>';
+        }).join('')
+      : '<span class="tm-nc-pista">Al completar la ruta aparecen aquí los x' + sub('i,t') + ' que valen 1; todos los demás valen 0.</span>';
+    var a = document.getElementById('tm-nocero-2'), b = document.getElementById('tm-nocero-3');
+    if (a.innerHTML !== html) a.innerHTML = html;
+    if (b.innerHTML !== html) b.innerHTML = html;
+  }
+
+  // ── navegación por pasos ──
+  var cuerpo = document.getElementById('tm-cuerpo-in'), escena = document.getElementById('tm-escena');
+  var atras = document.getElementById('tm-atras'), adelante = document.getElementById('tm-adelante');
+  function nav() {
+    Array.prototype.forEach.call(document.querySelectorAll('#tm-pasos li'), function (li, n) {
+      li.className = n + 1 < paso ? 'hecho' : n + 1 === paso ? 'actual' : '';
+    });
+    atras.disabled = paso === 1;
+    adelante.disabled = paso === 4 || (paso === 2 && ruta.length < T);
+  }
+  // las mismas piezas (distancias, grafo, matriz, Q_C) se mudan a la escena de cada
+  // paso y vuelven a su sitio en el resumen, así nada se duplica
+  var MOV = {
+    dist: document.querySelector('.tm-distancias'), grafo: svg, contador: document.querySelector('.tm-contador-fila'),
+    tabla: tabla, q: outQ, terminos: outT
+  };
+  var CASA = {};
+  Object.keys(MOV).forEach(function (k) { CASA[k] = document.createComment(k); MOV[k].parentNode.insertBefore(CASA[k], MOV[k]); });
+  var SLOTS = { 1: { dist: 'dist', grafo: 'grafo-1' }, 2: { contador: 'contador', grafo: 'grafo-2', tabla: 'tabla' }, 3: { q: 'q', terminos: 'terminos' }, 4: {} };
+  function colocar() {
+    Object.keys(MOV).forEach(function (k) {
+      var s = SLOTS[paso][k];
+      if (s) escena.querySelector('[data-slot="' + s + '"]').appendChild(MOV[k]);
+      else CASA[k].parentNode.insertBefore(MOV[k], CASA[k].nextSibling);
+    });
+  }
+
+  // ── paso 3: Q_C término a término; tacha los ceros y suma los que quedan ──
+  var animT = 0, acumEl = document.getElementById('tm-acum');
+  var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animar() {
+    clearTimeout(animT);
+    detalle();
+    escena.classList.add('animando');
+    var B = Number(document.getElementById('tm-b').value) || 0;
+    var terms = outT.querySelectorAll('.tm-term'), n = 0, vals = [];
+    function suma(fin) {
+      var total = Math.round(B * vals.reduce(function (s, v) { return s + v; }, 0) * 100) / 100;
+      acumEl.innerHTML = '<span class="tm-acum-rot">suma</span>' + (vals.length ? (B === 1 ? '' : B + ' · (') +
+        vals.map(function (v, i) { return '<span class="tm-acum-v">' + (i ? '+ ' : '') + v + '</span>'; }).join(' ') + (B === 1 ? '' : ')') : '0') +
+        (fin ? ' = <span class="tm-circulo tm-acum-v">' + total + '</span>' : '');
+    }
+    function siguiente() {
+      if (n > 0) terms[n - 1].classList.remove('ahora');
+      if (n === terms.length) { escena.classList.remove('animando'); suma(true); return; }
+      var tm = terms[n], par = tm.parentNode, vivo = tm.classList.contains('on');
+      tm.classList.add('hecho', 'ahora');
+      if (vivo) { vals.push(Number(par.getAttribute('data-v'))); suma(false); }
+      var hermanos = par.querySelectorAll('.tm-term');
+      if (hermanos[hermanos.length - 1] === tm) par.classList.add('hecho');
+      n++;
+      animT = setTimeout(siguiente, quieto ? 0 : vivo ? 800 : 260);
+    }
+    suma(false);
+    animT = setTimeout(siguiente, quieto ? 0 : 700);
+  }
+
+  function irA(n) {
+    clearTimeout(animT);
+    escena.classList.remove('animando');
+    paso = n;
+    cuerpo.setAttribute('data-paso', n);
+    colocar();
+    pintar();
+    if (n === 3) animar();
+  }
+  atras.addEventListener('click', function () { if (paso > 1) irA(paso - 1); });
+  adelante.addEventListener('click', function () { if (!adelante.disabled) irA(paso + 1); });
+  document.getElementById('tm-repetir').addEventListener('click', animar);
+
+  function pintar() { grafo(); contador(); rutas(); detalle(); nocero(); nav(); }
   Array.prototype.forEach.call(document.querySelectorAll('.tm-distancias input[data-par]'), function (inp) {
     inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); nuevo = null; pintar(); });
   });
@@ -173,5 +258,5 @@
     var cerrado = caja.classList.toggle('cerrado');
     boton.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
   });
-  pintar();
+  irA(1);
 })();
