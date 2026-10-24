@@ -155,17 +155,18 @@
       // "estás aquí": el último nodo de una ruta a medias lleva un anillo que late
       if (k === aqui) el('circle', { 'class': 'tm-aqui', cx: p[0], cy: p[1], r: 24 }, g);
       el('circle', { 'class': 'tm-nodo', cx: p[0], cy: p[1], r: 24 }, g);
-      // dentro, la variable x_{i,t}: la t se vuelve número cuando el camión pasa por ahí
-      var t = el('text', { 'class': 'tm-xit', x: p[0] - 2, y: p[1] + 5 }, g);
+      // dentro, la letra de la ubicación
+      el('text', { 'class': 'tm-letra-dentro', x: p[0], y: p[1] + 7 }, g).textContent = k;
+      // afuera, su variable x_{i,t}, del lado opuesto al centro del triángulo;
+      // la t se vuelve número cuando el camión pasa por ahí
+      var vx = p[0] - cen[0], vy = p[1] - cen[1], vl = Math.hypot(vx, vy) || 1;
+      var lx = Math.min(280, Math.max(20, p[0] + vx / vl * 42)), ly = Math.min(194, Math.max(14, p[1] + vy / vl * 40 + 4));
+      var t = el('text', { 'class': 'tm-xit tm-xit-fuera', x: lx, y: ly }, g);
       t.appendChild(document.createTextNode('x'));
       var sb = el('tspan', { 'class': 'tm-xit-sub', dy: '4' }, t);
       sb.appendChild(document.createTextNode((n + 1) + ','));
       if (pt) sb.appendChild(document.createTextNode(String(pt)));
       else el('tspan', { 'class': 'tm-xit-t' }, sb).textContent = 't';
-      // afuera, la letra de la ubicación, del lado opuesto al centro del triángulo
-      var vx = p[0] - cen[0], vy = p[1] - cen[1], vl = Math.hypot(vx, vy) || 1;
-      var lx = Math.min(290, Math.max(10, p[0] + vx / vl * 37)), ly = Math.min(194, Math.max(14, p[1] + vy / vl * 37 + 7));
-      el('text', { 'class': 'tm-letra-fuera', x: lx, y: ly }, g).textContent = k;
       if (paso === 1) return;
       g.addEventListener('click', function () { tocar(k); });
       g.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tocar(k); } });
