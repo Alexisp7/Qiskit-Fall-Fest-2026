@@ -108,10 +108,14 @@
       html += '<div class="tm-par' + (vivo ? ' vivo' : ' nulo') + '"><span class="tm-d' + (vivo ? ' on' : '') + '">d' + sub('' + i + j) + '</span>(' + terms.join(' + ') + ')</div>';
     }
     outT.innerHTML = html;
-    // tabla sol: x_{i,t}
+    // la ruta como matriz x_{i,t}: de aquí sale la sumatoria de la derecha
     var h = '<tr><th></th>' + [1, 2, 3].map(function (t) { return '<th>t' + sub(t) + '</th>'; }).join('') + '</tr>';
     L.forEach(function (k, n) {
-      h += '<tr><th>' + k + ' (x' + sub(n + 1) + ')</th>' + [1, 2, 3].map(function (t) { var v = x(n + 1, t); return '<td class="' + (v ? 'uno' : '') + '">' + v + '</td>'; }).join('') + '</tr>';
+      h += '<tr><th>' + k + ' (x' + sub(n + 1) + ')</th>' + [1, 2, 3].map(function (t) {
+        var v = x(n + 1, t);
+        // cada celda dice qué variable es; las que valen 1 van sombreadas
+        return '<td class="' + (v ? 'uno' : '') + '"><span class="tm-celda-x">x' + sub((n + 1) + ',' + t) + (v ? ' = 1' : '') + '</span><span class="tm-celda-v">' + v + '</span></td>';
+      }).join('') + '</tr>';
     });
     tabla.innerHTML = h;
   }
