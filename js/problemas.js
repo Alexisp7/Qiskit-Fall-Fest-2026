@@ -106,5 +106,11 @@
     inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); pintar(); });
   });
   document.getElementById('tm-b').addEventListener('input', detalle);
+  // el ejemplo completo se contrae y se despliega desde su título
+  var caja = svg.closest('.tm'), boton = document.getElementById('tm-toggle');
+  boton.addEventListener('click', function () {
+    var cerrado = caja.classList.toggle('cerrado');
+    boton.setAttribute('aria-expanded', cerrado ? 'false' : 'true');
+  });
   pintar();
 })();
