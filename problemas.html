@@ -1949,6 +1949,8 @@
     /* en el resumen el botón atrás va a la esquina libre, sin sumar alto */
     .tm-cuerpo-in { position: relative; }
     .tm-cuerpo-in[data-paso="4"] .tm-nav-abajo { position: absolute; right: 0; bottom: 4px; margin: 0; }
+    /* B: costo en dólares por unidad de distancia recorrida */
+    .tm-b-nota { font-family: 'Inter', sans-serif; font-style: normal; font-size: 10.5px; line-height: 1.3; color: #9a958c; margin-top: -4px; max-width: 120px; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2033,7 +2035,7 @@
                   <label>d<sub>12</sub> = <input type="number" min="0" step="1" value="5" data-par="AB" aria-label="Distancia de A a B"></label>
                   <label>d<sub>23</sub> = <input type="number" min="0" step="1" value="7" data-par="BC" aria-label="Distancia de B a C"></label>
                   <label>d<sub>13</sub> = <input type="number" min="0" step="1" value="9" data-par="AC" aria-label="Distancia de A a C"></label>
-                  <label class="tm-b">B = <input type="number" min="0" step="0.5" value="1" id="tm-b" aria-label="Peso B"></label>
+                  <label class="tm-b">B = $<input type="number" min="0" step="0.5" value="1" id="tm-b" aria-label="Costo por unidad de movida, en dólares"></label><span class="tm-b-nota">costo por unidad de movida</span>
                 </div>
                 <svg class="tm-grafo" id="tm-grafo" viewBox="0 0 300 200" aria-label="Triángulo A, B, C con sus distancias"></svg>
               </div>
@@ -2107,6 +2109,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=23"></script>
+  <script src="js/problemas.js?v=24"></script>
 </body>
 </html>

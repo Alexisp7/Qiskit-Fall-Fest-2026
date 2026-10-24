@@ -16,6 +16,7 @@
 
   function d(a, b) { return a === b ? 0 : (D[a + b] != null ? D[a + b] : D[b + a]); }
   function sub(t) { return '<sub>' + t + '</sub>'; }
+  function usd(v) { return '$' + Math.round(v * 100) / 100; }   // B es el costo en $ por unidad de movida
   function el(tag, attrs, padre) {
     var n = document.createElementNS(NS, tag);
     for (var k in attrs) n.setAttribute(k, attrs[k]);
@@ -110,6 +111,7 @@
   var lista = document.getElementById('tm-rutas');
   function rutas() {
     var min = Math.min.apply(null, RUTAS.map(coste)), elegida = indiceRuta();
+    var B = Number(document.getElementById('tm-b').value) || 0;
     lista.innerHTML = '';
     RUTAS.forEach(function (r, n) {
       var li = document.createElement('li');
@@ -117,7 +119,7 @@
       li.className = 'tm-ruta' + (n === elegida ? ' elegida' : '') + (c === min ? ' minima' : '');
       li.innerHTML = '<button type="button"><span class="tm-r-n">Q' + sub('C') + '<sup>' + (n + 1) + '</sup></span>' +
         '<span class="tm-r-camino">' + r.join(' → ') + '</span>' +
-        '<span class="tm-r-coste">' + c + '</span>' + (c === min ? '<span class="tm-r-min">mínima</span>' : '') + '</button>';
+        '<span class="tm-r-coste">' + usd(B * c) + '</span>' + (c === min ? '<span class="tm-r-min">mínima</span>' : '') + '</button>';
       li.querySelector('button').addEventListener('click', function () { ruta = r.slice(); nuevo = null; pintar(); });
       lista.appendChild(li);
     });
@@ -135,13 +137,13 @@
     var pares = [], vals = [];
     for (var k = 1; k < r.length; k++) { pares.push('d' + sub('' + IDX[r[k - 1]] + IDX[r[k]])); vals.push(d(r[k - 1], r[k])); }
     var total = B * vals.reduce(function (s, v) { return s + v; }, 0);
-    var abre = B === 1 ? '' : B + ' (', cierra = B === 1 ? '' : ')';
+    var abre = B === 1 ? '' : usd(B) + ' (', cierra = B === 1 ? '' : ')';
     var nombre = 'Q' + sub('C') + (n >= 0 ? '<sup>' + (n + 1) + '</sup>' : '');
     outQ.innerHTML = '<span class="tm-q-nom">' + nombre + '</span> = B <span class="tm-sigma chica"><sup>3</sup>Σ<sub>i,j</sub></span> d' + sub('ij') +
       ' <span class="tm-sigma chica"><sup>2</sup>Σ<sub>t=1</sub></span> x' + sub('i,t') + ' x' + sub('j,t+1') + '<span class="tm-q-res">' +
       (pares.length ? ' = ' + abre + pares.join(' + ') + cierra : '') +
       (pares.length > 1 || (pares.length && B !== 1) ? ' = ' + abre + vals.join(' + ') + cierra : '') +
-      ' = <span class="tm-circulo">' + Math.round(total * 100) / 100 + '</span>' + (r.length < T ? ' <span class="tm-parcial">parcial</span>' : '') + '</span>';
+      ' = <span class="tm-circulo">' + usd(total) + '</span>' + (r.length < T ? ' <span class="tm-parcial">parcial</span>' : '') + '</span>';
     var html = '';
     for (var j = 1; j <= 3; j++) for (var i = 1; i <= 3; i++) {
       var terms = [], vivo = false;
@@ -216,9 +218,9 @@
     var terms = outT.querySelectorAll('.tm-term'), n = 0, vals = [];
     function suma(fin) {
       var total = Math.round(B * vals.reduce(function (s, v) { return s + v; }, 0) * 100) / 100;
-      acumEl.innerHTML = '<span class="tm-acum-rot">suma</span>' + (vals.length ? (B === 1 ? '' : B + ' · (') +
+      acumEl.innerHTML = '<span class="tm-acum-rot">suma</span>' + (vals.length ? (B === 1 ? '' : usd(B) + ' · (') +
         vals.map(function (v, i) { return '<span class="tm-acum-v">' + (i ? '+ ' : '') + v + '</span>'; }).join(' ') + (B === 1 ? '' : ')') : '0') +
-        (fin ? ' = <span class="tm-circulo tm-acum-v">' + total + '</span>' : '');
+        (fin ? ' = <span class="tm-circulo tm-acum-v">' + usd(total) + '</span>' : '');
     }
     function siguiente() {
       if (n > 0) terms[n - 1].classList.remove('ahora');
@@ -258,7 +260,7 @@
   Array.prototype.forEach.call(document.querySelectorAll('.tm-distancias input[data-par]'), function (inp) {
     inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); nuevo = null; pintar(); });
   });
-  document.getElementById('tm-b').addEventListener('input', detalle);
+  document.getElementById('tm-b').addEventListener('input', function () { rutas(); detalle(); });
   document.getElementById('tm-reiniciar').addEventListener('click', function () { ruta = []; nuevo = null; pintar(); });
   // el ejemplo completo se contrae y se despliega desde su título
   var caja = svg.closest('.tm'), boton = document.getElementById('tm-toggle');
