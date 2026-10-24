@@ -1684,6 +1684,12 @@
       .tm-terminos { grid-template-columns: 1fr; }
       .tm-rutas { grid-template-columns: 1fr; }
     }
+    /* sin huecos: rutas junto al grafo y la tabla sol junto a los términos */
+    .problemas-wrap .section-header { margin-bottom: 18px; }
+    .tm-medio { grid-template-columns: auto auto; justify-content: start; column-gap: 56px; }
+    .tm-rutas { grid-template-columns: repeat(2, 230px); }
+    .tm-detalle { grid-template-columns: auto auto; justify-content: start; column-gap: 64px; }
+    .tm-coste { grid-template-columns: auto auto; justify-content: start; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1713,7 +1719,6 @@
       <div class="section-header entra" style="--i:1">
         <h2 class="section-title">El problema a <em>resolver</em></h2>
       </div>
-      <p class="problemas-intro entra" style="--i:2">El reto del hackathon Qiskit Fall Fest 2026 que desarrollamos en este espacio.</p>
     </div>
 
     <!-- ejemplo rápido: trayectoria mínima con 3 ubicaciones -->
