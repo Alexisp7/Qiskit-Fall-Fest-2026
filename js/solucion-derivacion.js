@@ -28,6 +28,8 @@
     return { J: J, h: h };
   }
   var MAT = matrices();
+  // el mismo Hamiltoniano del triángulo, para la demostración del ansatz
+  window.HAM_TRI = { J: MAT.J, h: MAT.h, cte: CTE, N: N, T: T };
   // Q(x) directo y H(z) con las matrices, para comprobar
   function Qx(x) {   // x[i][t], 1-indexado
     var c = 0, tem = 0, esp = 0;

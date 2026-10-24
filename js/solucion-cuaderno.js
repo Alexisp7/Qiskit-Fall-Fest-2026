@@ -51,6 +51,113 @@
   var KW = /^(def|class|return|for|in|if|elif|else|not|and|or|None|True|False|import|from|as|lambda|while|with|is|raise|pass|yield)$/;
   var BI = /^(print|range|len|sum|min|max|abs|float|int|list|sorted|enumerate|zip|isinstance|super|self|dict|set)$/;
   function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // ── glosario: lo que hace cada función, clase o llamada que aparece en el código ──
+  var GLOS = {
+    Problema: 'Clase que guarda el grafo, los tiempos y el mapa (lugar, tiempo) → qubit.',
+    QUBO: 'Clase de un polinomio cuadrático en variables binarias: constante + términos lineales + términos cuadráticos. Se suma y se escala por piezas.',
+    q: 'Índice del qubit que representa x(lugar, tiempo).',
+    var: 'Camino inverso de q: de un qubit k al par (lugar, tiempo).',
+    distancia: 'Distancia de la arista i–j, o None si no hay camino.',
+    agregar_constante: 'Suma un número fijo al polinomio.',
+    agregar_lineal: 'Suma c·x_k: un término de una sola variable.',
+    agregar_cuadratico: 'Suma c·x_k·x_l; si k = l queda como lineal porque x² = x en binario.',
+    agregar_cuadrado: 'Expande peso·(c₀ + Σ a_k x_k)² y lo suma: la forma de casi todas las restricciones.',
+    energia: 'Valor del polinomio para una cadena de bits concreta.',
+    energias_todas: 'Energía de los 2ⁿ estados de una vez; solo sirve para n pequeño.',
+    a_ising: 'Cambia x_k = (1 − Z_k)/2 y devuelve el Hamiltoniano de Pauli (Z y ZZ) más el offset.',
+    coste_distancia: 'Pieza de la distancia: suma d_ij · x(i,t) · x(j,t+1) para cada salto por un camino.',
+    exactamente_uno: 'Ayuda genérica: agrega (1 − Σ x)², que vale 0 solo si exactamente un qubit está en 1.',
+    un_lugar_por_tiempo: 'Restricción temporal: en cada tiempo, exactamente un lugar.',
+    visitar_una_vez: 'Restricción espacial: cada lugar aparece exactamente una vez.',
+    saltos_prohibidos: 'Castiga ir de i a j en tiempos seguidos cuando no hay camino entre ellos.',
+    empezar_en: 'Castiga no estar en el lugar indicado en el tiempo 1.',
+    terminar_en: 'Castiga no estar en el lugar indicado en el último tiempo.',
+    cerrar_camino: 'Castiga usar la arista i–j en cualquier sentido.',
+    visitar_antes: 'Castiga visitar b antes que a.',
+    sugerir_penalizacion: 'Propone un A mayor que cualquier ahorro que se consiga rompiendo una regla.',
+    armar_hamiltoniano: 'Suma las piezas con su peso: el QUBO total.',
+    resolver_exacto: 'Revisa todos los estados y devuelve los de menor energía: la referencia.',
+    _entero_a_bits: 'Convierte el número de un estado en su lista de bits (bit k = qubit k).',
+    ansatz: 'Arma el circuito: capas de RY(θ), cascada de CZ y una capa final de RY.',
+    resolver_vqe: 'VQE: minimiza ⟨ψ(θ)|H|ψ(θ)⟩ con COBYLA desde varios arranques y lee el mejor estado.',
+    bits_a_ruta: 'Traduce los bits a la ruta: el lugar activo en cada tiempo.',
+    matriz_x: 'Ordena los bits como matriz lugares × tiempos.',
+    desglose: 'Imprime el aporte de cada pieza para una solución.',
+    dibujar_ruta: 'Dibuja el grafo y resalta la ruta.',
+    pasar_por_en: 'Pieza propia de ejemplo: castiga no pasar por un lugar en un tiempo dado.',
+    ParameterVector: 'Lista de parámetros simbólicos θ de Qiskit, que se reemplazan por números al evaluar.',
+    QuantumCircuit: 'Circuito cuántico de Qiskit con n qubits.',
+    ry: 'Compuerta RY(θ): gira el qubit entre |0⟩ y |1⟩ con amplitudes reales.',
+    cz: 'Compuerta CZ: cambia el signo cuando los dos qubits están en |1⟩.',
+    SparsePauliOp: 'Operador de Qiskit escrito como suma de productos de Pauli (aquí Z y ZZ).',
+    from_sparse_list: 'Construye el SparsePauliOp a partir de (etiqueta, qubits, coeficiente).',
+    Statevector: 'Simula el estado exacto del circuito (vector de 2ⁿ amplitudes).',
+    expectation_value: 'Valor esperado ⟨ψ|H|ψ⟩ del operador en el estado.',
+    probabilities: 'Probabilidad de medir cada estado de la base.',
+    assign_parameters: 'Reemplaza los θ simbólicos por valores numéricos.',
+    num_parameters: 'Cantidad de parámetros θ del circuito.',
+    minimize: 'Optimizador de SciPy; aquí con el método COBYLA, sin gradientes.',
+    default_rng: 'Generador de números aleatorios de NumPy con semilla fija.',
+    uniform: 'Números al azar repartidos de forma pareja en un intervalo.',
+    argsort: 'Índices que ordenan un arreglo de menor a mayor.',
+    defaultdict: 'Diccionario que crea el valor 0.0 la primera vez que se usa una clave.',
+    combinations: 'Todos los pares (sin repetir) de una lista.',
+    Graph: 'Grafo de NetworkX.',
+    add_weighted_edges_from: 'Agrega aristas con su peso (la distancia).',
+    has_edge: '¿Existe la arista i–j?',
+    asarray: 'Convierte una lista en arreglo de NumPy.',
+    arange: 'Números consecutivos 0, 1, 2, …',
+    full: 'Arreglo lleno con un mismo valor.',
+    real: 'Parte real de un número complejo.',
+    abs: 'Valor absoluto.',
+    isclose: '¿Son iguales salvo errores de redondeo?',
+    items: 'Pares (clave, valor) del diccionario.',
+    values: 'Valores del diccionario.',
+    append: 'Agrega un elemento al final de la lista.',
+    __add__: 'Suma de dos QUBO: junta constantes, términos lineales y cuadráticos.',
+    __mul__: 'Multiplica todo el QUBO por un número (el peso de la pieza).',
+    __init__: 'Constructor: prepara el objeto al crearlo.',
+    print: 'Muestra un texto en la salida.',
+    range: 'Secuencia de enteros para recorrer.',
+    len: 'Cantidad de elementos.',
+    sum: 'Suma de los elementos.',
+    min: 'El menor valor (con key, el que minimiza esa función).',
+    max: 'El mayor valor.',
+    float: 'Convierte a número decimal.',
+    enumerate: 'Recorre dando la posición y el valor.',
+    zip: 'Recorre dos listas a la vez.',
+    sorted: 'Copia ordenada.',
+    isinstance: '¿Es de este tipo?'
+  };
+  function descLinea(raw) {
+    var l = raw.trim(), m, nota = '';
+    if (!l) return '';
+    var com = l.indexOf('#') > 0 && !/['"][^'"]*#/.test(l) ? l.slice(l.indexOf('#') + 1).trim() : '';
+    if (l[0] === '#') return l.replace(/^#+\s*/, '').replace(/-{3,}/g, '').trim() || 'Comentario.';
+    if (/^"""|"""$/.test(l)) return 'Documentación: ' + l.replace(/"""/g, '').trim();
+    var base = '';
+    if ((m = /^def (\w+)\((.*)\)\s*:/.exec(l))) base = 'Define la función ' + m[1] + '(' + m[2] + ')' + (GLOS[m[1]] ? ': ' + GLOS[m[1]] : '.');
+    else if ((m = /^class (\w+)/.exec(l))) base = 'Define la clase ' + m[1] + (GLOS[m[1]] ? ': ' + GLOS[m[1]] : '.');
+    else if ((m = /^return\s+(.+)/.exec(l))) base = 'Devuelve ' + m[1].replace(/\s*#.*$/, '') + '.';
+    else if ((m = /^for (.+?) in (.+):/.exec(l))) base = 'Recorre cada ' + m[1] + ' en ' + m[2] + '.';
+    else if ((m = /^if (.+):/.exec(l))) base = 'Si ' + m[1] + ', hace lo de abajo.';
+    else if ((m = /^elif (.+):/.exec(l))) base = 'Si no, pero ' + m[1] + ', hace lo de abajo.';
+    else if (/^else\s*:/.test(l)) base = 'En cualquier otro caso, hace lo de abajo.';
+    else if (/^(import|from) /.test(l)) base = 'Importa ' + l.replace(/^from\s+/, '').replace(/\s+import\s+/, ': ') + '.';
+    else if ((m = /^([\w\.\[\]\(\), ]+?)\s*(\+=|-=|\*=|=)\s*(.+)$/.exec(l)) && !/==/.test(m[2])) {
+      var rhs = m[3].replace(/\s*#.*$/, '');
+      base = m[2] === '+=' ? 'Suma ' + rhs + ' a ' + m[1] + '.' : m[2] === '-=' ? 'Resta ' + rhs + ' a ' + m[1] + '.' : 'Guarda en ' + m[1] + ': ' + rhs + '.';
+    }
+    else base = 'Ejecuta: ' + l.replace(/\s*#.*$/, '');
+    // si la línea llama a algo conocido, se agrega qué hace
+    if (!/^(def|class) /.test(l)) {
+      var ids = l.replace(/#.*$/, '').match(/[A-Za-z_]\w*(?=\s*\()/g) || [];
+      for (var i = 0; i < ids.length; i++) if (GLOS[ids[i]] && !/^(print|range|len|sum|min|max|float|enumerate|zip|sorted|isinstance|abs)$/.test(ids[i])) { nota = ids[i] + ': ' + GLOS[ids[i]]; break; }
+    }
+    return (com ? com.charAt(0).toUpperCase() + com.slice(1) + '. ' : '') + base + (nota ? ' — ' + nota : '');
+  }
+
   function resaltar(linea, enCadena) {
     var out = '', i = 0, n = linea.length, previo = '', m;
     if (enCadena) {
@@ -73,7 +180,8 @@
       if ((m = /^\d+(\.\d+)?(e-?\d+)?/.exec(resto)) && !/\w/.test(linea[i - 1] || '')) { out += '<span class="py-n">' + m[0] + '</span>'; i += m[0].length; continue; }
       if ((m = /^[A-Za-z_θ]\w*/.exec(resto))) {
         var w = m[0];
-        out += KW.test(w) ? '<span class="py-k">' + w + '</span>' : (previo === 'def' || previo === 'class') ? '<span class="py-f">' + w + '</span>' : BI.test(w) ? '<span class="py-b">' + w + '</span>' : esc(w);
+        var pieza = KW.test(w) ? '<span class="py-k">' + w + '</span>' : (previo === 'def' || previo === 'class') ? '<span class="py-f">' + w + '</span>' : BI.test(w) ? '<span class="py-b">' + w + '</span>' : esc(w);
+        out += GLOS.hasOwnProperty(w) && !KW.test(w) ? '<span class="py-id" data-g="' + w + '">' + pieza + '</span>' : pieza;
         previo = w; i += w.length; continue;
       }
       out += esc(c); if (c !== ' ') previo = ''; i++;
@@ -82,7 +190,7 @@
   }
   function codigoHtml(src) {
     var abierta = false;
-    return src.replace(/\n$/, '').split('\n').map(function (l) { var r = resaltar(l, abierta); abierta = r.abierta; return '<span class="nb-linea">' + (r.html || ' ') + '</span>'; }).join('');
+    return src.replace(/\n$/, '').split('\n').map(function (l) { var r = resaltar(l, abierta); abierta = r.abierta; var d = descLinea(l); return '<span class="nb-linea"' + (d ? ' data-l="' + esc(d).replace(/"/g, '&quot;') + '"' : '') + '>' + (r.html || ' ') + '</span>'; }).join('');
   }
 
   // ── dibujo del ejemplo ──
@@ -365,6 +473,23 @@
     return nombres;
   }
 
+  // ── el cuadro de ayuda: sobre una función o llamada, qué hace; sobre una línea, qué hace esa línea ──
+  var tip = null;
+  function mostrarTip(ev) {
+    var id = ev.target.closest && ev.target.closest('.py-id'), ln = ev.target.closest && ev.target.closest('.nb-linea');
+    if (!id && !(ln && ln.getAttribute('data-l'))) { if (tip) tip.hidden = true; return; }
+    if (!tip) { tip = document.createElement('div'); tip.className = 'nb-tip'; document.body.appendChild(tip); }
+    if (id) { var w = id.getAttribute('data-g'); tip.innerHTML = '<b>' + w + '</b>' + GLOS[w]; }
+    else tip.innerHTML = '<span class="nb-tip-l">línea</span>' + ln.getAttribute('data-l');
+    tip.hidden = false;
+    var x = ev.clientX + 16, y = ev.clientY + 18, r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 10) x = window.innerWidth - r.width - 10;
+    if (y + r.height > window.innerHeight - 10) y = ev.clientY - r.height - 12;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  document.addEventListener('mousemove', function (ev) { if (ev.target.closest && ev.target.closest('.nb-codigo')) mostrarTip(ev); else if (tip && !tip.hidden) tip.hidden = true; }, { passive: true });
+  document.addEventListener('scroll', function () { if (tip) tip.hidden = true; }, { passive: true, capture: true });
+
   // ── montar el cuaderno ──
   window.montarCuaderno = function (raiz, etapa) {
     var nb = document.querySelector('.nb[data-nb="' + etapa + '"]');
@@ -401,6 +526,10 @@
     // celdas y ejemplo en su propia grilla: así el ejemplo fijo no se monta sobre las matrices
     var grilla = document.createElement('div'); grilla.className = 'nb-grilla';
     grilla.appendChild(col); grilla.appendChild(lado); nb.appendChild(grilla);
+    if (etapa === 'ansatz' && window.montarAnsatzMat) {
+      var az = document.createElement('section'); az.className = 'nb-deriva nb-ansatz-mat'; az.id = 'celda-ansatz-mat';
+      nb.appendChild(az); window.montarAnsatzMat(az);
+    }
     // primero la demostración, de corrido, y al final las matrices de la red
     if (etapa === 'inicializar' && window.montarDerivacion) {
       var dv = document.createElement('section'); dv.className = 'nb-deriva'; dv.id = 'celda-derivacion';
