@@ -149,6 +149,7 @@
     outNum.innerHTML = t.length ? '= ' + B + ' ( ' + t.map(function (tr) { var v = d(tr[0], tr[1]); return v == null ? '∞' : v; }).join(' + ') + ' )' : '';
     outTotal.textContent = faltante ? '∞' : num(B * suma);
 
+    explicito(t, B);
     if (!ruta.length) return estado('Toca los puntos en el orden de la vuelta. Al tocar el quinto, la vuelta se cierra sola.');
     if (faltante) return estado('Esa vuelta usa una conexión que no existe (casilla vacía en la matriz).', true);
     if (ruta.length < N) return estado('Faltan ' + [1, 2, 3, 4, 5].filter(function (k) { return ruta.indexOf(k) < 0; }).join(', ') + '.');
@@ -156,6 +157,51 @@
     if (m.c === Infinity) return estado('Con estas distancias no hay ninguna vuelta posible.', true);
     if (suma === m.c) estado('Es la vuelta de menor coste: de las 24 posibles desde el punto ' + ruta[0] + ', ninguna baja de ' + num(B * m.c) + '.', false, true);
     else estado('Vuelta completa. La de menor coste da ' + num(B * m.c) + ': esta suma ' + num(B * (suma - m.c)) + ' de más.');
+  }
+  // ── cálculo explícito de f_C con cada x_{i,t} ──
+  // x_{i,t} = 1 si el punto i se visita en el turno t. Con la vuelta completa,
+  // el turno siguiente al 5 es el 1 (la vuelta regresa al inicio).
+  var tablaX = document.getElementById('xit');
+  var gridEx = document.getElementById('ex-grid');
+  var finalEx = document.getElementById('ex-final');
+  function xs(i, t) { return '<span class="xv">x' + sub(i + ',' + t) + '</span>'; }
+  function explicito(t, B) {
+    var completa = ruta.length === N;
+    function x(i, tt) { return ruta[tt - 1] === i ? 1 : 0; }
+    function sig(tt) { return tt === N ? (completa ? 1 : null) : tt + 1; }
+    // tabla de x_{i,t}
+    var h = '<tr><th></th>' + [1, 2, 3, 4, 5].map(function (tt) { return '<th>t=' + tt + '</th>'; }).join('') + '</tr>';
+    for (var i = 1; i <= N; i++) {
+      h += '<tr><th>i=' + i + '</th>';
+      for (var tt = 1; tt <= N; tt++) h += '<td class="' + (x(i, tt) ? 'uno' : '') + '">' + x(i, tt) + '</td>';
+      h += '</tr>';
+    }
+    tablaX.innerHTML = h;
+    // d_ij ( x_{i,1} x_{j,2} + … + x_{i,5} x_{j,1} ), para cada par i, j
+    var html = '';
+    for (var i2 = 1; i2 <= N; i2++) for (var j = 1; j <= N; j++) {
+      if (j === 1) html += '<div class="ex-grupo">i = ' + i2 + ' · sale del punto ' + i2 + '</div>';
+      var terminos = [], activo = false;
+      for (var t2 = 1; t2 <= N; t2++) {
+        var s2 = sig(t2);
+        var on = s2 != null && x(i2, t2) === 1 && x(j, s2) === 1;
+        if (on) activo = true;
+        terminos.push('<span class="term' + (on ? ' on' : '') + '">' + xs(i2, t2) + xs(j, s2 == null ? 6 : s2) + '</span>');
+      }
+      var v = d(i2, j);
+      html += '<div class="ex-celda' + (activo ? ' activa' : ' nula') + '">' +
+        '<span class="ex-d' + (activo ? ' on' : '') + '">d' + sub('' + i2 + j) + '</span>' +
+        '<span class="ex-paren">(</span>' + terminos.join('<span class="ex-mas">+</span>') + '<span class="ex-paren">)</span>' +
+        '<span class="ex-valor">' + (activo ? '= ' + (v == null ? '∞' : v) : '= 0') + '</span></div>';
+    }
+    gridEx.innerHTML = html;
+    // resultado: solo sobreviven los d_ij de los tramos recorridos
+    var vivos = t.map(function (tr) { return tr; });
+    if (!vivos.length) { finalEx.innerHTML = 'f<sub>C</sub> = 0'; return; }
+    var falta = vivos.some(function (tr) { return d(tr[0], tr[1]) == null; });
+    var suma = vivos.reduce(function (s, tr) { return s + (d(tr[0], tr[1]) || 0); }, 0);
+    finalEx.innerHTML = 'f<sub>C</sub> = B ( ' + vivos.map(function (tr) { return 'd' + sub('' + tr[0] + tr[1]); }).join(' + ') + ' ) = ' + B + ' ( ' +
+      vivos.map(function (tr) { var vv = d(tr[0], tr[1]); return vv == null ? '∞' : vv; }).join(' + ') + ' ) = <span class="ex-circulo">' + (falta ? '∞' : num(B * suma)) + '</span>';
   }
   function estado(txt, error, bien) {
     outEstado.textContent = txt;

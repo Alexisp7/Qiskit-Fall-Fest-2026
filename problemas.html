@@ -1489,6 +1489,41 @@
       .matriz { overflow-x: auto; }
       .m-rot { display: none; }
     }
+    /* cálculo explícito de f_C: cada término x_{i,t} x_{j,t+1} */
+    .explicito { margin-top: 22px; padding-top: 14px; border-top: 2px dashed rgba(35,64,142,.35); }
+    .ex-tit { font-size: 30px; color: var(--tinta-azul); margin-bottom: 8px; }
+    .ex-arriba { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; align-items: center; margin-bottom: 12px; }
+    .ex-sub { font-size: 22px; color: var(--tinta-roja); margin-bottom: 2px; }
+    .xit { border-collapse: collapse; font-family: 'Caveat', cursive; font-size: 20px; color: var(--tinta-negra); }
+    .xit th { font-weight: 400; font-size: 16px; color: var(--tinta-azul); padding: 0 8px; }
+    .xit td { width: 34px; height: 28px; text-align: center; border: 1px solid rgba(35,64,142,.35); background: rgba(255,255,255,.6); }
+    .xit td.uno { background: #C9F2B5; font-weight: 700; color: #1d5e2c; }
+    .ex-leyenda { display: inline-flex; gap: 10px; margin-left: 6px; }
+    .ley-on { background: #C9F2B5; padding: 0 6px; border-radius: 6px; }
+    .ley-off { text-decoration: line-through; text-decoration-color: var(--tinta-roja); color: #888; }
+    .ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 6px 18px; font-size: 19px; color: var(--tinta-negra); }
+    .ex-celda { position: relative; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 2px; padding: 2px 6px; line-height: 1.5; }
+    .ex-celda sub { font-size: 12px; }
+    .ex-d { color: #7a1f3d; font-weight: 700; margin-right: 2px; }
+    .ex-d.on { background: #C9F2B5; border-radius: 8px; padding: 0 4px; }
+    .ex-paren { color: #555; }
+    .ex-mas { color: #999; margin: 0 2px; }
+    .term { color: #999; }
+    .term .xv + .xv { margin-left: 1px; }
+    .term.on { color: #1d5e2c; background: #C9F2B5; border-radius: 8px; padding: 0 4px; font-weight: 700; }
+    .ex-valor { margin-left: 6px; color: var(--tinta-azul); white-space: nowrap; }
+    .ex-celda.activa .ex-valor { color: var(--tinta-roja); font-weight: 700; }
+    /* los pares sin ningún término en 1 quedan tachados, como en el cuaderno */
+    .ex-celda.nula::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: rgba(192,57,43,.7); transform: rotate(-2.5deg); pointer-events: none; }
+    .ex-celda.nula .ex-d { color: #b08a96; }
+    .ex-final { margin-top: 14px; font-size: 30px; color: #7a1f3d; }
+    .ex-final sub { font-size: 17px; }
+    .ex-circulo { display: inline-block; min-width: 54px; text-align: center; padding: 0 12px; border: 4px solid #F3A6E2; border-radius: 50%; color: var(--tinta-negra); font-weight: 700; }
+    @media (max-width: 900px) {
+      .ex-arriba { grid-template-columns: 1fr; }
+      .ex-grid { grid-template-columns: 1fr; font-size: 17px; }
+    }
+    .ex-grupo { grid-column: 1 / -1; font-family: 'Space Mono', monospace; font-size: 9.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--tinta-azul); margin-top: 8px; border-bottom: 1px solid rgba(35,64,142,.25); padding-bottom: 2px; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1563,6 +1598,18 @@
         </div>
         <p class="m-nota">Edita la mitad de arriba: la de abajo se copia sola (d<sub>ij</sub> = d<sub>ji</sub>). Deja una casilla vacía (∞) si no hay conexión directa.</p>
       </div>
+      <div class="explicito">
+        <div class="ex-tit">Cálculo explícito de f<sub>C</sub>, término a término</div>
+        <div class="ex-arriba">
+          <div class="xit-caja">
+            <div class="ex-sub">x<sub>i,t</sub> de tu vuelta</div>
+            <table class="xit" id="xit"></table>
+          </div>
+          <p class="m-nota">Cada x<sub>i,t</sub> vale 1 si el punto i se visita en el turno t, y 0 si no. En cada producto x<sub>i,t</sub> x<sub>j,t+1</sub> solo sobrevive el que tiene los dos en 1: el punto i en el turno t y el punto j justo después. Como la vuelta regresa al inicio, el turno siguiente al 5 es el 1 (x<sub>j,6</sub> = x<sub>j,1</sub>). <span class="ex-leyenda"><span class="ley-on">término = 1</span> <span class="ley-off">término = 0</span></span></p>
+        </div>
+        <div class="ex-grid" id="ex-grid"></div>
+        <div class="ex-final" id="ex-final"></div>
+      </div>
     </div>
   </section>
 
@@ -1575,6 +1622,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=5"></script>
+  <script src="js/problemas.js?v=7"></script>
 </body>
 </html>
