@@ -1997,7 +1997,7 @@
     .tm-cuerpo-in[data-paso="4"] .tm-lado .tm-terminos { font-size: 18px; }
     .tm-cuerpo-in[data-paso="4"] .tm-lado .tm-q { font-size: 25px; }
     /* aviso junto al grafo: parpadea en gris cuando la ruta está completa */
-    .tm-otra { font-family: 'Inter', sans-serif; font-size: 11px; fill: #8a857c; text-anchor: end; animation: tmParpadeo 1.3s ease-in-out infinite; pointer-events: none; }
+    .tm-otra { font-family: 'Inter', sans-serif; font-size: 11px; fill: #8a857c; animation: tmParpadeo 1.3s ease-in-out infinite; pointer-events: none; }
     @keyframes tmParpadeo { 50% { opacity: .12; } }
     /* al costado de la matriz: los x_{i,t} que valen 1, y abajo reiniciar */
     .tm-sol-fila { display: flex; align-items: stretch; gap: 26px; }
@@ -2012,6 +2012,8 @@
     @media (prefers-reduced-motion: reduce) { .tm-otra, .tm-res-x .tm-llave span { animation: none; } }
     /* el menú de pasos, más abajo del título */
     .tm-nav { margin-top: 18px; }
+    /* paso 1: el grafo un poco más chico, deja ver cómo se estira */
+    .tm-e1-fila .tm-slot-grafo .tm-grafo { width: 400px; max-height: 262px; }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -2175,6 +2177,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=26"></script>
+  <script src="js/problemas.js?v=29"></script>
 </body>
 </html>

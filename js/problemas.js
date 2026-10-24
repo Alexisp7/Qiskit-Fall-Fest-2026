@@ -10,7 +10,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   var L = ['A', 'B', 'C'];                       // ubicación i = 1, 2, 3
   var IDX = { A: 1, B: 2, C: 3 };
-  var POS = { A: [52, 52], B: [168, 52], C: [248, 160] };
+  var POS = null;                // posiciones actuales de los nodos (se animan)
   var D = { AB: 5, BC: 7, AC: 9 };
   var T = 3;
 
@@ -48,6 +48,68 @@
   }
 
   // ── grafo dirigido ──
+  // ── forma del triángulo según las distancias ──
+  // Los lados siguen a d_ij de forma algo suavizada (potencia 0.8), así un cambio
+  // estira o encoge el triángulo sin deformarlo al extremo. Si una distancia no
+  // cumple la desigualdad triangular se recorta para que el dibujo exista.
+  var CAJA = { w: 300, h: 200, m: 36 };
+  function forma(dd) {
+    var e = function (v) { return Math.pow(Math.max(Number(v) || 0, 0.5), 0.8); };
+    var c = e(dd.AB), a = e(dd.BC), b = e(dd.AC), h = 0.94;
+    if (b > h * (a + c)) b = h * (a + c);
+    if (a > h * (b + c)) a = h * (b + c);
+    if (c > h * (a + b)) c = h * (a + b);
+    var cx = (b * b + c * c - a * a) / (2 * c);
+    return { A: [0, 0], B: [c, 0], C: [cx, Math.sqrt(Math.max(b * b - cx * cx, 0))] };
+  }
+  function girar(f, ang) {
+    var co = Math.cos(ang), si = Math.sin(ang), o = {};
+    L.forEach(function (k) { o[k] = [f[k][0] * co - f[k][1] * si, f[k][0] * si + f[k][1] * co]; });
+    return o;
+  }
+  function limites(f) {
+    var xs = L.map(function (k) { return f[k][0]; }), ys = L.map(function (k) { return f[k][1]; });
+    return { x0: Math.min.apply(null, xs), y0: Math.min.apply(null, ys), w: Math.max.apply(null, xs) - Math.min.apply(null, xs), h: Math.max.apply(null, ys) - Math.min.apply(null, ys) };
+  }
+  function ajuste(f) { var b = limites(f); return Math.min((CAJA.w - 2 * CAJA.m) / Math.max(b.w, 1e-6), (CAJA.h - 2 * CAJA.m) / Math.max(b.h, 1e-6)); }
+  // el giro y la escala de referencia salen de las distancias iniciales (5, 7, 9):
+  // con valores mayores el triángulo crece hasta llenar el recuadro, con menores se encoge
+  var GIRO = 0, REF = 0;
+  (function () {
+    var f0 = forma(D);
+    for (var g = 0; g < 360; g += 2) {
+      var s0 = ajuste(girar(f0, g * Math.PI / 180));
+      if (s0 > REF) { REF = s0; GIRO = g * Math.PI / 180; }
+    }
+    REF *= 0.82;
+  })();
+  function objetivo() {
+    var f = girar(forma(D), GIRO), b = limites(f), s = Math.min(ajuste(f), REF);
+    // que los nodos nunca se toquen
+    var lmin = Math.min(Math.hypot(f.A[0] - f.B[0], f.A[1] - f.B[1]), Math.hypot(f.B[0] - f.C[0], f.B[1] - f.C[1]), Math.hypot(f.A[0] - f.C[0], f.A[1] - f.C[1]));
+    s = Math.min(Math.max(s, 84 / Math.max(lmin, 1e-6)), ajuste(f));
+    var ox = (CAJA.w - b.w * s) / 2 - b.x0 * s, oy = (CAJA.h - b.h * s) / 2 - b.y0 * s, o = {};
+    L.forEach(function (k) { o[k] = [f[k][0] * s + ox, f[k][1] * s + oy]; });
+    return o;
+  }
+  // al cambiar una distancia los nodos se deslizan a su nueva posición
+  var animG = 0, finG = 0;
+  function moverGrafo() {
+    var dest = objetivo();
+    var igual = POS && L.every(function (k) { return Math.abs(POS[k][0] - dest[k][0]) < 0.5 && Math.abs(POS[k][1] - dest[k][1]) < 0.5; });
+    cancelAnimationFrame(animG); clearTimeout(finG);
+    if (!POS || igual || quieto) { POS = dest; grafo(); return; }
+    var ini = POS, t0 = performance.now();
+    function cuadro(ahora) {
+      var k = Math.min(1, (ahora - t0) / 420), e = 1 - Math.pow(1 - k, 3), o = {};
+      L.forEach(function (n) { o[n] = [ini[n][0] + (dest[n][0] - ini[n][0]) * e, ini[n][1] + (dest[n][1] - ini[n][1]) * e]; });
+      POS = o; grafo();
+      if (k < 1) animG = requestAnimationFrame(cuadro);
+    }
+    animG = requestAnimationFrame(cuadro);
+    finG = setTimeout(function () { cancelAnimationFrame(animG); POS = dest; grafo(); }, 520);   // por si la pestaña no anima
+  }
+
   function grafo() {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var r = paso === 1 ? [] : ruta;   // en el paso 1 solo se ven las distancias
@@ -58,14 +120,17 @@
     var tramos = [];
     for (var i = 1; i < r.length; i++) tramos.push([r[i - 1], r[i]]);
     var enRuta = {};
+    var cen = [(POS.A[0] + POS.B[0] + POS.C[0]) / 3, (POS.A[1] + POS.B[1] + POS.C[1]) / 3];
     tramos.forEach(function (tr) { enRuta[tr.slice().sort().join('')] = true; });
     [['A', 'B'], ['B', 'C'], ['A', 'C']].forEach(function (p) {
       var a = POS[p[0]], b = POS[p[1]], k = p.join('');
       if (enRuta[k]) el('line', { 'class': 'tm-resalte', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
       else el('line', { 'class': 'tm-arista', x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
       var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey);
-      var lado = k === 'AC' ? -1 : 1; // cada peso por fuera del triángulo
-      el('text', { 'class': 'tm-peso', x: mx + lado * ey / l * 16, y: my - lado * ex / l * 16 + 6 }).textContent = d(p[0], p[1]);
+      // cada peso por fuera del triángulo: del lado opuesto al centro
+      var nx = ey / l, ny = -ex / l;
+      if ((mx - cen[0]) * nx + (my - cen[1]) * ny < 0) { nx = -nx; ny = -ny; }
+      el('text', { 'class': 'tm-peso', x: mx + nx * 16, y: my + ny * 16 + 6 }).textContent = d(p[0], p[1]);
     });
     tramos.forEach(function (tr) {
       var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 27;
@@ -73,9 +138,15 @@
     });
     // ruta completa: un aviso gris que parpadea invita a empezar otra
     if (paso !== 1 && r.length === T) {
-      var aviso1 = el('text', { 'class': 'tm-otra', x: 299, y: 58 });
-      aviso1.textContent = 'toca un nodo';
-      el('text', { 'class': 'tm-otra', x: 299, y: 72 }).textContent = 'para empezar otra';
+      // en la esquina más alejada de los nodos
+      var mejor = null;
+      [[2, 14, 'start'], [298, 14, 'end'], [2, 184, 'start'], [298, 184, 'end']].forEach(function (q) {
+        var dmin = Math.min.apply(null, L.map(function (k) { return Math.hypot(POS[k][0] - (q[2] === 'end' ? q[0] - 40 : q[0] + 40), POS[k][1] - q[1]); }));
+        if (!mejor || dmin > mejor.d) mejor = { q: q, d: dmin };
+      });
+      var q = mejor.q;
+      el('text', { 'class': 'tm-otra', x: q[0], y: q[1], 'text-anchor': q[2] }).textContent = 'toca un nodo';
+      el('text', { 'class': 'tm-otra', x: q[0], y: q[1] + 14, 'text-anchor': q[2] }).textContent = 'para empezar otra';
     }
     var aqui = r.length < T ? r[r.length - 1] : null;
     L.forEach(function (k, n) {
@@ -283,7 +354,7 @@
     li.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); volver(); } });
   });
 
-  function pintar() { grafo(); contador(); rutas(); detalle(); nocero(); nav(); }
+  function pintar() { moverGrafo(); contador(); rutas(); detalle(); nocero(); nav(); }
   Array.prototype.forEach.call(document.querySelectorAll('.tm-distancias input[data-par]'), function (inp) {
     inp.addEventListener('input', function () { D[inp.getAttribute('data-par')] = Math.max(0, Number(inp.value) || 0); nuevo = null; pintar(); });
   });
