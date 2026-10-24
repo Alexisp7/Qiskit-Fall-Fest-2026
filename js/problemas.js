@@ -71,6 +71,12 @@
       var a = POS[tr[0]], b = POS[tr[1]], ex = b[0] - a[0], ey = b[1] - a[1], l = Math.hypot(ex, ey), R0 = 27;
       el('line', { 'class': 'tm-dir', x1: a[0] + ex / l * R0, y1: a[1] + ey / l * R0, x2: b[0] - ex / l * (R0 + 2), y2: b[1] - ey / l * (R0 + 2), 'marker-end': 'url(#tm-flecha)' });
     });
+    // ruta completa: un aviso gris que parpadea invita a empezar otra
+    if (paso !== 1 && r.length === T) {
+      var aviso1 = el('text', { 'class': 'tm-otra', x: 299, y: 58 });
+      aviso1.textContent = 'toca un nodo';
+      el('text', { 'class': 'tm-otra', x: 299, y: 72 }).textContent = 'para empezar otra';
+    }
     var aqui = r.length < T ? r[r.length - 1] : null;
     L.forEach(function (k, n) {
       var p = POS[k], paso = r.indexOf(k) + 1;
@@ -98,7 +104,7 @@
     for (var t = 1; t <= T; t++) puntos += '<span class="tm-c-punto' + (t <= n ? ' lleno' : '') + (t === n ? ' actual' : '') + '"></span>';
     var txt = n === 0 ? 'Toca el nodo donde empieza el camión'
       : n < T ? 'En t = ' + n + ' estás en <b>' + ruta[n - 1] + '</b> · toca la siguiente ubicación'
-      : 'Ruta completa en t = ' + T + ' · toca un nodo para empezar otra';
+      : 'Ruta completa en t = ' + T;
     cont.innerHTML = '<span class="tm-c-t">t = ' + Math.max(n, 0) + '<span class="tm-c-de"> / ' + T + '</span></span><span class="tm-c-puntos">' + puntos + '</span><span class="tm-c-txt">' + txt + '</span>';
   }
   function aviso(txt) {
@@ -187,6 +193,13 @@
           return '<span class="tm-nc" style="--k:' + t + '">x' + sub(IDX[k] + ',' + (t + 1)) + ' = 1</span>';
         }).join('')
       : '<span class="tm-nc-pista">Al completar la ruta aparecen aquí los x' + sub('i,t') + ' que valen 1; todos los demás valen 0.</span>';
+    var res = ruta.length === T
+      ? '<span class="tm-res-impl">⇒</span><span class="tm-llave">' + ruta.map(function (k, t) {
+          return '<span style="--k:' + t + '">x' + sub(IDX[k] + ',' + (t + 1)) + ' = 1</span>';
+        }).join('') + '</span>'
+      : '<span class="tm-res-vacio">Completa la ruta para ver los x' + sub('i,t') + ' que valen 1.</span>';
+    var c = document.getElementById('tm-nocero-4');
+    if (c.innerHTML !== res) c.innerHTML = res;
     var a = document.getElementById('tm-nocero-2'), b = document.getElementById('tm-nocero-3');
     if (a.innerHTML !== html) a.innerHTML = html;
     if (b.innerHTML !== html) b.innerHTML = html;
@@ -208,11 +221,11 @@
   // paso y vuelven a su sitio en el resumen, así nada se duplica
   var MOV = {
     dist: document.querySelector('.tm-distancias'), grafo: svg, contador: document.querySelector('.tm-contador-fila'),
-    tabla: tabla, q: outQ, terminos: outT
+    tabla: tabla, q: outQ, terminos: outT, reiniciar: document.getElementById('tm-reiniciar')
   };
   var CASA = {};
   Object.keys(MOV).forEach(function (k) { CASA[k] = document.createComment(k); MOV[k].parentNode.insertBefore(CASA[k], MOV[k]); });
-  var SLOTS = { 1: { dist: 'dist', grafo: 'grafo-1' }, 2: { contador: 'contador', grafo: 'grafo-2', tabla: 'tabla' }, 3: { q: 'q', terminos: 'terminos' }, 4: {} };
+  var SLOTS = { 1: { dist: 'dist', grafo: 'grafo-1' }, 2: { contador: 'contador', grafo: 'grafo-2', tabla: 'tabla', reiniciar: 'reiniciar' }, 3: { q: 'q', terminos: 'terminos' }, 4: {} };
   function colocar() {
     Object.keys(MOV).forEach(function (k) {
       var s = SLOTS[paso][k];
