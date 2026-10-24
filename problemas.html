@@ -1797,6 +1797,10 @@
     .tm-celda-x sub { font-size: 8px; }
     .tm-tabla td.uno { background: rgba(200,169,110,.32); box-shadow: inset 0 0 0 1px rgba(140,109,51,.35); }
     .tm-tabla td.uno .tm-celda-x { color: #8C6D33; font-weight: 600; }
+    /* el valor pegado a su x, y cada x que vale 0 tachada por separado */
+    .tm-x-val { top: -.62em; }
+    .tm-terminos { line-height: 2; }
+    .tm-x.cero::after { content: ''; position: absolute; left: -1px; right: -1px; top: 58%; height: 1px; background: rgba(140,109,51,.65); transform: rotate(-12deg); }
 </style>
   <script>
     // si llega desde la QFT de la portada, el menú ya bajó allá: no se anima
@@ -1911,6 +1915,6 @@
       </div>
     </div>
   </footer>
-  <script src="js/problemas.js?v=14"></script>
+  <script src="js/problemas.js?v=15"></script>
 </body>
 </html>
