@@ -554,6 +554,10 @@
       var az = document.createElement('section'); az.className = 'nb-deriva nb-ansatz-mat'; az.id = 'celda-ansatz-mat';
       nb.appendChild(az); window.montarAnsatzMat(az);
     }
+    if (etapa === 'solver' && window.montarVQEMat) {
+      var vq = document.createElement('section'); vq.className = 'nb-deriva nb-ansatz-mat'; vq.id = 'celda-vqe-mat';
+      nb.appendChild(vq); window.montarVQEMat(vq);
+    }
     // primero la demostración, de corrido, y al final las matrices de la red
     if (etapa === 'inicializar' && window.montarDerivacion) {
       var dv = document.createElement('section'); dv.className = 'nb-deriva'; dv.id = 'celda-derivacion';

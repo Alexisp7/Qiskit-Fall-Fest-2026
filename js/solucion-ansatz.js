@@ -1,7 +1,8 @@
 // El ansatz en matemáticas: por qué, partiendo de ángulos θ al azar, la capa de
 // R_Y, la cascada de CZ y la capa final pueden llegar a la ruta de mínima
-// energía. Para el triángulo (9 qubits) se simula el estado exacto en el
-// navegador y se optimiza parámetro por parámetro.
+// energía. El VQE en matemáticas (etapa Solver): la energía E(θ), la regla de la
+// sinusoide y, para el triángulo (9 qubits), el estado exacto simulado en el
+// navegador y optimizado parámetro por parámetro.
 (function () {
   var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var C = '\\color{#8C6D33}';
@@ -50,7 +51,7 @@
     { t: 'Para qué sirve la cascada: el paisaje', l: [
       ['b \\text{ ruta válida}\\;\\Rightarrow\\; H(b \\oplus e_k) - H(b) \\;\\ge\\; A - 2B\\,d_{\\max} > 0', 'Cambiar un solo bit de una ruta válida rompe al menos una regla (cuesta A) y ahorra a lo más dos distancias. Cada ruta válida es un mínimo local: pasar de 1 → 3 → 2 a 1 → 2 → 3 exige cambiar cuatro bits a la vez.'],
       ['\\text{con CZ:}\\quad \\langle z_k z_l\\rangle_\\theta \\ne \\langle z_k\\rangle_\\theta\\langle z_l\\rangle_\\theta', 'La cascada agrega direcciones correlacionadas, por ejemplo «x₂₂ y x₃₃ suben mientras x₃₂ y x₂₃ bajan», que pueden ayudar a salir de esos mínimos.'],
-      ['\\text{triángulo, 2000 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{35\\,\\%} \\text{ con CZ}, \\quad 32\\,\\% \\text{ sin CZ}', 'Medido con la misma regla de abajo. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
+      ['\\text{triángulo, 2000 arranques:}\\quad P(\\text{llegar a } E = 12) \\approx ' + C + '{35\\,\\%} \\text{ con CZ}, \\quad 32\\,\\% \\text{ sin CZ}', 'Medido con la regla de la sinusoide de la etapa Solver. Los demás arranques terminan en H = 14 o 16, que son otras rutas válidas. La cascada ayuda, pero no lo garantiza: por eso el VQE usa varios arranques.']
     ] },
     { t: 'De θ al azar a la ruta: cada ángulo es un seno', l: [
       ['E(\\theta_j) = \\alpha_j \\cos(\\theta_j - \\beta_j) + \\gamma_j', 'Cada θ_j aparece en una sola R_Y, así que la energía, como función de ese ángulo, es una sinusoide.'],
@@ -187,7 +188,7 @@
       ['Primera capa', String.raw`\bigotimes_{k=1}^{${n}}\big(\cos\tfrac{\theta_k}{2}|0\rangle + \sin\tfrac{\theta_k}{2}|1\rangle\big)`, 'Igual que con la cascada.'],
       ['Sin cascada, cada qubit por su cuenta', String.raw`|\psi\rangle = \bigotimes_{k=1}^{${n}} R_Y(\varphi_k)\,R_Y(\theta_k)|0\rangle = \bigotimes_{k=1}^{${n}}\big(\cos\tfrac{\gamma_k}{2}|0\rangle + \sin\tfrac{\gamma_k}{2}|1\rangle\big), \qquad \gamma_k = \theta_k + \varphi_k`, 'Un solo producto, sin suma de términos: ' + (2 * n) + ' ángulos que funcionan como ' + n + '.'],
       ['Amplitudes y probabilidades', String.raw`\psi(b) = \prod_{k=1}^{${n}} u_k(b_k), \qquad P(b) = \prod_{k=1}^{${n}} P_k(b_k)`, 'Con la cascada había 2ⁿ⁻¹ términos con signos; aquí, uno.'],
-      ['La energía del campo medio', String.raw`E = \text{cte} + \sum_{k} h_k \cos\gamma_k + \sum_{k<l} J_{kl}\cos\gamma_k\cos\gamma_l`, 'Es la ecuación de la sección 7: multilineal, con el mínimo en una cadena de bits. Llega a la ruta, pero cada ruta válida es un mínimo local.']
+      ['La energía del campo medio', String.raw`E = \text{cte} + \sum_{k} h_k \cos\gamma_k + \sum_{k<l} J_{kl}\cos\gamma_k\cos\gamma_l`, 'Es la ecuación de la sección 6, «Sin la cascada»: multilineal, con el mínimo en una cadena de bits. Llega a la ruta, pero cada ruta válida es un mínimo local.']
     ];
   }
   function circuitoN(n, sinCZ) {
@@ -308,29 +309,50 @@
       '<div class="az-cmp-caja"><table><thead><tr><th>Ansatz</th><th>Parámetros</th><th>CZ</th><th>¿Contiene la ruta óptima?</th><th>¿Entrelaza?</th><th>Llega al óptimo*</th><th>Evaluaciones*</th></tr></thead><tbody>' +
       F.map(function (f) { return '<tr' + f[7] + '><td>' + f[0] + '</td><td>' + f[1] + '</td><td>' + f[2] + '</td><td>' + f[3] + '</td><td>' + f[4] + '</td><td><b>' + f[5] + '</b></td><td>' + f[6] + '</td></tr>'; }).join('') +
       '</tbody></table></div>' +
-      '<p class="az-cmp-pie">* Triángulo, 9 qubits: 2000 arranques al azar con la regla de la sinusoide de la sección 10 (± 1 punto). «Llega al óptimo» = termina en E = 12; «evaluaciones» = promedio de energías calculadas por arranque.</p>' +
+      '<p class="az-cmp-pie">* Triángulo, 9 qubits: 2000 arranques al azar con la regla de la sinusoide de la etapa Solver (± 1 punto). «Llega al óptimo» = termina en E = 12; «evaluaciones» = promedio de energías calculadas por arranque.</p>' +
       '<p class="dv-nota">Es la versión más chica que entrelaza de verdad. Sin la capa final, la CZ no hace nada medible y el circuito equivale al campo medio. Sin la CZ, el estado es un producto y el optimizador se queda antes en otra ruta válida (32 % contra 35 %). Una segunda capa duplica parámetros y compuertas CZ y no mejora en el triángulo (33 %); en un chip real suma ruido y riesgo de <i>barren plateaus</i>. Además usa solo R<sub>Y</sub>, que da amplitudes reales (todo lo que necesita un Hamiltoniano diagonal; R<sub>Z</sub> sobre |0⟩ no cambia probabilidades), y CZ solo entre vecinos. La ventaja es modesta y no garantiza el óptimo: por eso el VQE usa varios arranques.</p></section>';
+  }
+
+  // el ansatz se queda con el circuito; la energía y la regla de la sinusoide pasan al VQE
+  var SV = [S[5], S[9]], SA = S.filter(function (p, i) { return i !== 5 && i !== 9; });
+  function seccion(p, i) {
+    return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' +
+      p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + '</section>';
   }
 
   window.montarAnsatzMat = function (caja) {
     function pintarTexto() {
       numero = 0;
       return '<div class="dv-cab"><div class="mx-kicker">El ansatz en matemáticas</div><h3 class="dv-tit">De un θ al azar a la ruta, a través de la cascada</h3>' +
-        '<p class="dv-resumen"><b>Resumen.</b> Se sigue el estado del circuito desde |0⟩<sup>⊗n</sup>: la primera capa de R<sub>Y</sub>(θ) con ángulos al azar reparte amplitud entre todas las rutas, la cascada de CZ las marca con signos que dependen de pares vecinos y la capa final hace interferir esos signos. Se muestra que la energía es un promedio de las rutas y que la ruta óptima está dentro de la familia del ansatz, incluso sin la cascada: lo que aportan las CZ no es alcanzar la ruta sino un mejor paisaje para el optimizador. Al final, cómo se llega ajustando un ángulo a la vez.</p></div>' +
-        '<div class="dv-pizarra">' + circuitoTexto() + S.map(function (p, i) {
-          return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + (i + 1) + '.</span>' + p.t + '</div>' +
-            p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('') + '</section>' +
+        '<p class="dv-resumen"><b>Resumen.</b> Se sigue el estado del circuito desde |0⟩<sup>⊗n</sup>: la primera capa de R<sub>Y</sub>(θ) con ángulos al azar reparte amplitud entre todas las rutas, la cascada de CZ las marca con signos que dependen de pares vecinos y la capa final hace interferir esos signos. Se muestra que la ruta óptima está dentro de la familia del ansatz, incluso sin la cascada: lo que aportan las CZ no es alcanzar la ruta sino un mejor paisaje para el optimizador. Cómo se calcula la energía y cómo se ajustan los ángulos está en la etapa Solver.</p></div>' +
+        '<div class="dv-pizarra">' + circuitoTexto() + SA.map(function (p, i) {
+          return seccion(p, i) +
             (i === 4 ? '<div class="az-2q-slot" data-modo="con"></div>' : '') +   // tras la capa final: el ejemplo de 2 qubits
-            (i === 6 ? '<div class="az-2q-slot" data-modo="sin"></div>' : '') +   // tras el campo medio: el mismo sin CZ
-            (i === 8 ? comparacion() : '');
+            (i === 5 ? '<div class="az-2q-slot" data-modo="sin"></div>' : '') +   // tras el campo medio: el mismo sin CZ
+            (i === 7 ? comparacion() : '');
         }).join('') + '</div>';
+    }
+    caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>';
+    function montarSlots() { Array.prototype.forEach.call(caja.querySelectorAll('.az-2q-slot'), montarDos); }
+    montarSlots();
+    (function listo() { if (window.katex) { caja.querySelector('.az-texto').innerHTML = pintarTexto(); montarSlots(); } else setTimeout(listo, 300); })();
+  };
+
+  // ── el VQE en matemáticas: la energía E(θ), la regla de la sinusoide y la demostración en vivo ──
+  window.montarVQEMat = function (caja) {
+    function pintarTexto() {
+      numero = 0;
+      return '<div class="dv-cab"><div class="mx-kicker">El VQE en matemáticas</div><h3 class="dv-tit">De la energía E(θ) a la ruta</h3>' +
+        '<p class="dv-resumen"><b>Resumen.</b> El ansatz propone un estado |ψ(θ)⟩; el VQE calcula su energía y ajusta los ángulos. Como Ĥ es diagonal, E(θ) es un promedio de las energías de las rutas, pesado por su probabilidad, y nunca baja del mínimo. Cada ángulo entra en una sola R<sub>Y</sub>, así que E es una sinusoide en ese ángulo: con tres evaluaciones se salta a su mínimo. Abajo se ve en vivo con el triángulo.</p></div>' +
+        '<div class="dv-pizarra">' + SV.map(seccion).join('') + '</div>';
     }
     caja.innerHTML = '<div class="az-texto">' + pintarTexto() + '</div>' +
       '<div class="az-demo"><div class="cp-mult-tit">Demostración en vivo: triángulo, 9 qubits, 18 ángulos</div>' +
       '<div class="az-controles"><button type="button" class="dv-btn" data-az="azar">θ al azar</button><button type="button" class="dv-btn dv-play" data-az="opt">optimizar</button><button type="button" class="dv-btn" data-az="construido">θ construido para 1 → 2 → 3</button>' +
       '<span class="az-estado" data-az="estado"></span></div>' +
       '<div class="az-cuerpo"><svg class="az-curva" viewBox="0 0 420 220" aria-label="Energía en cada barrido"></svg><div class="az-top" data-az="top"></div></div>' +
-      '<p class="dv-nota">La energía se calcula con el estado exacto del circuito: E(θ) = Σ<sub>b</sub> |ψ(b)|² H(b). Cada barrido ajusta los 18 ángulos uno por uno con la regla de la ecuación de la sinusoide. Desde distintos θ al azar puede quedar en un mínimo local: vuelve a sortear y a optimizar.</p></div>';
+      '<p class="dv-nota">La energía se calcula con el estado exacto del circuito del ansatz: E(θ) = Σ<sub>b</sub> |ψ(b)|² H(b). Cada barrido ajusta los 18 ángulos uno por uno con la regla de la sinusoide. Desde distintos θ al azar puede quedar en un mínimo local: vuelve a sortear y a optimizar.</p></div>';
+    (function listo() { if (window.katex) caja.querySelector('.az-texto').innerHTML = pintarTexto(); else setTimeout(listo, 300); })();
     var sim = prepararSim();
     var th = [], hist = [], tim = 0, corriendo = false;
     function sortear() { th = []; for (var j = 0; j < 18; j++) th.push(Math.random() * 2 * Math.PI); hist = [energia(sim, th)]; }
@@ -382,8 +404,5 @@
     caja.querySelector('[data-az="opt"]').addEventListener('click', correr);
     caja.querySelector('[data-az="construido"]').addEventListener('click', function () { clearTimeout(tim); corriendo = false; construido(); pintar(); });
     sortear(); pintar();
-    function montarSlots() { Array.prototype.forEach.call(caja.querySelectorAll('.az-2q-slot'), montarDos); }
-    montarSlots();
-    (function listo() { if (window.katex) { caja.querySelector('.az-texto').innerHTML = pintarTexto(); montarSlots(); } else setTimeout(listo, 300); })();
   };
 })();
