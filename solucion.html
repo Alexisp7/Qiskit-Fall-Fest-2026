@@ -1895,6 +1895,16 @@
     .nb-grilla { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 34px; align-items: start; }
     .nb-matrices { margin-top: 26px; }
     @media (max-width: 1000px) { .nb-grilla { grid-template-columns: 1fr; } }
+    /* la demostración, de corrido */
+    .dv-pizarra { padding: 26px 34px 30px; }
+    .dv-seccion { padding: 14px 0 18px; border-bottom: 1px solid rgba(200,169,110,.18); }
+    .dv-seccion:last-child { border-bottom: none; }
+    .dv-linea { border-left: 2px solid rgba(200,169,110,.35); margin: 4px 0; }
+    .dv-caso { border: 1px solid rgba(200,169,110,.3); border-radius: 4px; padding: 8px 12px; margin: 10px 0; background: rgba(255,255,255,.02); }
+    .dv-caso .dv-linea { border-left: none; }
+    .dv-cierre { color: #C8A96E; font-size: 13.5px; margin-top: 12px; }
+    .dv-caso-tit { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 19px; color: #F2EEE6; margin: 2px 0 2px; }
+    .dv-caso-tit, .dv-paso-tit, .dv-tit { font-variant-numeric: lining-nums; }
 </style>
   <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('rp-intro');</script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -2032,7 +2042,7 @@
   </footer>
   <script src="js/solucion-celdas.js?v=2"></script>
   <script src="js/solucion.js?v=21"></script>
-  <script src="js/solucion-derivacion.js?v=1"></script>
-  <script src="js/solucion-cuaderno.js?v=4"></script>
+  <script src="js/solucion-derivacion.js?v=3"></script>
+  <script src="js/solucion-cuaderno.js?v=5"></script>
 </body>
 </html>

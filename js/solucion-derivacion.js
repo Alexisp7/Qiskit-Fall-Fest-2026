@@ -1,13 +1,14 @@
-// Del QUBO al Ising, paso a paso: la derivación completa para el ejemplo de 3
-// nodos con 2 restricciones (temporal y espacial). Cada paso escribe sus
-// ecuaciones una tras otra, como en una pizarra, hasta llegar al Hamiltoniano
-// como operador y a lo que busca el VQE. Las ecuaciones se dibujan con KaTeX.
+// Del QUBO al Ising, de corrido: la derivación completa para el ejemplo de 3
+// nodos con 2 restricciones (temporal y espacial), sin saltar pasos, hasta las
+// matrices J y h. Al final se comprueba con números que H(z) da lo mismo que
+// Q(x) y que las restricciones castigan lo que deben. Ecuaciones con KaTeX.
 (function () {
-  var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   // el ejemplo: triángulo d12 = 5, d23 = 7, d13 = 9, con A = 100 y B = 1
   var N = 3, T = 3, A = 100, B = 1, D = [[0, 5, 9], [5, 0, 7], [9, 7, 0]];
   function k(i, t) { return (i - 1) * T + t; }          // k = (i − 1)T + t
+  function sumaD() { var s = 0; for (var i = 0; i < N; i++) for (var j = 0; j < N; j++) s += D[i][j]; return s; }
+  var CTE = B * (T - 1) / 4 * sumaD() + A * T * (N * N - 3 * N + 4) / 4 + A * N * (T * T - 3 * T + 4) / 4;
+
   function matrices() {
     var M = N * T, J = [], h = [];
     for (var a = 0; a < M; a++) { J.push(new Array(M).fill(0)); h.push(0); }
@@ -26,94 +27,123 @@
     for (var i4 = 1; i4 <= N; i4++) for (var t4 = 1; t4 <= T; t4++) for (var u = t4 + 1; u <= T; u++) pon(k(i4, t4), k(i4, u), A / 2);
     return { J: J, h: h };
   }
-  function n3(v) { return (Math.abs(v) < 1e-12 ? 0 : v).toFixed(2).replace(/\.00$/, '').replace('.', '{,}'); }
+  var MAT = matrices();
+  // Q(x) directo y H(z) con las matrices, para comprobar
+  function Qx(x) {   // x[i][t], 1-indexado
+    var c = 0, tem = 0, esp = 0;
+    for (var t = 1; t < T; t++) for (var i = 1; i <= N; i++) for (var j = 1; j <= N; j++) c += D[i - 1][j - 1] * x[i][t] * x[j][t + 1];
+    for (var t2 = 1; t2 <= T; t2++) { var s = 0; for (var i2 = 1; i2 <= N; i2++) s += x[i2][t2]; tem += (1 - s) * (1 - s); }
+    for (var i3 = 1; i3 <= N; i3++) { var s2 = 0; for (var t3 = 1; t3 <= T; t3++) s2 += x[i3][t3]; esp += (1 - s2) * (1 - s2); }
+    return { c: B * c, tem: tem, esp: esp, total: B * c + A * tem + A * esp };
+  }
+  function Hz(x) {
+    var z = []; for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) z.push(1 - 2 * x[i][t]);
+    var hz = 0, jz = 0;
+    for (var a = 0; a < z.length; a++) { hz += MAT.h[a] * z[a]; for (var b = a + 1; b < z.length; b++) jz += MAT.J[a][b] * z[a] * z[b]; }
+    return { z: z, hz: hz, jz: jz, total: CTE + hz + jz };
+  }
+  function unos(pares) {   // pares [i, t] con x = 1; el resto 0
+    var x = {}; for (var i = 1; i <= N; i++) { x[i] = {}; for (var t = 1; t <= T; t++) x[i][t] = 0; }
+    pares.forEach(function (p) { x[p[0]][p[1]] = 1; });
+    return x;
+  }
+  function n(v) { var r = Math.round(v * 100) / 100; return (Math.abs(r) < 1e-12 ? 0 : r).toString().replace('.', '{,}'); }
+
   function texMatrices() {
-    var m = matrices(), M = N * T;
-    var filas = m.J.map(function (f, a) {
+    var M = N * T;
+    var filas = MAT.J.map(function (f, a) {
       return f.map(function (v, b) {
-        var s = n3(v);
+        var s = n(v);
         if ((a === 0 && b === 1) || (a === 1 && b === 0)) return '\\colorbox{#5b4a26}{$' + s + '$}';
         if ((a === 0 && b === 4) || (a === 4 && b === 0)) return '\\colorbox{#24406b}{$' + s + '$}';
         return v ? s : '\\color{#6f7891}{0}';
       }).join(' & ');
     }).join(' \\\\ ');
     var zs = []; for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) zs.push('z_{' + i + t + '}');
-    return 'z=\\begin{pmatrix}' + zs.join('\\\\') + '\\end{pmatrix}\\quad J_{kl}=\\begin{pmatrix}' + filas + '\\end{pmatrix}\\quad h_k=\\begin{pmatrix}' + m.h.map(n3).join('\\\\') + '\\end{pmatrix}';
+    return 'z=\\begin{pmatrix}' + zs.join('\\\\') + '\\end{pmatrix}\\quad J_{kl}=\\begin{pmatrix}' + filas + '\\end{pmatrix}\\quad h_k=\\begin{pmatrix}' + MAT.h.map(n).join('\\\\') + '\\end{pmatrix}';
+  }
+  function texCaso(nombre, pares, txt) {
+    var x = unos(pares), q = Qx(x), hz = Hz(x);
+    var xs = []; for (var i = 1; i <= N; i++) for (var t = 1; t <= T; t++) if (x[i][t]) xs.push('x_{' + i + t + '}');
+    return [nombre,
+      xs.join(' = ') + ' = 1,\\ \\text{el resto } 0 \\qquad z = (' + hz.z.join(',\\,') + ')',
+      'Q(x) = \\underbrace{' + n(q.c) + '}_{Q_C} + 100\\cdot\\underbrace{' + q.tem + '}_{Q_{\\text{tem}}} + 100\\cdot\\underbrace{' + q.esp + '}_{Q_{\\text{esp}}} = ' + C + '{' + n(q.total) + '}',
+      'H(z) = \\underbrace{' + n(CTE) + '}_{\\text{cte}} + \\underbrace{(' + n(hz.hz) + ')}_{\\sum h_k z_k} + \\underbrace{(' + n(hz.jz) + ')}_{\\sum_{k<l} J_{kl} z_k z_l} = ' + C + '{' + n(hz.total) + '} \\quad ' + (Math.abs(q.total - hz.total) < 1e-9 ? '\\checkmark' : '\\times'),
+      txt
+    ];
   }
 
   var C = '\\color{#C8A96E}';
-  var PASOS = [
+  var S = [
     { t: 'La función de coste en x', l: [
-      ['Q(x) = B\\sum_{i,j}^{N} d_{ij}\\sum_{t=1}^{T-1} x_{i,t}\\,x_{j,t+1} \\;+\\; \\underbrace{A\\sum_{t=1}^{T}\\Big(1-\\sum_{i=1}^{N}x_{i,t}\\Big)^{2}}_{Q_{\\text{temporal}}} \\;+\\; \\underbrace{A\\sum_{i=1}^{N}\\Big(1-\\sum_{t=1}^{T}x_{i,t}\\Big)^{2}}_{Q_{\\text{espacial}}}', 'Distancia más las dos restricciones, cada una con su peso A.'],
-      ['N = 3 \\text{ nodos},\\qquad T = 3 \\text{ tiempos},\\qquad x_{i,t}\\in\\{0,1\\}'],
+      ['Q(x) = B\\sum_{i,j}^{N} d_{ij}\\sum_{t=1}^{T-1} x_{i,t}\\,x_{j,t+1} \\;+\\; \\underbrace{A\\sum_{t=1}^{T}\\Big(1-\\sum_{i=1}^{N}x_{i,t}\\Big)^{2}}_{Q_{\\text{temporal}}} \\;+\\; \\underbrace{A\\sum_{i=1}^{N}\\Big(1-\\sum_{t=1}^{T}x_{i,t}\\Big)^{2}}_{Q_{\\text{espacial}}}', 'Distancia más dos restricciones: un lugar por tiempo (temporal) y cada lugar una vez (espacial).'],
+      ['N = 3 \\text{ nodos},\\qquad T = 3 \\text{ tiempos},\\qquad x_{i,t}\\in\\{0,1\\},\\qquad B = 1,\\quad A = 100 \\gg B\\,d_{\\max}'],
       ['x_{i,t}:\\ \\{x_{11},x_{12},x_{13},x_{21},x_{22},x_{23},x_{31},x_{32},x_{33}\\}', 'Nueve variables binarias: una por lugar y tiempo.']
     ] },
-    { t: 'Un qubit no sabe qué es 0 y 1', l: [
-      ['Z\\,|0\\rangle = +1\\,|0\\rangle \\qquad Z\\,|1\\rangle = -1\\,|1\\rangle', 'Lo que un qubit entrega al medir Z son los valores +1 y −1.'],
-      [C + '{x_{i,t} = \\dfrac{1 - z_{i,t}}{2}}, \\qquad z_{i,t}\\in\\{-1,+1\\}', 'Mapeo estándar: x = 0 → z = +1 · x = 1 → z = −1.']
+    { t: 'Un qubit no sabe qué es 0 y 1: mapeo Ising', l: [
+      ['Z\\,|0\\rangle = +1\\,|0\\rangle \\qquad Z\\,|1\\rangle = -1\\,|1\\rangle', 'Al medir Z, un qubit entrega +1 o −1.'],
+      ['x_{i,t} = \\dfrac{1 - z_{i,t}}{2}, \\qquad z_{i,t}\\in\\{-1,+1\\}', 'Mapeo estándar.'],
+      ['z = +1 \\Rightarrow x = \\tfrac{1-1}{2} = 0 \\qquad z = -1 \\Rightarrow x = \\tfrac{1+1}{2} = 1 \\qquad z^{2} = 1,\\quad x^{2} = x']
     ] },
-    { t: 'Productos y cuadrados en z', l: [
-      ['x_{i,t}\\,x_{j,t+1} = \\tfrac14\\big(1 - z_{i,t} - z_{j,t+1} + z_{i,t}z_{j,t+1}\\big)'],
-      ['x_{i,t}\\,x_{i,t\'} = \\tfrac14\\big(1 - z_{i,t} - z_{i,t\'} + z_{i,t}z_{i,t\'}\\big)'],
-      ['\\Big(1-\\sum_{i} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{i} x_{i,t} + \\sum_{i,j} x_{i,t}\\,x_{j,t}', 'Las tres piezas con las que se reescribe todo Q.']
+    { t: 'Productos de dos variables', l: [
+      ['x_{i,t}\\,x_{j,t+1} = \\frac{1-z_{i,t}}{2}\\cdot\\frac{1-z_{j,t+1}}{2} = \\tfrac14\\big(1 - z_{i,t} - z_{j,t+1} + z_{i,t}z_{j,t+1}\\big)'],
+      ['x_{i,t}\\,x_{j,t} = \\tfrac14\\big(1 - z_{i,t} - z_{j,t} + z_{i,t}z_{j,t}\\big) \\qquad x_{i,t}\\,x_{i,t\'} = \\tfrac14\\big(1 - z_{i,t} - z_{i,t\'} + z_{i,t}z_{i,t\'}\\big)', 'La misma cuenta para dos lugares en un tiempo o un lugar en dos tiempos.']
     ] },
-    { t: 'Q_C: la distancia', l: [
-      ['B\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}x_{i,t}x_{j,t+1} = \\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}\\big(1 - z_{i,t} - z_{j,t+1} + z_{i,t}z_{j,t+1}\\big)'],
-      ['= B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} \\;-\\; \\tfrac14\\sum_{i}\\sum_{t=1}^{T-1}' + C + '{a_i}\\,z_{i,t} \\;-\\; \\tfrac14\\sum_{j}\\sum_{t=1}^{T-1}' + C + '{b_j}\\,z_{j,t+1} \\;+\\; \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}\\,z_{i,t}z_{j,t+1}\\Big\\}'],
-      [C + '{a_i = \\sum_j d_{ij}}, \\qquad ' + C + '{b_j = \\sum_i d_{ij}}', 'Lo que sale de cada lugar y lo que llega a él.'],
-      ['\\sum_{j}\\sum_{t=1}^{T-1} b_j\\,z_{j,t+1} = \\sum_{i}\\sum_{t=2}^{T} b_i\\,z_{i,t}', 'Se corre el índice (t + 1 → t) y se renombra j → i.'],
-      ['Q_C = B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} - \\tfrac14\\sum_{i=1}^{N}\\Big[a_i z_{i,1} + b_i z_{i,T} + \\sum_{t=2}^{T-1}(a_i+b_i)\\,z_{i,t}\\Big] + \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}\\,z_{i,t}z_{j,t+1}\\Big\\}']
+    { t: 'El cuadrado de cada restricción', l: [
+      ['\\Big(1-\\sum_{i} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{i} x_{i,t} + \\Big(\\sum_{i} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{i} x_{i,t} + \\sum_{i}\\sum_{j} x_{i,t}\\,x_{j,t}'],
+      ['\\Big(1-\\sum_{t} x_{i,t}\\Big)^{2} = 1 - 2\\sum_{t} x_{i,t} + \\sum_{t}\\sum_{t\'} x_{i,t}\\,x_{i,t\'}']
+    ] },
+    { t: 'Q_C: la distancia, término a término', l: [
+      ['B\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}x_{i,t}x_{j,t+1} = \\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1}\\big(1 - z_{i,t} - z_{j,t+1} + z_{i,t}z_{j,t+1}\\big)', 'Se reemplaza el producto por su forma en z.'],
+      ['\\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1} 1 = B\\,\\tfrac{T-1}{4}\\sum_{i,j}d_{ij}', 'El 1: la suma en t tiene T − 1 términos.'],
+      ['-\\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1} z_{i,t} = -\\tfrac{B}{4}\\sum_{i}\\sum_{t=1}^{T-1}\\Big(\\sum_{j}d_{ij}\\Big) z_{i,t} = -\\tfrac{B}{4}\\sum_{i}\\sum_{t=1}^{T-1} ' + C + '{a_i}\\,z_{i,t}, \\qquad ' + C + '{a_i = \\sum_j d_{ij}}', 'El −z del lugar de salida.'],
+      ['-\\tfrac{B}{4}\\sum_{i,j}d_{ij}\\sum_{t=1}^{T-1} z_{j,t+1} = -\\tfrac{B}{4}\\sum_{j}\\sum_{t=1}^{T-1} ' + C + '{b_j}\\,z_{j,t+1} = -\\tfrac{B}{4}\\sum_{i}\\sum_{t=2}^{T} b_i\\,z_{i,t}, \\qquad ' + C + '{b_j = \\sum_i d_{ij}}', 'El −z del lugar de llegada; se corre t + 1 → t y se renombra j → i.'],
+      ['\\sum_{t=1}^{T-1} a_i z_{i,t} + \\sum_{t=2}^{T} b_i z_{i,t} = a_i\\,z_{i,1} + b_i\\,z_{i,T} + \\sum_{t=2}^{T-1}(a_i + b_i)\\,z_{i,t}', 'Se separan t = 1 (solo sale), t = T (solo llega) y los tiempos del medio.'],
+      ['Q_C = B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} - \\tfrac14\\sum_{i=1}^{N}\\Big[a_i z_{i,1} + b_i z_{i,T} + \\sum_{t=2}^{T-1}(a_i+b_i)\\,z_{i,t}\\Big] + \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}\\,z_{i,t}z_{j,t+1}\\Big\\}', 'El último término es el + zz que no cambió.']
+    ] },
+    { t: 'Q temporal: un lugar por tiempo', l: [
+      ['\\sum_{t}\\Big(1-\\sum_{i}x_{i,t}\\Big)^{2} = \\sum_{t}\\Big(1 - 2\\sum_{i}x_{i,t} + \\sum_{i,j}x_{i,t}x_{j,t}\\Big)'],
+      ['-2\\sum_{i}x_{i,t} = -\\sum_{i}(1 - z_{i,t}) = -N + \\sum_{i} z_{i,t}'],
+      ['\\sum_{i,j}x_{i,t}x_{j,t} = \\Big(\\sum_i x_{i,t}\\Big)^{2} = \\tfrac14\\Big(N - \\sum_i z_{i,t}\\Big)^{2} = \\tfrac14\\Big(N^{2} - 2N\\sum_i z_{i,t} + \\big(\\textstyle\\sum_i z_{i,t}\\big)^{2}\\Big)'],
+      ['\\Big(\\sum_i z_{i,t}\\Big)^{2} = \\sum_i z_{i,t}^{2} + 2\\sum_{i<j} z_{i,t}z_{j,t} = N + 2\\sum_{i<j} z_{i,t}z_{j,t}', 'Porque z² = 1.'],
+      ['1 - N + \\sum_i z_{i,t} + \\tfrac{N^{2}}{4} - \\tfrac{N}{2}\\sum_i z_{i,t} + \\tfrac{N}{4} + \\tfrac12\\sum_{i<j} z_{i,t}z_{j,t} = \\tfrac{4 - 3N + N^{2}}{4} + \\big(1 - \\tfrac N2\\big)\\sum_i z_{i,t} + \\tfrac12\\sum_{i<j} z_{i,t}z_{j,t}', 'Se juntan los términos de un mismo t.'],
+      ['Q_{\\text{tem}} = A\\Big[\\tfrac{T}{4}\\big(4 - 3N + N^{2}\\big) + \\big(1 - \\tfrac{N}{2}\\big)\\sum_{i}\\sum_{t} z_{i,t} + \\tfrac12\\sum_{t}\\sum_{i<j} z_{i,t}z_{j,t}\\Big]', 'Y se suma sobre los T tiempos.']
     ] },
     { t: 'Q espacial: cada lugar una vez', l: [
       ['\\sum_{i}\\Big(1-\\sum_{t}x_{i,t}\\Big)^{2} = \\sum_{i}\\Big(1 - 2\\sum_{t}x_{i,t} + \\sum_{t,t\'}x_{i,t}x_{i,t\'}\\Big)'],
-      ['-2\\sum_{t}x_{i,t} = -\\sum_{t}(1 - z_{i,t}) = ' + C + '{-T + \\sum_{t} z_{i,t}}'],
-      ['\\sum_{t,t\'}x_{i,t}x_{i,t\'} = \\Big(\\sum_t x_{i,t}\\Big)^{2} = \\tfrac14\\Big(T - \\sum_t z_{i,t}\\Big)^{2} = \\tfrac14\\Big(T^{2} - 2T\\sum_t z_{i,t} + \\big(\\textstyle\\sum_t z_{i,t}\\big)^{2}\\Big)'],
-      ['\\Big(\\sum_t z_{i,t}\\Big)^{2} = ' + C + '{T + 2\\sum_{t<t\'} z_{i,t}z_{i,t\'}}', 'Porque z² = 1: los términos con t = t′ suman T.'],
-      ['Q_{\\text{esp}} = A\\Big[\\tfrac{N}{4}\\big(4 - 3T + T^{2}\\big) + \\big(1 - \\tfrac{T}{2}\\big)\\sum_{i}\\sum_{t} z_{i,t} + \\tfrac12\\sum_{i}\\sum_{t<t\'} z_{i,t}z_{i,t\'}\\Big]', 'Se juntan las constantes: N(1 − ¾T + ¼T²).']
-    ] },
-    { t: 'Q temporal: un lugar por tiempo', l: [
-      ['\\sum_{t}\\Big(1-\\sum_{i}x_{i,t}\\Big)^{2} \\quad\\Longrightarrow\\quad \\text{lo mismo con } N \\leftrightarrow T', 'La cuenta es idéntica: ahora la suma interna recorre los lugares.'],
-      ['Q_{\\text{tem}} = A\\Big[\\tfrac{T}{4}\\big(4 - 3N + N^{2}\\big) + \\big(1 - \\tfrac{N}{2}\\big)\\sum_{i}\\sum_{t} z_{i,t} + \\tfrac12\\sum_{t}\\sum_{i<j} z_{i,t}z_{j,t}\\Big]']
+      ['-2\\sum_{t}x_{i,t} = -\\sum_{t}(1 - z_{i,t}) = -T + \\sum_{t} z_{i,t}'],
+      ['\\sum_{t,t\'}x_{i,t}x_{i,t\'} = \\tfrac14\\Big(T - \\sum_t z_{i,t}\\Big)^{2} = \\tfrac14\\Big(T^{2} - 2T\\sum_t z_{i,t} + T + 2\\sum_{t<t\'} z_{i,t}z_{i,t\'}\\Big)', 'Con (Σₜ z)² = T + 2 Σ_{t<t′} z z.'],
+      ['1 - T + \\sum_t z_{i,t} + \\tfrac{T^{2}}{4} - \\tfrac{T}{2}\\sum_t z_{i,t} + \\tfrac{T}{4} + \\tfrac12\\sum_{t<t\'} z_{i,t}z_{i,t\'} = \\tfrac{4 - 3T + T^{2}}{4} + \\big(1 - \\tfrac T2\\big)\\sum_t z_{i,t} + \\tfrac12\\sum_{t<t\'} z_{i,t}z_{i,t\'}'],
+      ['Q_{\\text{esp}} = A\\Big[\\tfrac{N}{4}\\big(4 - 3T + T^{2}\\big) + \\big(1 - \\tfrac{T}{2}\\big)\\sum_{i}\\sum_{t} z_{i,t} + \\tfrac12\\sum_{i}\\sum_{t<t\'} z_{i,t}z_{i,t\'}\\Big]']
     ] },
     { t: 'La función de coste en Ising', l: [
-      ['\\boxed{\\begin{aligned} H(z) = {}& B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} - \\tfrac14\\sum_{i=1}^{N}\\Big[a_i z_{i,1} + b_i z_{i,T} + \\sum_{t=2}^{T-1}(a_i+b_i)z_{i,t}\\Big] + \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}z_{i,t}z_{j,t+1}\\Big\\} \\\\ &+ A\\Big\\{\\tfrac{T}{4}(4-3N+N^{2}) + \\big(1-\\tfrac N2\\big)\\sum_{i}\\sum_{t}z_{i,t} + \\tfrac12\\sum_{t}\\sum_{i<j}z_{i,t}z_{j,t}\\Big\\} \\\\ &+ A\\Big\\{\\tfrac{N}{4}(4-3T+T^{2}) + \\big(1-\\tfrac T2\\big)\\sum_{i}\\sum_{t}z_{i,t} + \\tfrac12\\sum_{i}\\sum_{t<t\'}z_{i,t}z_{i,t\'}\\Big\\}\\end{aligned}}', 'La misma función, ahora en espines: lista para leerse como Hamiltoniano.']
+      ['\\boxed{\\begin{aligned} H(z) = {}& B\\Big\\{\\tfrac{T-1}{4}\\sum_{i,j}d_{ij} - \\tfrac14\\sum_{i=1}^{N}\\Big[a_i z_{i,1} + b_i z_{i,T} + \\sum_{t=2}^{T-1}(a_i+b_i)z_{i,t}\\Big] + \\tfrac14\\sum_{t=1}^{T-1}\\sum_{i,j}d_{ij}z_{i,t}z_{j,t+1}\\Big\\} \\\\ &+ A\\Big\\{\\tfrac{T}{4}(4-3N+N^{2}) + \\big(1-\\tfrac N2\\big)\\sum_{i}\\sum_{t}z_{i,t} + \\tfrac12\\sum_{t}\\sum_{i<j}z_{i,t}z_{j,t}\\Big\\} \\\\ &+ A\\Big\\{\\tfrac{N}{4}(4-3T+T^{2}) + \\big(1-\\tfrac T2\\big)\\sum_{i}\\sum_{t}z_{i,t} + \\tfrac12\\sum_{i}\\sum_{t<t\'}z_{i,t}z_{i,t\'}\\Big\\}\\end{aligned}}', 'Es la misma función que Q(x), escrita en espines.']
     ] },
-    { t: 'La constante, que se ignora', l: [
-      ['\\text{cte} = B\\,\\frac{T-1}{4}\\sum_{i,j}d_{ij} + A\\,\\frac{T(N^{2}-3N+4)}{4} + A\\,\\frac{N(T^{2}-3T+4)}{4}', 'No depende de z: mueve toda la energía por igual y no cambia cuál es la mínima.'],
-      ['B = 1,\\; A = 100,\\; \\sum_{i,j}d_{ij} = 2(5+7+9) = 42 \\;\\Rightarrow\\; \\text{cte} = 21 + 300 + 300 = ' + C + '{621}']
-    ] },
-    { t: 'Campos locales', l: [
-      ['h_{i,t} = \\underbrace{B\\,h^{(c)}_{i,t}}_{\\text{costo}} + \\underbrace{A\\big(1-\\tfrac N2\\big)}_{\\text{temporal}} + \\underbrace{A\\big(1-\\tfrac T2\\big)}_{\\text{espacial}}'],
-      ['h^{(c)}_{i,t} = -\\tfrac14\\begin{cases} \\sum_j d_{ij}, & t = 1 \\\\ \\sum_j (d_{ij} + d_{ji}), & 2\\le t\\le T-1 \\\\ \\sum_j d_{ji}, & t = T \\end{cases}'],
-      ['h > 0:\\ z\\to +1\\ (x = 0) \\qquad h < 0:\\ z \\to -1\\ (x = 1)', 'El campo alinea al espín: un h negativo empuja a visitar.'],
-      ['h_{1,1} = 1\\cdot\\Big(-\\tfrac{5+9}{4}\\Big) + 100\\big(1-\\tfrac32\\big) + 100\\big(1-\\tfrac32\\big) = -3{,}5 - 50 - 50 = ' + C + '{-103{,}5}']
-    ] },
-    { t: 'Acoplamientos', l: [
-      ['J_{(i,t)(j,t+1)} = \\tfrac{B}{4}\\,d_{ij}', 'Costo de transición, para t = 1, …, T − 1.'],
-      ['J_{(i,t)(j,t)} = \\tfrac{A}{2} \\quad (i<j,\\ \\text{mismo } t)', 'Se activa si dos lugares están en el mismo tiempo.'],
-      ['J_{(i,t)(i,t\')} = \\tfrac{A}{2} \\quad (t<t\',\\ \\text{mismo } i)', 'Se activa si un lugar aparece en dos tiempos.'],
-      ['J_{(1,1)(2,2)} = \\tfrac{5}{4} = ' + C + '{1{,}25} \\qquad J_{(1,1)(1,2)} = \\tfrac{100}{2} = ' + C + '{50}']
+    { t: 'Constante, campos locales y acoplamientos', l: [
+      ['\\text{cte} = B\\,\\frac{T-1}{4}\\sum_{i,j}d_{ij} + A\\,\\frac{T(N^{2}-3N+4)}{4} + A\\,\\frac{N(T^{2}-3T+4)}{4}', 'Todo lo que no lleva z. No cambia cuál es el mínimo.'],
+      ['h_{i,t} = B\\,h^{(c)}_{i,t} + A\\big(1-\\tfrac N2\\big) + A\\big(1-\\tfrac T2\\big), \\qquad h^{(c)}_{i,t} = -\\tfrac14\\begin{cases} \\sum_j d_{ij}, & t = 1 \\\\ \\sum_j (d_{ij} + d_{ji}), & 2\\le t\\le T-1 \\\\ \\sum_j d_{ji}, & t = T \\end{cases}', 'Todo lo que multiplica a un solo z: de la distancia, de la regla temporal y de la espacial.'],
+      ['J_{(i,t)(j,t+1)} = \\tfrac{B}{4}\\,d_{ij} \\qquad J_{(i,t)(j,t)} = \\tfrac{A}{2}\\ (i<j) \\qquad J_{(i,t)(i,t\')} = \\tfrac{A}{2}\\ (t<t\')', 'Todo lo que multiplica a un par z z: transición, mismo tiempo y mismo lugar.'],
+      ['h > 0:\\ z\\to +1\\ (x = 0) \\qquad h < 0:\\ z \\to -1\\ (x = 1)', 'El campo alinea al espín.']
     ] },
     { t: 'De pares a una matriz', l: [
       ['H = \\text{cte} + \\sum_{i=1}^{N}\\sum_{t=1}^{T} h_{i,t}\\,z_{i,t} + \\sum_{\\text{pares únicos}} J_{(i,t)(j,t\')}\\,z_{i,t}\\,z_{j,t\'}'],
-      ['M = N\\times T \\text{ variables}, \\qquad ' + C + '{k = (i-1)\\,T + t},\\quad k = 1,\\dots,M', 'Cada par (i, t) recibe un índice k distinto: para t entre 1 y T, cada i ocupa un bloque de T índices seguidos.'],
-      ['H_{\\text{matriz}} = \\sum_{k=1}^{M} h_k z_k + \\sum_{k=1}^{M}\\sum_{l=k+1}^{M} J_{kl}\\,z_k z_l \\;=\\; z^{\\mathsf T} J\\, z + h^{\\mathsf T} z \\;(+\\,\\text{cte})', 'En zᵀJz, J lleva cada par una sola vez (k < l); si se escribe simétrica, cada lado vale la mitad.']
+      ['M = N\\times T, \\qquad k = (i-1)\\,T + t \\in \\{1,\\dots,M\\}', 'Para cada i, los T tiempos ocupan k = (i − 1)T + 1, …, iT: bloques que no se pisan, así que cada (i, t) tiene un k propio.'],
+      ['H_{\\text{matriz}} = \\sum_{k=1}^{M} h_k z_k + \\sum_{k=1}^{M}\\sum_{l=k+1}^{M} J_{kl}\\,z_k z_l \\;(+\\,\\text{cte}) \\;=\\; z^{\\mathsf T} J_{\\text{sup}}\\, z + h^{\\mathsf T} z', 'Con J simétrica, J_sim = J_sup + J_supᵀ y zᵀ J_sup z = ½ zᵀ J_sim z.']
+    ] },
+    { t: 'El Hamiltoniano como operador y lo que busca el VQE', l: [
+      ['z_k \\to \\hat Z_k = \\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}, \\qquad \\hat H = \\sum_{k<l} J_{kl}\\,\\hat Z_k\\otimes\\hat Z_l + \\sum_{k=1}^{M} h_k\\,\\hat Z_k'],
+      ['\\hat Z_k\\otimes\\hat Z_l = \\mathrm{diag}(1,-1,-1,1) \\;\\Rightarrow\\; \\hat H \\text{ es diagonal en la base computacional}', 'Solo aparecen Z y Z ⊗ Z.'],
+      ['\\min_{\\theta} E(\\theta) = \\min_{\\theta}\\langle\\psi(\\theta)|\\hat H|\\psi(\\theta)\\rangle = \\min_\\theta \\Big[\\sum_{k<l} J_{kl}\\langle\\hat Z_k\\otimes\\hat Z_l\\rangle_\\theta + \\sum_k h_k\\langle\\hat Z_k\\rangle_\\theta\\Big]', 'El estado |ψ(θ)⟩ lo da el ansatz: la etapa siguiente.']
     ] },
     { t: 'Para nuestro ejemplo: N = 3, T = 3, M = 9', l: [
       ['z_{11}\\to 1,\\ z_{12}\\to 2,\\ z_{13}\\to 3,\\ z_{21}\\to 4,\\ z_{22}\\to 5,\\ z_{23}\\to 6,\\ z_{31}\\to 7,\\ z_{32}\\to 8,\\ z_{33}\\to 9', 'Por ejemplo z₂₃: (2 − 1)·3 + 3 = 6.'],
-      ['J_{12}:\\ k = 1\\ (i=1,t=1),\\ l = 2\\ (i=1,t\'=2) \\Rightarrow \\text{restricción espacial} = \\tfrac A2 = 50 \\qquad J_{15}:\\ z_{11}, z_{22} \\Rightarrow \\tfrac B4 d_{12} = 1{,}25'],
-      [function () { return texMatrices(); }, 'Las matrices completas (J simétrica, como en la foto). En dorado J₁₂, en azul J₁₅.']
+      ['a = b = (5+9,\\ 5+7,\\ 9+7) = (14,\\ 12,\\ 16) \\qquad \\textstyle\\sum_{i,j}d_{ij} = 2(5+7+9) = 42', 'Las distancias son simétricas: lo que sale de cada lugar es lo que llega.'],
+      ['\\text{cte} = 1\\cdot\\tfrac{2}{4}\\cdot 42 + 100\\cdot\\tfrac{3\\cdot 4}{4} + 100\\cdot\\tfrac{3\\cdot 4}{4} = 21 + 300 + 300 = ' + C + '{' + CTE + '}'],
+      ['h_{1,1} = -\\tfrac{14}{4} + 100(1-\\tfrac32) + 100(1-\\tfrac32) = -3{,}5 - 50 - 50 = ' + C + '{-103{,}5} \\qquad h_{1,2} = -\\tfrac{14+14}{4} - 100 = ' + C + '{-107}'],
+      ['J_{12}:\\ (z_{11}, z_{12}) \\text{ mismo lugar} \\Rightarrow \\tfrac{A}{2} = ' + C + '{50} \\qquad J_{15}:\\ (z_{11}, z_{22}) \\text{ transición } 1\\to 2 \\Rightarrow \\tfrac{B}{4}d_{12} = ' + C + '{1{,}25}'],
+      [function () { return texMatrices(); }, 'Las matrices completas (J simétrica). En dorado J₁₂, en azul J₁₅.']
     ] },
-    { t: 'El Hamiltoniano como operador', l: [
-      ['z_k \\;\\to\\; \\hat Z_k, \\qquad \\hat Z = \\begin{pmatrix} 1 & 0 \\\\ 0 & -1 \\end{pmatrix}'],
-      ['\\hat H = \\sum_{1\\le k<l\\le M} J_{kl}\\,\\hat Z_k\\otimes\\hat Z_l + \\sum_{k=1}^{M} h_k\\,\\hat Z_k', 'J y h ya los conocemos.'],
-      ['\\hat Z_k\\otimes\\hat Z_l = \\begin{pmatrix} 1&0&0&0\\\\0&-1&0&0\\\\0&0&-1&0\\\\0&0&0&1\\end{pmatrix} \\;\\Rightarrow\\; ' + C + '{\\hat H \\text{ es diagonal en la base computacional}}', 'Solo aparecen Z y Z ⊗ Z.']
-    ] },
-    { t: 'Lo que busca el VQE', l: [
-      ['\\min_{\\theta} E(\\theta) = \\min_{\\theta}\\,\\langle\\psi(\\theta)|\\,\\hat H\\,|\\psi(\\theta)\\rangle'],
-      ['E(\\theta) = \\sum_{k<l} J_{kl}\\,\\langle\\psi(\\theta)|\\hat Z_k\\otimes\\hat Z_l|\\psi(\\theta)\\rangle + \\sum_{k=1}^{M} h_k\\,\\langle\\psi(\\theta)|\\hat Z_k|\\psi(\\theta)\\rangle'],
-      ['\\text{¿Qué } |\\psi(\\theta)\\rangle \\text{ usamos?} \\quad \\Longrightarrow \\quad \\text{ansatz}', 'Es arbitrario: de hardware eficiente (HEA) o universales como TwoLocal o EfficientSU2. Eso es la etapa siguiente.']
-    ] }
+    { t: 'Comprobación: H(z) da lo mismo que Q(x)', casos: true }
   ];
 
   function tex(s) {
@@ -121,58 +151,29 @@
     if (window.katex) { try { return katex.renderToString(src, { displayMode: true, throwOnError: false }); } catch (e) {} }
     return '<code>' + src.replace(/</g, '&lt;') + '</code>';
   }
+  function lineas(p) {
+    if (p.casos) {
+      var casos = [
+        texCaso('Ruta válida 1 → 2 → 3', [[1, 1], [2, 2], [3, 3]], 'Cada tiempo tiene un lugar y cada lugar aparece una vez: las dos restricciones valen 0 y solo queda la distancia 5 + 7.'),
+        texCaso('Rompe la regla espacial: el lugar 1 se repite', [[1, 1], [1, 2], [3, 3]], 'El lugar 1 aparece dos veces y el 2 ninguna: (1 − 2)² + (1 − 0)² = 2, que suma 2A. En z se ve en J₁₂ = 50, que ahora multiplica a (−1)(−1) = +1.'),
+        texCaso('Rompe la regla temporal: dos lugares en t = 1', [[1, 1], [2, 1], [3, 2]], 'En t = 1 hay dos lugares y en t = 3 ninguno: (1 − 2)² + (1 − 0)² = 2 en la regla temporal. La distancia cuenta 1 → 3 y 2 → 3 (9 + 7). En z se activa J₁₄ = 50, el par (z₁₁, z₂₁) del mismo tiempo.')
+      ];
+      var out = '';
+      casos.forEach(function (c) { out += '<div class="dv-caso"><div class="dv-caso-tit">' + c[0] + '</div>' + c.slice(1, 4).map(function (l) { return '<div class="dv-linea">' + tex(l) + '</div>'; }).join('') + '<p class="dv-nota">' + c[4] + '</p></div>'; });
+      return out + '<p class="dv-nota dv-cierre">Las tres coinciden: las matrices J y h son la misma función de coste. Abajo, la misma construcción para la red minera.</p>';
+    }
+    return p.l.map(function (l) { return '<div class="dv-linea">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>'; }).join('');
+  }
 
   window.montarDerivacion = function (caja) {
-    caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Del QUBO al Ising · paso a paso</div><h3 class="dv-tit">Demostración para 3 nodos y 2 restricciones</h3></div>' +
-      '<div class="dv-pizarra"><div class="dv-paso-tit"></div><div class="dv-lineas" aria-live="polite"></div></div>' +
-      '<div class="dv-controles"><button type="button" class="dv-btn" data-dv="atras" aria-label="Paso anterior">‹</button>' +
-      '<button type="button" class="dv-btn dv-play" data-dv="play">▶ reproducir</button>' +
-      '<button type="button" class="dv-btn" data-dv="sig" aria-label="Paso siguiente">›</button>' +
-      '<ol class="dv-puntos"></ol><span class="dv-cuenta"></span></div>';
-    var tit = caja.querySelector('.dv-paso-tit'), lin = caja.querySelector('.dv-lineas'), puntos = caja.querySelector('.dv-puntos');
-    var play = caja.querySelector('[data-dv="play"]'), cuenta = caja.querySelector('.dv-cuenta');
-    PASOS.forEach(function (p, n) {
-      var li = document.createElement('li'), b = document.createElement('button');
-      b.type = 'button'; b.title = p.t; b.setAttribute('aria-label', 'Paso ' + (n + 1) + ': ' + p.t);
-      b.addEventListener('click', function () { parar(); ir(n, true); });
-      li.appendChild(b); puntos.appendChild(li);
-    });
-    var actual = 0, tim = 0, sonando = false;
-    function ir(n, escribir) {
-      clearTimeout(tim);
-      actual = Math.max(0, Math.min(PASOS.length - 1, n));
-      var p = PASOS[actual];
-      tit.innerHTML = '<span class="dv-num">' + String(actual + 1).padStart(2, '0') + '</span>' + p.t;
-      lin.innerHTML = p.l.map(function (l, m) {
-        return '<div class="dv-linea' + (escribir && !quieto ? ' oculta' : '') + '" data-m="' + m + '">' + tex(l[0]) + (l[1] ? '<p class="dv-nota">' + l[1] + '</p>' : '') + '</div>';
-      }).join('');
-      Array.prototype.forEach.call(puntos.querySelectorAll('button'), function (b, i) { b.className = i === actual ? 'actual' : i < actual ? 'hecho' : ''; });
-      cuenta.textContent = (actual + 1) + ' / ' + PASOS.length;
-      if (escribir && !quieto) escribirLineas(0);
-      else if (sonando) tim = setTimeout(siguiente, 2600);
+    function pintar() {
+      caja.innerHTML = '<div class="dv-cab"><div class="mx-kicker">Del QUBO al Ising · de corrido</div><h3 class="dv-tit">Demostración para 3 nodos y 2 restricciones</h3></div>' +
+        '<div class="dv-pizarra">' + S.map(function (p, i) {
+          return '<section class="dv-seccion"><div class="dv-paso-tit"><span class="dv-num">' + String(i + 1).padStart(2, '0') + '</span>' + p.t + '</div>' + lineas(p) + '</section>';
+        }).join('') + '</div>';
     }
-    // cada línea aparece cuando la anterior ya se leyó
-    function escribirLineas(m) {
-      var l = lin.querySelector('[data-m="' + m + '"]');
-      if (!l) { if (sonando) tim = setTimeout(siguiente, 2600); return; }
-      Array.prototype.forEach.call(lin.querySelectorAll('.dv-linea'), function (x) { x.classList.remove('ultima'); });
-      l.classList.remove('oculta'); l.classList.add('ultima');
-      tim = setTimeout(function () { escribirLineas(m + 1); }, 1500 + Math.min(1600, l.textContent.length * 9));
-    }
-    function siguiente() {
-      if (actual < PASOS.length - 1) ir(actual + 1, true);
-      else parar();
-    }
-    function parar() { sonando = false; play.textContent = '▶ reproducir'; clearTimeout(tim); Array.prototype.forEach.call(lin.querySelectorAll('.dv-linea.oculta'), function (x) { x.classList.remove('oculta'); }); }
-    play.addEventListener('click', function () {
-      if (sonando) { parar(); return; }
-      sonando = true; play.textContent = '❚❚ pausa';
-      if (actual === PASOS.length - 1) ir(0, true); else ir(actual, true);
-    });
-    caja.querySelector('[data-dv="atras"]').addEventListener('click', function () { parar(); ir(actual - 1, true); });
-    caja.querySelector('[data-dv="sig"]').addEventListener('click', function () { parar(); ir(actual + 1, true); });
-    // KaTeX puede llegar después: se vuelve a dibujar el paso
-    function listo() { if (window.katex) ir(actual, false); else setTimeout(listo, 300); }
-    ir(0, false); listo();
+    pintar();
+    // KaTeX puede llegar después: se vuelve a dibujar
+    (function listo() { if (window.katex) pintar(); else setTimeout(listo, 300); })();
   };
 })();

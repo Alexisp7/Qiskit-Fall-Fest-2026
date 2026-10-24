@@ -401,13 +401,14 @@
     // celdas y ejemplo en su propia grilla: así el ejemplo fijo no se monta sobre las matrices
     var grilla = document.createElement('div'); grilla.className = 'nb-grilla';
     grilla.appendChild(col); grilla.appendChild(lado); nb.appendChild(grilla);
-    if (etapa === 'inicializar' && window.montarMatrices) {
-      var mat = document.createElement('section'); mat.className = 'nb-matrices'; mat.id = 'celda-matrices';
-      nb.appendChild(mat); window.montarMatrices(mat);
-    }
+    // primero la demostración, de corrido, y al final las matrices de la red
     if (etapa === 'inicializar' && window.montarDerivacion) {
       var dv = document.createElement('section'); dv.className = 'nb-deriva'; dv.id = 'celda-derivacion';
       nb.appendChild(dv); window.montarDerivacion(dv);
+    }
+    if (etapa === 'inicializar' && window.montarMatrices) {
+      var mat = document.createElement('section'); mat.className = 'nb-matrices'; mat.id = 'celda-matrices';
+      nb.appendChild(mat); window.montarMatrices(mat);
     }
     var svg = lado.querySelector('.nb-ej'), exp = lado.querySelector('.nb-exp'), paso = lado.querySelector('.nb-ej-paso');
     var previas = [], actual = null, fijo = 0;
@@ -421,14 +422,14 @@
         li.appendChild(b); indice.appendChild(li);
       });
       if (etapa === 'inicializar') {
-        var li2 = document.createElement('li'), b2 = document.createElement('button');
-        b2.type = 'button'; b2.textContent = 'Matrices explícitas J y h'; b2.className = 'clave';
-        b2.addEventListener('click', function () { document.getElementById('celda-matrices').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' }); });
-        li2.appendChild(b2); indice.appendChild(li2);
         var li3 = document.createElement('li'), b3 = document.createElement('button');
         b3.type = 'button'; b3.textContent = 'Del QUBO al Ising, paso a paso'; b3.className = 'clave';
         b3.addEventListener('click', function () { document.getElementById('celda-derivacion').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' }); });
         li3.appendChild(b3); indice.appendChild(li3);
+        var li2 = document.createElement('li'), b2 = document.createElement('button');
+        b2.type = 'button'; b2.textContent = 'Matrices explícitas J y h'; b2.className = 'clave';
+        b2.addEventListener('click', function () { document.getElementById('celda-matrices').scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' }); });
+        li2.appendChild(b2); indice.appendChild(li2);
       }
     }
     function activar(id, ir) {
