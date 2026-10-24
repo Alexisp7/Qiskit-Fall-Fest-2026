@@ -220,7 +220,7 @@
     clearTimeout(avisoT); avisoT = setTimeout(contador, 2200);
   }
   var tOps = $('t-ops');
-  for (var tt = 2; tt <= 14; tt++) tOps.insertAdjacentHTML('beforeend', '<button type="button" data-t="' + tt + '" aria-pressed="' + (tt === T ? 'true' : 'false') + '">' + tt + '</button>');
+  for (var tt = 2; tt <= 16; tt++) tOps.insertAdjacentHTML('beforeend', '<button type="button" data-t="' + tt + '" aria-pressed="' + (tt === T ? 'true' : 'false') + '">' + tt + '</button>');
   Array.prototype.forEach.call(tOps.querySelectorAll('button'), function (bt) {
     bt.addEventListener('click', function () {
       T = Number(bt.getAttribute('data-t'));
@@ -305,25 +305,45 @@
   }
 
   // ── paso 5: castigos ──
+  // Como en la distancia: cada regla se revisa por turno y solo se escriben las
+  // cuentas de las que se rompen; las que se cumplen quedan en 0 sin desarrollo.
+  var castT = 0;
   function tarjetasCastigo() {
+    clearTimeout(castT);
     var p = castigos(ruta), a = A();
-    var cnt = {}; ruta.forEach(function (k) { cnt[k] = (cnt[k] || 0) + 1; });
-    var faltan = L.filter(function (k) { return !cnt[k]; });
-    var saltos = []; for (var i = 1; i < ruta.length; i++) if (!camino(ruta[i - 1], ruta[i])) saltos.push(ruta[i - 1] + '→' + ruta[i] + ' (t=' + i + ')');
-    var pares = []; if (antesOn) { var tb = []; ruta.forEach(function (k, t) { if (k === aA) tb.forEach(function (t0) { pares.push('x' + sub(IDX[bB] + ',' + t0) + 'x' + sub(IDX[aA] + ',' + (t + 1))); }); if (k === bB) tb.push(t + 1); }); }
-    var T_ = [
-      ['Temporalidad', 'Σ<sub>t</sub> (1 − Σ<sub>i</sub> x<sub>i,t</sub>)<sup>2</sup>', p.tiempo, p.tiempo ? p.tiempo + ' tiempos sin lugar' : 'cada t tiene exactamente un lugar'],
-      ['Espacialidad', 'Σ<sub>i</sub> (1 − y<sub>i</sub>)<sup>2</sup>', p.visita, faltan.length ? 'sin visitar: ' + faltan.join(', ') : 'los 8 lugares aparecen' + (ruta.length > N ? ' (con retrocesos)' : '')],
-      ['Saltos prohibidos', 'Σ<sub>t</sub> Σ<sub>(i,j)∉E</sub> x<sub>i,t</sub> x<sub>j,t+1</sub>', p.salto, saltos.length ? saltos.join(' · ') : 'todos los tramos usan caminos'],
-      ['Empezar en ' + s, '1 − x<sub>' + IDX[s] + ',1</sub>', p.inicio, 'parte en ' + ruta[0]],
-      ['Terminar en ' + f, '1 − x<sub>' + IDX[f] + ',' + T + '</sub>', p.fin, 'termina en ' + ruta[T - 1]],
-      ['Visitar ' + aA + ' antes que ' + bB, 'Σ<sub>t</sub> Σ<sub>t′&lt;t</sub> x<sub>' + IDX[bB] + ',t′</sub> x<sub>' + IDX[aA] + ',t</sub>', antesOn ? p.antes : null, antesOn ? (pares.length ? pares.join(' + ') : 'nunca pasa por ' + bB + ' antes de ' + aA) : 'desactivada']
+    var faltan = L.filter(function (k) { return ruta.indexOf(k) < 0; });
+    var saltos = []; for (var i = 1; i < ruta.length; i++) if (!camino(ruta[i - 1], ruta[i])) saltos.push('x' + sub(IDX[ruta[i - 1]] + ',' + i) + 'x' + sub(IDX[ruta[i]] + ',' + (i + 1)));
+    var pares = [];
+    if (antesOn) { var tb = []; ruta.forEach(function (k, t) { if (k === aA) tb.forEach(function (t0) { pares.push('x' + sub(IDX[bB] + ',' + t0) + 'x' + sub(IDX[aA] + ',' + (t + 1))); }); if (k === bB) tb.push(t + 1); }); }
+    function suma(terms) { return terms.join(' + ') + (terms.length > 1 ? ' = ' + terms.length : ''); }
+    var REGLAS = [
+      ['Temporalidad', 'P' + sub('tiempo') + ' = Σ' + sub('t') + ' (1 − Σ' + sub('i') + ' x' + sub('i,t') + ')<sup>2</sup>', p.tiempo, ''],
+      ['Espacialidad', 'P' + sub('visita') + ' = Σ' + sub('i') + ' (1 − y' + sub('i') + ')<sup>2</sup>', p.visita,
+        faltan.map(function (k) { return '(1 − y' + sub(IDX[k]) + ')<sup>2</sup>'; }).join(' + ') + ' = ' + faltan.map(function () { return '1'; }).join(' + ') + (faltan.length > 1 ? ' = ' + faltan.length : '') + ' <span class="caso-cast-por">sin visitar: ' + faltan.join(', ') + '</span>'],
+      ['Saltos prohibidos', 'P' + sub('salto') + ' = Σ' + sub('t') + ' Σ' + sub('(i,j)∉E') + ' x' + sub('i,t') + ' x' + sub('j,t+1'), p.salto, suma(saltos)],
+      ['Empezar en ' + s, 'P' + sub('inicio') + ' = 1 − x' + sub(IDX[s] + ',1'), p.inicio, '1 − x' + sub(IDX[s] + ',1') + ' = 1 − 0 = 1 <span class="caso-cast-por">parte en ' + ruta[0] + '</span>'],
+      ['Terminar en ' + f, 'P' + sub('fin') + ' = 1 − x' + sub(IDX[f] + ',' + T), p.fin, '1 − x' + sub(IDX[f] + ',' + T) + ' = 1 − 0 = 1 <span class="caso-cast-por">termina en ' + ruta[T - 1] + '</span>']
     ];
-    $('castigos').innerHTML = T_.map(function (c, n) {
-      var off = c[2] === null;
-      return '<div class="caso-cast' + (off ? ' off' : c[2] ? ' roto' : ' ok') + '" style="--k:' + n + '"><div class="caso-cast-n">' + c[0] + '</div><div class="caso-f">' + c[1] + '</div><div class="caso-cast-d">' + c[3] + '</div><div class="caso-cast-v">' + (off ? '—' : '= ' + c[2]) + '</div></div>';
+    if (antesOn) REGLAS.push(['Visitar ' + aA + ' antes que ' + bB, 'P' + sub('antes') + ' = Σ' + sub('t') + ' Σ' + sub('t′<t') + ' x' + sub(IDX[bB] + ',t′') + ' x' + sub(IDX[aA] + ',t'), p.antes, suma(pares)]);
+    $('castigos').innerHTML = REGLAS.map(function (c, n) {
+      return '<div class="caso-cast pendiente" data-n="' + n + '"><span class="caso-cast-n">' + c[0] + '</span><span class="caso-f">' + c[1] + '</span>' +
+        '<span class="caso-cast-v">= ' + c[2] + '</span>' + (c[2] ? '<div class="caso-cast-cuenta">= ' + c[3] + '</div>' : '') + '</div>';
     }).join('');
-    $('q-castigo').innerHTML = 'A · P = ' + usd(a) + ' · (' + [p.tiempo, p.visita, p.salto, p.inicio, p.fin].concat(antesOn ? [p.antes] : []).join(' + ') + ') = ' + usd(a) + ' · ' + p.total + ' = <span class="tm-circulo">' + usd(a * p.total) + '</span>';
+    var filas = $('castigos').querySelectorAll('.caso-cast'), k = 0;
+    $('q-castigo').innerHTML = '';
+    function siguiente() {
+      if (k === filas.length) {
+        var vals = REGLAS.map(function (c) { return c[2]; });
+        $('q-castigo').innerHTML = 'A · P = ' + usd(a) + ' · (' + vals.join(' + ') + ') = ' + usd(a) + ' · ' + p.total + ' = <span class="tm-circulo">' + usd(a * p.total) + '</span>';
+        return;
+      }
+      var fi = filas[k], roto = REGLAS[k][2] > 0;
+      fi.classList.remove('pendiente');
+      fi.classList.add(roto ? 'roto' : 'ok');
+      k++;
+      castT = setTimeout(siguiente, quieto ? 0 : roto ? 900 : 380);
+    }
+    castT = setTimeout(siguiente, quieto ? 0 : 400);
   }
 
   // ── paso 6: resumen ──
@@ -353,15 +373,15 @@
   function pintar() {
     if (paso === 1) grafo(raiz.querySelector('[data-grafo="1"]'), 1);
     if (paso === 3) { grafo(raiz.querySelector('[data-grafo="3"]'), 3); matriz(raiz.querySelector('[data-mat="3"]')); contador(); rutas(); }
-    if (paso === 5) tarjetasCastigo();
     if (paso === 6) { grafo(raiz.querySelector('[data-grafo="6"]'), 6); matriz(raiz.querySelector('[data-mat="6"]')); resumen(); }
     nav();
   }
   function irA(n) {
-    clearTimeout(animT); escena.classList.remove('animando');
+    clearTimeout(animT); clearTimeout(castT); escena.classList.remove('animando');
     paso = n; escena.setAttribute('data-paso', n); raiz.setAttribute('data-en', n);
     pintar();
     if (n === 4) animar();
+    if (n === 5) tarjetasCastigo();
   }
   atras.addEventListener('click', function () { if (paso > 1) irA(paso - 1); });
   adelante.addEventListener('click', function () { if (!adelante.disabled) irA(paso + 1); });
@@ -389,4 +409,76 @@
 
   generar();
   irA(1);
+
+  // ── antecedente: aparición al entrar en pantalla, cifras que cuentan y el marco
+  // que pasa de la foto satelital a los caminos y al grafo ──
+  var anims = document.querySelectorAll('.ctx-anim');
+  var marco = document.querySelector('[data-ctx-marco]');
+  var PIES = {
+    sat: 'Foto satelital de la mina Orcopampa con sus posibles caminos. Los planos son reales.',
+    cam: 'Los posibles caminos entre las instalaciones A, T, B, C, D y E.',
+    graf: 'Solo las distancias se reducen al grafo que tenemos: cada instalación es un nodo xᵢ.'
+  };
+  var grafoCtx = document.querySelector('[data-grafo="ctx"]');
+  var ciclo = 0, ciclando = false;
+  function vista(v, auto) {
+    if (!marco) return;
+    Array.prototype.forEach.call(marco.querySelectorAll('[data-vista]'), function (b) {
+      b.setAttribute('aria-selected', b.getAttribute('data-vista') === v ? 'true' : 'false');
+      b.classList.toggle('cargando', !!auto && b.getAttribute('data-vista') === v);
+    });
+    Array.prototype.forEach.call(marco.querySelectorAll('.ctx-vista'), function (f) { f.classList.toggle('activa', f.getAttribute('data-v') === v); });
+    marco.querySelector('[data-ctx-pie]').textContent = PIES[v];
+    if (v === 'graf') {
+      grafo(grafoCtx, 1);
+      grafoCtx.classList.remove('dibuja'); void grafoCtx.getBoundingClientRect(); grafoCtx.classList.add('dibuja');
+    }
+  }
+  if (marco) {
+    marco.querySelector('[data-ctx-pie]').textContent = PIES.sat;
+    Array.prototype.forEach.call(marco.querySelectorAll('[data-vista]'), function (b) {
+      b.addEventListener('click', function () { clearTimeout(ciclo); ciclando = false; vista(b.getAttribute('data-vista'), false); });
+    });
+    grafo(grafoCtx, 1);
+  }
+  // recorrido automático, una sola vez: satélite → caminos → grafo
+  function recorrer() {
+    if (ciclando) return;
+    ciclando = true;
+    vista('sat', true);
+    ciclo = setTimeout(function () { vista('cam', true); ciclo = setTimeout(function () { vista('graf', false); ciclando = false; }, 3200); }, 3200);
+  }
+  function contar(elm) {
+    var hasta = Number(elm.getAttribute('data-hasta')), miles = elm.hasAttribute('data-miles'), t0 = null, dur = 1400;
+    if (quieto) return;
+    function fmt(v) { v = Math.round(v); return miles ? v.toLocaleString('en-US') : String(v); }
+    function cuadro(ahora) {
+      if (t0 === null) t0 = ahora;
+      var k = Math.min(1, (ahora - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      elm.textContent = fmt(hasta * e);
+      if (k < 1) requestAnimationFrame(cuadro); else elm.textContent = fmt(hasta);
+    }
+    requestAnimationFrame(cuadro);
+  }
+  // pasar el cursor por una instalación la resalta en el grafo
+  Array.prototype.forEach.call(document.querySelectorAll('.ctx-card[data-nodo]'), function (card) {
+    function foco(si) {
+      var n = grafoCtx && grafoCtx.querySelector('.caso-nodo[aria-label^="' + card.getAttribute('data-nodo') + ' "]');
+      if (n) n.classList.toggle('foco', si);
+    }
+    card.addEventListener('mouseenter', function () { foco(true); });
+    card.addEventListener('mouseleave', function () { foco(false); });
+  });
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('visto');
+        if (en.target === marco) recorrer();
+        Array.prototype.forEach.call(en.target.querySelectorAll('.ctx-num'), contar);
+        obs.unobserve(en.target);
+      });
+    }, { threshold: 0.25 });
+    Array.prototype.forEach.call(anims, function (e) { obs.observe(e); });
+  } else Array.prototype.forEach.call(anims, function (e) { e.classList.add('visto'); });
 })();
