@@ -182,6 +182,8 @@
   function nav() {
     Array.prototype.forEach.call(document.querySelectorAll('#tm-pasos li'), function (li, n) {
       li.className = n + 1 < paso ? 'hecho' : n + 1 === paso ? 'actual' : '';
+      if (n + 1 < paso) { li.setAttribute('tabindex', '0'); li.setAttribute('role', 'button'); }
+      else { li.removeAttribute('tabindex'); li.removeAttribute('role'); }
     });
     atras.disabled = paso === 1;
     adelante.disabled = paso === 4 || (paso === 2 && ruta.length < T);
@@ -245,6 +247,12 @@
   atras.addEventListener('click', function () { if (paso > 1) irA(paso - 1); });
   adelante.addEventListener('click', function () { if (!adelante.disabled) irA(paso + 1); });
   document.getElementById('tm-repetir').addEventListener('click', animar);
+  // tocar el círculo de un paso ya hecho retrocede hasta él
+  Array.prototype.forEach.call(document.querySelectorAll('#tm-pasos li'), function (li, n) {
+    function volver() { if (n + 1 < paso) irA(n + 1); }
+    li.addEventListener('click', volver);
+    li.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); volver(); } });
+  });
 
   function pintar() { grafo(); contador(); rutas(); detalle(); nocero(); nav(); }
   Array.prototype.forEach.call(document.querySelectorAll('.tm-distancias input[data-par]'), function (inp) {
