@@ -487,7 +487,7 @@
   var anims = document.querySelectorAll('.ctx-anim');
   var marco = document.querySelector('[data-ctx-marco]');
   var PIES = {
-    sat: 'Vista satelital: llegada a la mina Orcopampa.',
+    sat: 'Vista satelital de la mina Orcopampa.',
     cam: 'Foto satelital con sus posibles caminos. Los planos son reales.',
     graf: 'Solo las distancias se reducen al grafo que tenemos: cada instalación es un nodo xᵢ.'
   };
@@ -519,7 +519,7 @@
   function recorrer() {
     if (ciclando) return;
     ciclando = true;
-    vista('sat', false);
+    vista('sat', true);
     // el video manda: al terminar pasa a los caminos y luego al grafo
     var video = marco.querySelector('video'), seguir = function () { vista('cam', true); ciclo = setTimeout(function () { vista('graf', false); ciclando = false; }, 3600); };
     if (video && !quieto) video.addEventListener('ended', function fin() { video.removeEventListener('ended', fin); if (ciclando) seguir(); });
